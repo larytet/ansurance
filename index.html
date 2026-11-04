@@ -44,7 +44,7 @@ select,.btn{background:var(--panel);border:1px solid var(--line);border-radius:8
 nav.tabs{display:flex;gap:4px;padding:8px 16px 0;border-bottom:1px solid var(--line);background:var(--panel)}
 nav.tabs button{background:transparent;border:0;border-bottom:3px solid transparent;padding:8px 14px;color:var(--muted)}
 nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent);font-weight:600}
-main{padding:16px;max-width:1280px;margin:0 auto}
+main{padding:16px;max-width:1500px;margin:0 auto}
 .note{color:var(--muted);font-size:13px;margin:0 0 12px}
 .toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
 .chip{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:4px 12px;font-size:13px}
@@ -123,6 +123,13 @@ input{background:var(--panel);color:var(--ink);border:1px solid var(--line);bord
 .prow:hover{border-color:var(--accent)}.prow .pn{flex:1}.prow .pid{color:var(--muted);font-size:12px}
 .scroll{max-height:320px;overflow:auto;border:1px solid var(--line);border-radius:8px}
 .scroll .tbl th{position:sticky;top:0;background:var(--panel)}
+
+body.narrow main{max-width:860px}body.narrow .grid{grid-template-columns:1fr}
+body.compact{font-size:14px}body.compact main{padding:10px}
+body.compact .row{padding:4px 10px;margin-bottom:3px}body.compact .row .d{font-size:12px}
+body.compact .prow{padding:3px 8px;margin-bottom:2px}body.compact .tbl th,body.compact .tbl td{padding:3px 8px}
+body.compact .card.detail,body.compact .icard{padding:10px}
+.pl{background:var(--accent-soft);color:var(--accent);border-radius:6px;padding:0 6px;font-size:11px;font-weight:600}
 </style>
 </head>
 <body>
@@ -391,6 +398,11 @@ var MSGS=[
   tr:{en:"Can you call me back tomorrow morning about my home insurance?",he:"אפשר שתחזרו אליי מחר בבוקר לגבי ביטוח הדירה?",ar:"هل يمكنكم الاتصال بي غدًا صباحًا بخصوص تأمين منزلي؟",ru:"Не могли бы вы перезвонить мне завтра утром по поводу страхования квартиры?"}},
  {from:"he",orig:"שלום, קיבלתי הודעה על שינוי בכללי הפנסיה. אפשר לקבוע פגישה?",
   tr:{en:"Hello, I got a notice about the pension rule change. Can we set up a meeting?",ar:"مرحبًا، وصلني إشعار بتغيير قواعد التقاعد. هل يمكن تحديد موعد؟",ru:"Здравствуйте, я получил уведомление об изменении правил пенсии. Можно назначить встречу?",fr:"Bonjour, j'ai reçu un avis sur le changement des règles de retraite. Peut-on fixer un rendez-vous ?"}}
+,
+ {from:"en",orig:"Hi, can I get a quote for home insurance?",
+  tr:{he:"היי, אפשר הצעת מחיר לביטוח דירה?",ar:"مرحبًا، هل يمكنني الحصول على عرض سعر لتأمين المنزل؟",ru:"Здравствуйте, можно получить расчёт по страхованию квартиры?",fr:"Bonjour, puis-je obtenir un devis pour une assurance habitation ?"}},
+ {from:"en",orig:"Please call me after 5 pm about my pension.",
+  tr:{he:"אנא התקשרו אליי אחרי 17:00 בנוגע לפנסיה שלי.",ar:"يرجى الاتصال بي بعد الساعة 5 مساءً بخصوص تقاعدي.",ru:"Пожалуйста, позвоните мне после 17:00 по поводу пенсии.",fr:"Merci de m'appeler après 17 h au sujet de ma retraite."}}
 ];
 /* each client has one preferred language: the language of their messages */
 var CLANG={"יוסי כהן":"he","Dana Levi":"he","فاطمة حداد":"ar","Omar Khoury":"ar","Ирина Волкова":"ru","Sergey Petrov":"ru","Marie Dubois":"fr","אבי מזרחי":"he","Nadia Mansour":"ar","Леонид Кац":"ru","Rachel Peretz":"he","أحمد صالح":"ar","Sophie Benhamou":"fr","Борис Рабин":"ru","מרים אזולאי":"he","Tamer Nasser":"ar","Elena Shapiro":"ru","David Biton":"he","Yael Friedman":"he","Karim Haddad":"ar"};
@@ -498,8 +510,8 @@ function uc(u){return u===2?"r":u===1?"a":""}
 function toast(s){var e=$("toast");e.textContent=s;e.classList.add("on");clearTimeout(toast.h);toast.h=setTimeout(function(){e.classList.remove("on")},2200)}
 function fnv(s){var h=2166136261;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return(h>>>0).toString(16).padStart(8,"0")}
 function logAudit(who,text){
-  var prev=S.audit.length?S.audit[S.audit.length-1].hash:"genesis",when=new Date().toISOString().slice(11,19);
-  S.audit.push({who:who,text:text,when:when,orig:text,hash:fnv(prev+who+text+when)});
+  var prev=S.audit.length?S.audit[S.audit.length-1].hash:"genesis",ts=Date.now();
+  S.audit.push({who:who,text:text,ts:ts,orig:text,hash:fnv(prev+who+text+ts)});
 }
 function visible(){var a=S.items[S.role];a=S.filter==="all"?a:a.filter(function(i){return i.type===S.filter});return S.q?a.filter(function(i){return matchClient(i.client,S.q)}):a}
 function roleName(r){return t("role_"+r)}
@@ -516,12 +528,12 @@ function applyChrome(){
   var rs=$("roleSel");rs.innerHTML="";
   ROLES.forEach(function(r){var b=document.createElement("button");b.textContent=roleName(r);b.setAttribute("aria-pressed",String(r===S.role));b.onclick=function(){S.role=r;S.filter="all";S.sel=null;S.lens=0;store("role",r);render()};rs.appendChild(b)});
   var tb=$("tabs");tb.innerHTML="";
-  ["inbox","integ","excel","intake","wa","call","pension","trust"].map(function(id){return [id,t("tab_"+id)]}).forEach(function(x){var b=document.createElement("button");b.setAttribute("role","tab");b.setAttribute("aria-selected",String(S.tab===x[0]));b.textContent=x[1];b.onclick=function(){S.tab=x[0];render()};tb.appendChild(b)});
+  ["inbox","integ","excel","intake","wa","call","pension","clients","settings","trust"].map(function(id){return [id,t("tab_"+id)]}).forEach(function(x){var b=document.createElement("button");b.setAttribute("role","tab");b.setAttribute("aria-selected",String(S.tab===x[0]));b.textContent=x[1];b.onclick=function(){S.tab=x[0];render()};tb.appendChild(b)});
   $("foot").textContent=t("foot");
 }
 function render(){
   stopCall();TOKEN++;applyChrome();
-  var V={inbox:renderInbox,integ:renderInteg,excel:renderExcel,intake:renderIntake,wa:renderWa,call:renderCall,pension:renderPension,trust:renderTrust};
+  var V={inbox:renderInbox,integ:renderInteg,excel:renderExcel,intake:renderIntake,wa:renderWa,call:renderCall,pension:renderPension,clients:renderClients,settings:renderSettings,trust:renderTrust};
   (V[S.tab]||renderInbox)();
 }
 
@@ -620,12 +632,12 @@ function removeSel(it){
 }
 
 function renderTrust(){
-  var rows="";S.audit.forEach(function(e,i){rows+='<tr class="'+(S.verdict&&S.verdict.bad===i?"bad":"")+'"><td>'+(i+1)+'</td><td>'+esc(e.who)+'</td><td>'+esc(e.text)+'</td><td>'+esc(e.when)+'</td><td><code>'+e.hash+'</code></td></tr>'});
+  var rows="";S.audit.forEach(function(e,i){rows+='<tr class="'+(S.verdict&&S.verdict.bad===i?"bad":"")+'"><td>'+(i+1)+'</td><td>'+esc(e.who)+'</td><td>'+esc(e.text)+'</td><td>'+esc(fmtTime(e.ts,true))+'</td><td><code>'+e.hash+'</code></td></tr>'});
   var v=S.verdict?'<p><b>'+esc(S.verdict.bad>=0?t("bad",{n:S.verdict.bad+1}):t("ok",{n:S.audit.length}))+'</b></p>':"";
   $("main").innerHTML='<p class="note">'+esc(t("trusthint"))+'</p><div class="card audit"><div class="actions" style="margin:0 0 10px"><button class="btn primary" id="ver">'+esc(t("verify"))+'</button><button class="btn" id="tam">'+esc(t("tamper"))+'</button><button class="btn" id="res">'+esc(t("restore"))+'</button></div>'+v+'<table><thead><tr><th>#</th><th>'+t("who")+'</th><th>'+t("what")+'</th><th>'+t("when")+'</th><th>'+t("hash")+'</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
   $("ver").onclick=function(){
     var prev="genesis",bad=-1;
-    S.audit.forEach(function(e,i){if(bad>=0)return;var h=fnv(prev+e.who+e.text+e.when);if(h!==e.hash)bad=i;prev=e.hash});
+    S.audit.forEach(function(e,i){if(bad>=0)return;var h=fnv(prev+e.who+e.text+e.ts);if(h!==e.hash)bad=i;prev=e.hash});
     S.verdict={bad:bad};renderTrust();
   };
   $("tam").onclick=function(){if(S.audit.length>1){S.audit[1].text+=" (edited)";S.verdict=null;renderTrust()}};
@@ -635,6 +647,17 @@ function renderTrust(){
 /* ---------- integration demos (all simulated, nothing leaves the page) ---------- */
 Object.assign(I.en,{
  sim:"Simulated: no real connection. Data is fictional.",
+ tab_clients:"Clients (preferences)",tab_settings:"System settings",
+ cp_intro:"Pick one or more clients and set the language we use with them. Messages, calls and templates use it. The Inbox shows the client's messages in this language, with a translation into yours.",
+ cp_none:"Select clients on the left.",cp_n:"{n} clients selected",cp_lang:"Preferred communication language",cp_mixed:"mixed",cp_apply:"Apply to {n} selected",
+ cp_effect:"You write in your own language. Messages to the client are translated into this language, and the client's messages are shown in their language with a translation. * marks a language set by you.",cp_example:"Example of what the client would receive ({l})",cp_done:"Saved",
+ au_cp:"Preferred language set to {l} for {n} clients",
+ wa_pref:"Preferred language: {l}",wa_tz:"Times are shown in {z}",ca_started:"Call started at {t}",
+ set_intro:"These settings are stored in this browser.",set_layout:"Screen width",set_wide:"Wide",set_narrow:"Narrow",
+ set_theme:"Default theme",set_system:"Follow system",set_light:"Light",set_dark:"Dark",
+ set_density:"List view",set_comfy:"Comfortable",set_compact:"Compact",set_density_note:"Compact shows 12 rows in the Lens instead of 8, with tighter tables.",
+ set_tz:"Time zone for communication",set_tz_browser:"Browser ({z})",set_tz_explicit:"Set explicitly",set_tz_input:"Time zone name, for example Asia/Jerusalem",set_tz_now:"Now in this time zone: {t}",
+ set_tz_note:"Used for times in chats, calls, the sync log and the audit log.",set_tz_bad:"Unknown time zone",set_reset:"Reset to defaults",
  tab_excel:"Excel (join)",
  xj_intro:"Type a name or a few digits of the ID. The demo looks in three spreadsheets, joins what it finds and builds one report. The join logic really runs; the files are generated.",
  xj_files:"Source files",xj_rows:"{n} rows",
@@ -705,6 +728,17 @@ Object.assign(I.en,{
 });
 Object.assign(I.he,{
  sim:"הדמיה: אין חיבור אמיתי. הנתונים בדויים.",
+ tab_clients:"לקוחות (העדפות)",tab_settings:"הגדרות מערכת",
+ cp_intro:"בחרו לקוח אחד או יותר וקבעו באיזו שפה מדברים איתם. הודעות, שיחות ותבניות משתמשות בה. תיבת המשימות מציגה את הודעות הלקוח בשפה הזו, עם תרגום לשפה שלכם.",
+ cp_none:"בחרו לקוחות בצד.",cp_n:"{n} לקוחות נבחרו",cp_lang:"שפת תקשורת מועדפת",cp_mixed:"מעורב",cp_apply:"החלה על {n} נבחרים",
+ cp_effect:"אתם כותבים בשפה שלכם. הודעות ללקוח מתורגמות לשפה הזו, והודעות הלקוח מוצגות בשפתו עם תרגום. כוכבית מסמנת שפה שנקבעה על ידכם.",cp_example:"דוגמה למה שהלקוח יקבל ({l})",cp_done:"נשמר",
+ au_cp:"שפה מועדפת: {l}, {n} לקוחות",
+ wa_pref:"שפה מועדפת: {l}",wa_tz:"השעות מוצגות ב־{z}",ca_started:"השיחה החלה ב־{t}",
+ set_intro:"ההגדרות נשמרות בדפדפן הזה.",set_layout:"רוחב מסך",set_wide:"רחב",set_narrow:"צר",
+ set_theme:"ערכת נושא ברירת מחדל",set_system:"לפי המערכת",set_light:"בהיר",set_dark:"כהה",
+ set_density:"תצוגת רשימות",set_comfy:"נוחה",set_compact:"דחוסה",set_density_note:"דחוסה מציגה 12 שורות בעדשה במקום 8, עם טבלאות צפופות יותר.",
+ set_tz:"אזור זמן לתקשורת",set_tz_browser:"הדפדפן ({z})",set_tz_explicit:"הגדרה ידנית",set_tz_input:"שם אזור זמן, למשל Asia/Jerusalem",set_tz_now:"עכשיו באזור הזמן הזה: {t}",
+ set_tz_note:"משמש לשעות בצ'אטים, בשיחות, ביומן הסנכרון וביומן הביקורת.",set_tz_bad:"אזור זמן לא מוכר",set_reset:"איפוס לברירות מחדל",
  tab_excel:"אקסל (איחוד)",
  xj_intro:"הקלידו שם או כמה ספרות מתעודת הזהות. הדמו מחפש בשלושה גיליונות, מאחד את הנמצא ומפיק דוח אחד. לוגיקת האיחוד באמת רצה; הקבצים נוצרו להדגמה.",
  xj_files:"קובצי מקור",xj_rows:"{n} שורות",
@@ -773,9 +807,9 @@ Object.assign(I.he,{
  pe_flags:"ממצאים",pe_f_dup:"כיסוי חיים כפול בשתי פוליסות",pe_f_fee:"דמי ניהול גבוהים ב{p}",pe_f_gap:"לא נמצא כיסוי אובדן כושר עבודה",pe_none:"לא נמצאו ממצאים",
  pe_prep:"הכנת סקירה לסוכן",pe_done:"נוצרה משימת סקירה (הדמיה)",pe_note:"דמי הניהול וההשוואות להמחשה בלבד."
 });
-Object.assign(I.ar,{tab_excel:"إكسل (دمج)",sim:"محاكاة: لا يوجد اتصال حقيقي. البيانات وهمية.",tab_integ:"التكاملات",tab_intake:"الاستقبال (فاكس، بريد)",tab_wa:"واتساب",tab_call:"مكالمة حية",tab_pension:"التقاعد (المسلكة)"});
-Object.assign(I.ru,{tab_excel:"Excel (объединение)",sim:"Симуляция: реального подключения нет. Данные вымышленные.",tab_integ:"Интеграции",tab_intake:"Приём (факс, почта)",tab_wa:"WhatsApp",tab_call:"Живой звонок",tab_pension:"Пенсия (клиринг)"});
-Object.assign(I.fr,{tab_excel:"Excel (jointure)",sim:"Simulation : aucune connexion réelle. Données fictives.",tab_integ:"Intégrations",tab_intake:"Réception (fax, e-mail)",tab_wa:"WhatsApp",tab_call:"Appel en direct",tab_pension:"Retraite (compensation)"});
+Object.assign(I.ar,{tab_clients:"العملاء (التفضيلات)",tab_settings:"إعدادات النظام",tab_excel:"إكسل (دمج)",sim:"محاكاة: لا يوجد اتصال حقيقي. البيانات وهمية.",tab_integ:"التكاملات",tab_intake:"الاستقبال (فاكس، بريد)",tab_wa:"واتساب",tab_call:"مكالمة حية",tab_pension:"التقاعد (المسلكة)"});
+Object.assign(I.ru,{tab_clients:"Клиенты (предпочтения)",tab_settings:"Настройки системы",tab_excel:"Excel (объединение)",sim:"Симуляция: реального подключения нет. Данные вымышленные.",tab_integ:"Интеграции",tab_intake:"Приём (факс, почта)",tab_wa:"WhatsApp",tab_call:"Живой звонок",tab_pension:"Пенсия (клиринг)"});
+Object.assign(I.fr,{tab_clients:"Clients (préférences)",tab_settings:"Paramètres système",tab_excel:"Excel (jointure)",sim:"Simulation : aucune connexion réelle. Données fictives.",tab_integ:"Intégrations",tab_intake:"Réception (fax, e-mail)",tab_wa:"WhatsApp",tab_call:"Appel en direct",tab_pension:"Retraite (compensation)"});
 /* quick replies and offer text in the other languages (call script and replies carry the translation point) */
 var WAQ={
  q1:{en:I.en.wa_q1,he:I.he.wa_q1,ar:"نعم، سأنقل الدفع إلى أول الشهر ابتداءً من الشهر القادم وسأؤكد هنا.",ru:"Да, перенесу платёж на 1-е число со следующего месяца и подтвержу здесь.",fr:"Oui, je déplace le paiement au 1er du mois dès le mois prochain et je confirme ici."},
@@ -805,7 +839,7 @@ var CARDS=["wa","mail","fax","tel","mis","sys","sf","xl","inv"];
 function renderInteg(){
   var h=sim()+'<p class="note">'+esc(t("ig_intro"))+'</p><div class="cards">';
   CARDS.forEach(function(c){
-    h+='<div class="card icard"><b>'+esc(t("ig_"+c))+'</b><div class="d">'+esc(t("ig_"+c+"_d"))+'</div><div class="st">● '+esc(t("ig_status"))+'</div><div class="d">'+esc(t("ig_last"))+': '+esc(S.sync[c]||t("ig_never"))+'</div>'+(S.syncRes[c]?'<div class="res">'+esc(S.syncRes[c])+'</div>':'')+'<div class="actions"><button class="btn primary" data-c="'+c+'">'+esc(t("ig_sync"))+'</button></div></div>';
+    h+='<div class="card icard"><b>'+esc(t("ig_"+c))+'</b><div class="d">'+esc(t("ig_"+c+"_d"))+'</div><div class="st">● '+esc(t("ig_status"))+'</div><div class="d">'+esc(t("ig_last"))+': '+esc(S.sync[c]?fmtTime(S.sync[c]):t("ig_never"))+'</div>'+(S.syncRes[c]?'<div class="res">'+esc(S.syncRes[c])+'</div>':'')+'<div class="actions"><button class="btn primary" data-c="'+c+'">'+esc(t("ig_sync"))+'</button></div></div>';
   });
   h+='</div><div class="card" style="padding:16px;margin-top:16px"><h2 style="margin:0 0 6px;font-size:17px">'+esc(t("ig_co_h"))+'</h2><p class="note">'+esc(t("ig_co_rule"))+'</p><label>'+esc(t("ig_sys_pick"))+' <select id="coSys"><option value="old"'+(S.coSys==="old"?" selected":"")+'>'+esc(t("ig_sys_old"))+'</option><option value="sf"'+(S.coSys==="sf"?" selected":"")+'>'+esc(t("ig_sys_sf"))+'</option></select></label> <button class="btn primary" id="coRun">'+esc(t("ig_co_run"))+'</button>';
   if(!S.co)h+='<p class="note" style="margin-top:10px">'+esc(t("ig_co_hint"))+'</p>';
@@ -858,7 +892,7 @@ function exportCsv(){
   logAudit(roleName(S.role),t("au_xlx",{n:NAMES.length}));toast("✓ "+t("au_xlx",{n:NAMES.length}));
 }
 function syncCard(c){
-  S.sync[c]=nowStr();S.syncRes[c]=t("ig_r_"+c);
+  S.sync[c]=Date.now();S.syncRes[c]=t("ig_r_"+c);
   if(c==="xl"){S.xl=genXl();S.syncRes.xl=t("ig_r_xl",{m:S.xl.rows.filter(function(r){return r.k==="ok"}).length,d:S.xl.rows.filter(function(r){return r.k!=="ok"}).length});logAudit(roleName(S.role),t("au_xl",{n:S.xl.rows.length}));toast("✓ "+S.syncRes.xl);renderInteg();return}
   if(c==="sys"||c==="sf"){S.coSys=c==="sf"?"sf":"old";
     var w=["old","old","new","new","man"];
@@ -913,32 +947,45 @@ function runIntake(){
 }
 
 /* --- WhatsApp chat --- */
+function waMsg(cl){var l=clang(cl),mine=MSGS.filter(function(m){return m.from===l});return mine[parseInt(fnv(cl),16)%mine.length]}
+S.wa.sel={"أحمد صالح":true};S.wa.client="أحمد صالح";S.wa.t0=Date.now()-7*60000;var WAPK=null;
 function renderWa(){
-  var cl="أحمد صالح",m=MSGS[1],tr=m.tr[S.lang];
-  var h=sim()+'<div class="grid"><div class="card" style="padding:14px"><h2 style="margin:0 0 4px;font-size:17px" dir="auto">'+esc(nm(cl))+'</h2>';
-  h+='<div class="note">'+esc(t("wa_cons"))+': <b style="color:'+(S.wa.optin?"var(--green)":"var(--red)")+'">'+esc(S.wa.optin?t("wa_cons_yes"):t("wa_cons_no"))+'</b></div><div class="chat">';
-  h+='<div class="bub in"><span dir="auto">'+esc(m.orig)+'</span>'+(m.from!==S.lang&&tr?'<small>'+esc(tr)+'</small>':'')+'</div>';
+  $("main").innerHTML=sim()+'<div class="grid"><div class="card" style="padding:14px" id="waLeft"></div><div id="waRight"></div></div>';
+  WAPK=makePicker($("waLeft"),{all:NAMES,sel:S.wa.sel,single:true,onChange:function(){
+    var k=Object.keys(S.wa.sel)[0];
+    if(!k){S.wa.sel[S.wa.client]=true;WAPK.draw();return}
+    if(k!==S.wa.client){S.wa.client=k;S.wa.msgs=[];S.wa.blocked=false;S.wa.optin=false;S.wa.t0=Date.now()-7*60000}
+    drawWa();
+  }});
+  drawWa();
+}
+function drawWa(){
+  var box=$("waRight");if(!box)return;
+  var cl=S.wa.client,cL=clang(cl),m=waMsg(cl),tr=m.tr[S.lang];
+  var h='<div class="card" style="padding:14px"><h2 style="margin:0 0 4px;font-size:17px" dir="auto">'+esc(nm(cl))+' <span class="badge">'+esc(LNAME[cL])+'</span></h2>';
+  h+='<div class="note">'+esc(t("wa_pref",{l:LNAME[cL]}))+' · '+esc(t("wa_cons"))+': <b style="color:'+(S.wa.optin?"var(--green)":"var(--red)")+'">'+esc(S.wa.optin?t("wa_cons_yes"):t("wa_cons_no"))+'</b></div><div class="chat">';
+  h+='<div class="bub in"><span dir="auto">'+esc(m.orig)+'</span>'+(m.from!==S.lang&&tr?'<small>'+esc(tr)+'</small>':'')+'<small>'+esc(fmtTime(S.wa.t0))+'</small></div>';
   S.wa.msgs.forEach(function(x){
-    if(x.type==="q")h+='<div class="bub out"><span dir="auto">'+esc(WAQ[x.k].ar)+'</span><small>'+esc(t("wa_yours"))+': '+esc(WAQ[x.k][S.lang]||WAQ[x.k].en)+'<br>'+esc(t("wa_sentto",{l:LNAME.ar}))+' ✓✓</small></div>';
-    else h+='<div class="bub out ad"><b>'+esc(t("wa_ad"))+'</b><br>'+esc(t("wa_offer_txt"))+'<small>'+esc(t("wa_sent"))+' ✓✓</small></div>';
+    if(x.type==="q")h+='<div class="bub out"><span dir="auto">'+esc(WAQ[x.k][cL]||WAQ[x.k].en)+'</span><small>'+esc(t("wa_yours"))+': '+esc(WAQ[x.k][S.lang]||WAQ[x.k].en)+'<br>'+esc(t("wa_sentto",{l:LNAME[cL]}))+' ✓✓ · '+esc(fmtTime(x.ts))+'</small></div>';
+    else h+='<div class="bub out ad"><b>'+esc(t("wa_ad"))+'</b><br>'+esc(t("wa_offer_txt"))+'<small>'+esc(t("wa_sent"))+' ✓✓ · '+esc(fmtTime(x.ts))+'</small></div>';
   });
-  h+='</div>';
+  h+='</div><div class="note">'+esc(t("wa_tz",{z:tzEff()}))+'</div>';
   if(S.wa.blocked)h+='<div class="alert">'+esc(t("wa_blocked"))+'</div>';
-  h+='</div><div class="card" style="padding:14px"><b>'+esc(t("wa_qr",{l:LNAME.ar}))+'</b><div class="actions"><button class="btn" data-q="q1">'+esc(WAQ.q1[S.lang]||WAQ.q1.en)+'</button><button class="btn" data-q="q2">'+esc(WAQ.q2[S.lang]||WAQ.q2.en)+'</button></div><hr style="border:0;border-top:1px solid var(--line);margin:14px 0"><label><input type="checkbox" id="optin"'+(S.wa.optin?" checked":"")+'> '+esc(t("wa_optin"))+'</label><div class="actions"><button class="btn primary" id="offer">'+esc(t("wa_offer"))+'</button></div></div></div>';
-  $("main").innerHTML=h;
-  document.querySelectorAll("[data-q]").forEach(function(b){b.onclick=function(){S.wa.msgs.push({type:"q",k:b.dataset.q});S.wa.blocked=false;logAudit(roleName(S.role),t("au_wa",{c:nm(cl)}));renderWa()}});
-  $("optin").onchange=function(){S.wa.optin=this.checked;S.wa.blocked=false;renderWa()};
+  h+='</div><div class="card" style="padding:14px;margin-top:12px"><b>'+esc(t("wa_qr",{l:LNAME[cL]}))+'</b><div class="actions"><button class="btn" data-q="q1">'+esc(WAQ.q1[S.lang]||WAQ.q1.en)+'</button><button class="btn" data-q="q2">'+esc(WAQ.q2[S.lang]||WAQ.q2.en)+'</button></div><hr style="border:0;border-top:1px solid var(--line);margin:14px 0"><label><input type="checkbox" id="optin"'+(S.wa.optin?" checked":"")+'> '+esc(t("wa_optin"))+'</label><div class="actions"><button class="btn primary" id="offer">'+esc(t("wa_offer"))+'</button></div></div>';
+  box.innerHTML=h;
+  box.querySelectorAll("[data-q]").forEach(function(b){b.onclick=function(){S.wa.msgs.push({type:"q",k:b.dataset.q,ts:Date.now()});S.wa.blocked=false;logAudit(roleName(S.role),t("au_wa",{c:nm(cl)}));drawWa()}});
+  $("optin").onchange=function(){S.wa.optin=this.checked;S.wa.blocked=false;drawWa()};
   $("offer").onclick=function(){
     if(!S.wa.optin){S.wa.blocked=true;logAudit(roleName(S.role),t("au_wab",{c:nm(cl)}));toast(t("wa_blocked"))}
-    else{S.wa.blocked=false;S.wa.msgs.push({type:"o"});logAudit(roleName(S.role),t("au_wao",{c:nm(cl)}))}
-    renderWa();
+    else{S.wa.blocked=false;S.wa.msgs.push({type:"o",ts:Date.now()});logAudit(roleName(S.role),t("au_wao",{c:nm(cl)}))}
+    drawWa();
   };
 }
 
 /* --- Live call with subtitles --- */
 function renderCall(){
   var h=sim()+'<p class="note">'+esc(t("ca_intro"))+'</p><div class="card" style="padding:14px"><div class="actions" style="margin:0 0 10px"><button class="btn primary" id="caGo">'+esc(S.call.run?t("ca_pause"):t("ca_start"))+'</button><button class="btn" id="caRe">'+esc(t("ca_restart"))+'</button></div>';
-  if(S.call.i>0)h+='<div class="note">🎙 '+esc(t("ca_rec"))+'</div>';
+  if(S.call.i>0)h+='<div class="note">🎙 '+esc(t("ca_rec"))+' · '+esc(t("ca_started",{t:fmtTime(S.call.t0)}))+'</div>';
   h+='<div class="subs">';
   CALL.slice(0,S.call.i).forEach(function(l){
     h+='<div class="sub '+l.who+'"><small>'+esc(t(l.who==="agent"?"ca_agent":"ca_client"))+' · '+esc(t("ca_spoken",{l:LNAME[l.from]}))+(l.flag?' · <span class="flag">⚑ '+esc(t("ca_flag"))+'</span>':'')+'</small><div class="txt" dir="auto">'+esc(l[S.lang]||l.en)+'</div>'+(l.from!==S.lang?'<small dir="auto">'+esc(l[l.from])+'</small>':'')+'</div>';
@@ -949,7 +996,7 @@ function renderCall(){
   $("caGo").onclick=function(){
     if(S.call.run){stopCall();renderCall();return}
     if(S.call.i>=CALL.length)S.call.i=0;
-    S.call.run=true;if(S.call.i===0)S.call.i=1;renderCall();
+    S.call.run=true;if(S.call.i===0){S.call.i=1;S.call.t0=Date.now()}renderCall();
     CALLH=setInterval(function(){
       if(S.tab!=="call"){stopCall();return}
       if(S.call.i>=CALL.length){stopCall();renderCall();return}
@@ -961,14 +1008,16 @@ function renderCall(){
 
 /* --- reusable client picker: quick search + lens + multi-select. Works for hundreds of clients --- */
 var PK_WIN=8;
+function fold(x){return String(x).normalize("NFD").replace(/[\u0300-\u036f\u0591-\u05c7\u064b-\u065f'\u2019\u05f3`\u00b4]/g,"").toLowerCase()}
 function matchClient(n,q){
-  q=(q||"").trim().toLowerCase();if(!q)return true;var tr=TR[n]||{};
-  return [n,tr.he||"",tr.en||"",clientId(n)].some(function(x){return String(x).toLowerCase().indexOf(q)>=0});
+  q=fold((q||"").trim());if(!q)return true;var tr=TR[n]||{};
+  var hay=fold([n,tr.he||"",tr.en||"",clientId(n)].join(" "));
+  return q.split(/\s+/).every(function(tok){return hay.indexOf(tok)>=0});
 }
 function makePicker(box,cfg){
   var P={q:"",lens:0},win=cfg.win||PK_WIN;
   box.innerHTML='<input class="pk-q" type="search" aria-label="'+esc(t("pk_search"))+'" placeholder="'+esc(t("pk_search"))+'" style="width:100%"><div class="actions"><button class="btn" data-k="all"></button><button class="btn" data-k="clr">'+esc(t("pk_clear"))+'</button></div><div class="note pk-count"></div><div class="strip pk-strip" tabindex="0" aria-label="Lens"></div><div class="lensinfo"><span class="pk-win"></span><span>'+esc(t("pk_lens"))+'</span></div><div class="list pk-list" tabindex="0"></div>';
-  var q=box.querySelector(".pk-q"),strip=box.querySelector(".pk-strip"),list=box.querySelector(".pk-list"),bAll=box.querySelector("[data-k=all]"),bClr=box.querySelector("[data-k=clr]");
+  var q=box.querySelector(".pk-q"),strip=box.querySelector(".pk-strip"),list=box.querySelector(".pk-list"),bAll=box.querySelector("[data-k=all]"),bClr=box.querySelector("[data-k=clr]");if(cfg.single){bAll.style.display="none";bClr.style.display="none"}
   function flt(){return cfg.all.filter(function(n){return matchClient(n,P.q)})}
   function draw(){
     var f=flt(),n=f.length;P.lens=Math.max(0,Math.min(P.lens,Math.max(0,n-win)));
@@ -976,7 +1025,7 @@ function makePicker(box,cfg){
     sh+='<div class="lens" style="inset-inline-start:'+(n?P.lens/n*100:0)+'%;width:'+(n?Math.min(1,win/n)*100:100)+'%"></div>';
     strip.innerHTML=sh;strip.style.display=n?"flex":"none";
     var lh=n?"":'<div class="empty">'+esc(t("pk_none"))+'</div>';
-    f.slice(P.lens,P.lens+win).forEach(function(c,i){lh+='<label class="prow"><input type="checkbox" data-i="'+(P.lens+i)+'"'+(cfg.sel[c]?" checked":"")+'><span class="pn" dir="auto">'+esc(nm(c))+'</span><span class="pid" dir="ltr">'+clientId(c)+'</span></label>'});
+    f.slice(P.lens,P.lens+win).forEach(function(c,i){lh+='<label class="prow"><input type="'+(cfg.single?"radio":"checkbox")+'" name="pkr" data-i="'+(P.lens+i)+'"'+(cfg.sel[c]?" checked":"")+'><span class="pn" dir="auto">'+esc(nm(c))+'</span><span class="pl">'+clang(c)+'</span><span class="pid" dir="ltr">'+clientId(c)+'</span></label>'});
     list.innerHTML=lh;
     box.querySelector(".pk-win").textContent=n?t("win",{a:P.lens+1,b:Math.min(n,P.lens+win),n:n}):"";
     var s=cfg.all.filter(function(c){return cfg.sel[c]}).length;
@@ -984,7 +1033,7 @@ function makePicker(box,cfg){
     bAll.textContent=t("pk_all",{n:n});
   }
   q.oninput=function(){P.q=this.value;P.lens=0;draw()};
-  list.onchange=function(e){var c=flt()[+e.target.dataset.i];if(!c)return;if(e.target.checked)cfg.sel[c]=true;else delete cfg.sel[c];draw();cfg.onChange()};
+  list.onchange=function(e){var c=flt()[+e.target.dataset.i];if(!c)return;if(e.target.checked){if(cfg.single)Object.keys(cfg.sel).forEach(function(k){delete cfg.sel[k]});cfg.sel[c]=true}else delete cfg.sel[c];draw();cfg.onChange()};
   bAll.onclick=function(){flt().forEach(function(c){cfg.sel[c]=true});draw();cfg.onChange()};
   bClr.onclick=function(){Object.keys(cfg.sel).forEach(function(k){delete cfg.sel[k]});draw();cfg.onChange()};
   var drag=false;
@@ -1131,6 +1180,79 @@ function renderExcel(){
   };
 }
 
+/* ---------- preferences: client language, system layout/theme/density/timezone ---------- */
+S.cp={};S.prefs={layout:"wide",density:"comfortable",tzMode:"browser",tz:"Asia/Jerusalem"};
+function clang(n){return (S.cp[n]&&S.cp[n].lang)||CLANG[n]||"en"}
+function tzBrowser(){try{return Intl.DateTimeFormat().resolvedOptions().timeZone||"UTC"}catch(e){return "UTC"}}
+function tzOk(z){try{new Intl.DateTimeFormat("en",{timeZone:z});return true}catch(e){return false}}
+function tzEff(){var z=S.prefs.tzMode==="browser"?tzBrowser():S.prefs.tz;return tzOk(z)?z:tzBrowser()}
+var LOC={en:"en-GB",he:"he-IL",ar:"ar-u-nu-latn",ru:"ru-RU",fr:"fr-FR"};
+function fmtTime(ts,withDate){
+  var o={timeZone:tzEff(),hour:"2-digit",minute:"2-digit",second:"2-digit",timeZoneName:"short"};
+  if(withDate){o.year="numeric";o.month="2-digit";o.day="2-digit"}
+  try{return new Intl.DateTimeFormat(LOC[S.lang]||"en-GB",o).format(ts)}catch(e){return new Date(ts).toISOString()}
+}
+function applyPrefs(){
+  var b=document.body;b.classList.toggle("narrow",S.prefs.layout==="narrow");b.classList.toggle("compact",S.prefs.density==="compact");
+  LENS=S.prefs.density==="compact"?12:8;PK_WIN=LENS;
+}
+function savePrefs(){store("prefs",JSON.stringify(S.prefs));store("cp",JSON.stringify(S.cp))}
+function refreshMsgs(n){
+  var mine=MSGS.filter(function(m){return m.from===clang(n)});if(!mine.length)return;
+  ROLES.forEach(function(r){S.items[r].forEach(function(it){if(it.client===n&&it.msg)it.msg=mine[parseInt(fnv(it.id),16)%mine.length]})});
+}
+
+/* --- Clients: preferences (preferred communication language) --- */
+S.cl={sel:{}};var CLPK=null;
+function renderClients(){
+  $("main").innerHTML='<p class="note">'+esc(t("cp_intro"))+'</p><div class="grid"><div class="card" style="padding:14px" id="clLeft"></div><div class="card" style="padding:14px" id="clRight"></div></div>';
+  CLPK=makePicker($("clLeft"),{all:NAMES,sel:S.cl.sel,onChange:drawCl});drawCl();
+}
+function drawCl(){
+  var box=$("clRight");if(!box)return;
+  var sel=NAMES.filter(function(n){return S.cl.sel[n]});
+  if(!sel.length){box.innerHTML='<div class="empty">'+esc(t("cp_none"))+'</div>';return}
+  var cur=clang(sel[0]),same=sel.every(function(n){return clang(n)===cur});
+  var h='<h2 style="margin:0 0 8px;font-size:17px" dir="auto">'+esc(sel.length===1?nm(sel[0]):t("cp_n",{n:sel.length}))+'</h2><label>'+esc(t("cp_lang"))+' <select id="cpLang">'+(same?"":'<option value="" selected>'+esc(t("cp_mixed"))+'</option>')+LANGS.map(function(l){return '<option value="'+l+'"'+(same&&l===cur?" selected":"")+'>'+esc(LNAME[l])+'</option>'}).join("")+'</select></label> <button class="btn primary" id="cpApply">'+esc(t("cp_apply",{n:sel.length}))+'</button><p class="note">'+esc(t("cp_effect"))+'</p>';
+  if(sel.length===1)h+='<div class="msg"><small>'+esc(t("cp_example",{l:LNAME[cur]}))+'</small><span dir="auto">'+esc(WAQ.q2[cur]||WAQ.q2.en)+'</span></div>';
+  h+='<div class="scroll"><table class="tbl"><thead><tr><th>'+esc(t("client"))+'</th><th>'+esc(t("idn"))+'</th><th>'+esc(t("cp_lang"))+'</th></tr></thead><tbody>';
+  sel.forEach(function(n){h+='<tr><td dir="auto">'+esc(nm(n))+'</td><td dir="ltr">'+clientId(n)+'</td><td>'+esc(LNAME[clang(n)])+(S.cp[n]?' *':'')+'</td></tr>'});
+  h+='</tbody></table></div>';
+  box.innerHTML=h;
+  $("cpApply").onclick=function(){
+    var v=$("cpLang").value;if(!v)return;
+    sel.forEach(function(n){S.cp[n]={lang:v};refreshMsgs(n)});
+    savePrefs();logAudit(roleName(S.role),t("au_cp",{l:LNAME[v],n:sel.length}));toast("✓ "+t("cp_done"));
+    if(CLPK)CLPK.draw();drawCl();
+  };
+}
+
+/* --- System settings: layout, default theme, list density, time zone --- */
+function renderSettings(){
+  var P=S.prefs,theme=S.theme||"system",zb=tzBrowser();
+  function rg(g,opts,cur){return '<div class="seg" data-g="'+g+'">'+opts.map(function(o){return '<button data-v="'+o[0]+'" aria-pressed="'+(o[0]===cur)+'">'+esc(t(o[1]))+'</button>'}).join("")+'</div>'}
+  var zones=[];try{zones=Intl.supportedValuesOf("timeZone")}catch(e){}
+  if(!zones.length)zones=["Asia/Jerusalem","Europe/London","Europe/Paris","Europe/Moscow","America/New_York","UTC"];
+  var h='<p class="note">'+esc(t("set_intro"))+'</p><div class="cards">'+
+   '<div class="card icard"><b>'+esc(t("set_layout"))+'</b><div class="actions">'+rg("layout",[["wide","set_wide"],["narrow","set_narrow"]],P.layout)+'</div></div>'+
+   '<div class="card icard"><b>'+esc(t("set_theme"))+'</b><div class="actions">'+rg("theme",[["system","set_system"],["light","set_light"],["dark","set_dark"]],theme)+'</div></div>'+
+   '<div class="card icard"><b>'+esc(t("set_density"))+'</b><div class="actions">'+rg("density",[["comfortable","set_comfy"],["compact","set_compact"]],P.density)+'</div><div class="d">'+esc(t("set_density_note"))+'</div></div>'+
+   '<div class="card icard" style="grid-column:1/-1"><b>'+esc(t("set_tz"))+'</b><div class="actions">'+rg("tzMode",[["browser","set_tz_browser"],["explicit","set_tz_explicit"]],P.tzMode).replace("{z}",esc(zb))+'</div>'+
+   '<div class="actions"><input id="tzIn" list="tzList" value="'+esc(P.tz)+'" placeholder="'+esc(t("set_tz_input"))+'" style="min-width:280px" dir="ltr"><datalist id="tzList">'+zones.map(function(z){return '<option value="'+z+'">'}).join("")+'</datalist></div>'+
+   '<div class="d">'+esc(t("set_tz_now",{t:fmtTime(Date.now(),true)}))+'</div><div class="d">'+esc(t("set_tz_note"))+'</div></div></div>'+
+   '<div class="actions"><button class="btn" id="setReset">'+esc(t("set_reset"))+'</button></div>';
+  $("main").innerHTML=h.replace("set_tz_browser","");
+  document.querySelectorAll('[data-g="tzMode"] button')[0].textContent=t("set_tz_browser",{z:zb});
+  document.querySelectorAll("[data-g] button").forEach(function(b){b.onclick=function(){
+    var g=b.parentNode.dataset.g,v=b.dataset.v;
+    if(g==="theme"){S.theme=v==="system"?null:v;store("theme",v)}
+    else{P[g]=v;savePrefs()}
+    applyPrefs();render();
+  }});
+  $("tzIn").onchange=function(){var v=this.value.trim();if(!tzOk(v)){toast(t("set_tz_bad"));return}P.tz=v;P.tzMode="explicit";savePrefs();render()};
+  $("setReset").onclick=function(){S.prefs={layout:"wide",density:"comfortable",tzMode:"browser",tz:"Asia/Jerusalem"};S.theme=null;store("theme","system");savePrefs();applyPrefs();render()};
+}
+
 /* ---------- Show me tour ---------- */
 function stopTour(){
   if(!S.tour)return;clearInterval(S.tour.h);["tourRing","tourTip"].forEach(function(i){var e=$(i);if(e)e.remove()});S.tour=null;
@@ -1162,6 +1284,9 @@ function startTour(){
   var l=load("lang");if(l&&I[l])S.lang=l;
   var th=load("theme");if(th==="light"||th==="dark")S.theme=th;
   var r=load("role");if(r&&ROLES.indexOf(r)>=0)S.role=r;
+  try{var sp=JSON.parse(load("prefs")||"null");if(sp)Object.assign(S.prefs,sp)}catch(e){}
+  try{var cp=JSON.parse(load("cp")||"null");if(cp){S.cp=cp;Object.keys(cp).forEach(refreshMsgs)}}catch(e){}
+  applyPrefs();
   logAudit("System","Nightly backup stored encrypted");
   logAudit("Manager","Login with two-factor authentication");
   logAudit("Back-office","Fax intake: 14 documents filed, 2 sent to review");
