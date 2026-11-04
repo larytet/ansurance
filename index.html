@@ -99,6 +99,24 @@ main{padding:16px;max-width:1280px;margin:0 auto}
 .tour-tip{position:fixed;z-index:51;max-width:300px;background:var(--panel);border:1px solid var(--accent);border-radius:10px;padding:10px 12px;box-shadow:var(--shadow);font-size:14px}
 .tour-tip small{display:block;color:var(--muted);margin-top:4px}
 footer{padding:20px;text-align:center;color:var(--muted);font-size:12px}
+
+nav.tabs{overflow-x:auto;white-space:nowrap}
+.sim{display:inline-block;background:var(--amber-soft);color:var(--amber);border-radius:999px;padding:2px 12px;font-size:12px;font-weight:600}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.icard{padding:14px}.icard .d{color:var(--muted);font-size:13px;margin:2px 0}.icard .st{color:var(--green);font-size:13px;margin-top:6px}.icard .res{margin-top:6px;font-size:13px;background:var(--green-soft);border-radius:8px;padding:6px 8px}
+.tbl{width:100%;border-collapse:collapse;font-size:14px}.tbl th,.tbl td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:start}
+.step{padding:6px 0;border-bottom:1px solid var(--line);font-size:14px}.tick{color:var(--green);font-weight:700}
+.chat{display:flex;flex-direction:column;gap:8px;margin:10px 0}
+.bub{max-width:85%;padding:8px 12px;border-radius:12px;background:var(--bg);border:1px solid var(--line)}
+.bub small{display:block;color:var(--muted);margin-top:4px;font-size:12px}
+.bub.in{align-self:flex-start}.bub.out{align-self:flex-end;background:var(--green-soft);border-color:var(--green)}.bub.ad{background:var(--amber-soft);border-color:var(--amber)}
+.alert{background:var(--red-soft);border:1px solid var(--red);color:var(--ink);border-radius:8px;padding:8px 10px;margin:8px 0}
+.subs{display:flex;flex-direction:column;gap:8px;margin:10px 0}
+.sub{padding:8px 12px;border-radius:10px;border:1px solid var(--line);max-width:90%}
+.sub.agent{align-self:flex-start;background:var(--accent-soft)}.sub.client{align-self:flex-end;background:var(--bg)}
+.sub .txt{font-size:17px}.sub small{color:var(--muted);display:block}.flag{color:var(--amber);font-weight:600}
+input,label{font:inherit}
+input{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px 10px}
 </style>
 </head>
 <body>
@@ -474,10 +492,14 @@ function applyChrome(){
   var rs=$("roleSel");rs.innerHTML="";
   ROLES.forEach(function(r){var b=document.createElement("button");b.textContent=roleName(r);b.setAttribute("aria-pressed",String(r===S.role));b.onclick=function(){S.role=r;S.filter="all";S.sel=null;S.lens=0;store("role",r);render()};rs.appendChild(b)});
   var tb=$("tabs");tb.innerHTML="";
-  [["inbox",t("tab_inbox")],["trust",t("tab_trust")]].forEach(function(x){var b=document.createElement("button");b.setAttribute("role","tab");b.setAttribute("aria-selected",String(S.tab===x[0]));b.textContent=x[1];b.onclick=function(){S.tab=x[0];render()};tb.appendChild(b)});
+  ["inbox","integ","intake","wa","call","pension","trust"].map(function(id){return [id,t("tab_"+id)]}).forEach(function(x){var b=document.createElement("button");b.setAttribute("role","tab");b.setAttribute("aria-selected",String(S.tab===x[0]));b.textContent=x[1];b.onclick=function(){S.tab=x[0];render()};tb.appendChild(b)});
   $("foot").textContent=t("foot");
 }
-function render(){applyChrome();S.tab==="inbox"?renderInbox():renderTrust()}
+function render(){
+  stopCall();TOKEN++;applyChrome();
+  var V={inbox:renderInbox,integ:renderInteg,intake:renderIntake,wa:renderWa,call:renderCall,pension:renderPension,trust:renderTrust};
+  (V[S.tab]||renderInbox)();
+}
 
 function renderInbox(){
   var all=S.items[S.role],vis=visible(),urgent=all.filter(function(i){return i.urg===2}).length;
@@ -585,13 +607,304 @@ function renderTrust(){
   $("res").onclick=function(){S.audit.forEach(function(e){e.text=e.orig});S.verdict=null;renderTrust()};
 }
 
+/* ---------- integration demos (all simulated, nothing leaves the page) ---------- */
+Object.assign(I.en,{
+ sim:"Simulated: no real connection. Data is fictional.",
+ tab_integ:"Integrations",tab_intake:"Intake (fax, email)",tab_wa:"WhatsApp",tab_call:"Live call",tab_pension:"Pension (Mislaka)",
+ t7:"Tabs: the Inbox plus simulated integrations (intake, WhatsApp, live call, pension, sync).",
+ au_sync:"Sync: {n}",au_intake:"Intake processed: {a}",au_wa:"WhatsApp reply sent to {c}",au_wab:"Campaign blocked by the consent gate for {c}",au_wao:"Campaign offer sent to {c} (opt-in on record)",au_pe:"Clearing house request sent for {c}",au_pe2:"Review task created for {c}",
+ ig_intro:"Each card is an integration from the spec. Press Sync now to see what it would do. Nothing leaves this page.",
+ ig_status:"Connected (simulated)",ig_last:"Last sync",ig_never:"never",ig_sync:"Sync now",
+ ig_wa:"WhatsApp Business API",ig_wa_d:"Two-way client messages, document photos, reminders",ig_r_wa:"12 messages in, 3 document photos sent to Intake",
+ ig_mail:"Microsoft 365 / Google Workspace",ig_mail_d:"Mailbox intake and calendar",ig_r_mail:"5 emails classified, 4 filed automatically",
+ ig_fax:"Cloud fax",ig_fax_d:"Incoming faxes as PDF",ig_r_fax:"2 faxes digitized, 1 sent to Review",
+ ig_tel:"Telephony + speech",ig_tel_d:"Call audio and live subtitles",ig_r_tel:"1 call transcribed with subtitles",
+ ig_mis:"Mislaka + Har HaBituach",ig_mis_d:"Pension and policy data",ig_r_mis:"Request queued, answer due in about 3 business days",
+ ig_sys:"Existing agency system (Surense / Atid)",ig_sys_d:"Two-way sync of clients and policies",ig_r_sys:"Daily sync done, see the example below",
+ ig_inv:"Green Invoice + Comsign",ig_inv_d:"Invoices and e-signature",ig_r_inv:"2 invoices created, 1 document sent for signature",
+
+ ig_sf:"Salesforce (Financial Services Cloud)",ig_sf_d:"Used by large Israeli insurers (reported: Migdal, Harel). Two-way sync of accounts, policies and tasks",ig_r_sf:"Synced: 6 accounts, 9 policies, 3 tasks pushed",
+ ig_sys_pick:"System to coexist with",ig_sys_old:"Surense / Atid (agency systems)",ig_sys_sf:"Salesforce (Financial Services Cloud)",
+ ig_map_h:"Field mapping to Salesforce (illustrative)",ig_map_a:"ansurance",ig_map_s:"Salesforce object",
+ map_client:"Client",map_policy:"Policy",map_lead:"Lead or campaign reply",map_case:"Claim or complaint",map_task:"Inbox item",map_doc:"Document",map_cons:"Marketing consent",
+ ig_sf_note:"Hebrew press reports Salesforce at Migdal (the first Salesforce insurance project in Israel, built by Cloudtech) and at Harel. Small agencies more often run Surense or Atid. This is a mock mapping, not a tested connector.",
+ ig_co_h:"Coexistence example: existing system plus ansurance",
+ ig_co_rule:"Conflict rule: the existing system wins on policy data. ansurance wins on documents, consents and tasks. Other conflicts become a manual task.",
+ ig_co_run:"Run daily sync",ig_co_hint:"Press the button to pull the changes since the last run.",ig_chg:"Change",ig_win:"Winner",
+ ig_w_old:"Existing system",ig_w_new:"ansurance",ig_w_man:"Manual task",
+ ig_c1:"Premium changed from 412 to 436",ig_c2:"Renewal date moved to the 1st of the month",ig_c3:"Opt-out of marketing recorded",ig_c4:"New document attached (ID card)",ig_c5:"Phone number differs between the two systems",
+ ig_co_sum:"{n} changes pulled, {m} need a manual task",
+ in_intro:"Pick an incoming item and press Process. The ID check and the client lookup really run in your browser. The OCR text is pre-written.",
+ in_i1:"Fax: ID card scan",in_i2:"WhatsApp: photo of a driving licence",in_i3:"Email: policy PDF",in_i4:"Fax: blurry ID card (dot-matrix)",in_i5:"Email: letter with a surname only",
+ in_k_id:"ID card",in_k_lic:"driving licence",in_k_pol:"policy",in_k_let:"letter",
+ in_go:"Process",in_try:"Try an ID number",in_check:"Check",in_valid:"Valid ID. Client: {c}",in_valid_no:"Valid ID format, no client has this number",in_invalid:"Check digit fails: likely a typo or an OCR error",in_hint:"Examples of IDs on file are shown in the Inbox detail pane.",
+ in_s1:"Capture: original stored, hash {h}",in_s2:"Digitize: OCR text read",in_s3:"Classify: {k}",in_s4:"Extract: {f}",in_s5:"Validate ID check digit: {r}",in_s6:"Attribute: {a}",in_s7:"Route: {r}",
+ in_ok:"ok",in_fail:"fails",in_none:"no ID found",
+ in_a_id:"matched by ID number to {c}",in_a_pol:"matched by policy number to {c}",in_a_none:"name only: two candidates ({a}, {b}), never filed on a name alone",in_a_bad:"ID digits unreliable, no match",
+ in_r_auto:"auto-filed to {c} (confidence {p}%)",in_r_rev:"sent to the Review queue",in_r_un:"sent to the Unassigned queue",
+ wa_cons:"Marketing consent",wa_cons_no:"not given: service messages only",wa_cons_yes:"given (opt-in on record)",
+ wa_qr:"Reply: you write in your language, the client receives {l}",wa_sentto:"Sent to the client (language: {l})",wa_yours:"Your text",
+ wa_offer:"Send product offer",wa_blocked:"Blocked: no marketing consent on record (Communications Law section 30A). Nothing was sent.",wa_optin:"Client gave a marketing opt-in",
+ wa_ad:"Advertisement",wa_offer_txt:"Invest in a provident fund before the yearly ceiling. Reply STOP to unsubscribe.",wa_sent:"Sent (simulated)",
+ wa_q1:"Yes, I will move it to the 1st of the month from next month and confirm here.",wa_q2:"Please send a photo of the standing-order form from your bank.",
+ ca_intro:"Press Start. The subtitles follow the language you chose. Lines marked with a flag hold amounts or dates and would be flagged for confirmation.",
+ ca_start:"Start",ca_pause:"Pause",ca_restart:"Restart",ca_agent:"Agent",ca_client:"Client",ca_rec:"Recording consent announced and logged",ca_flag:"confirm",ca_note:"Machine translation, may contain errors.",ca_end:"End of example",ca_spoken:"spoken: {l}",
+ pe_intro:"Pick a client. The request is blocked until a signed authorization is on file. The results are fictional.",
+ pe_client:"Client",pe_auth:"Signed authorization on file",pe_signreq:"Send authorization for e-signature",pe_signed:"Signed",
+ pe_req:"Send request to clearing house and Har HaBituach",pe_blocked:"Blocked: no signed authorization",pe_pending:"Request sent. Institutions answer within about 3 business days.",pe_ff:"Fast-forward 3 days",
+ pe_res:"Results (refreshed {d})",pe_ins:"Provider",pe_prod:"Product",pe_prem:"Monthly premium",pe_fee:"Fee",
+ pe_p1:"Pension fund",pe_p2:"Managers' insurance",pe_p3:"Provident fund",pe_p4:"Life insurance",pe_p5:"Disability cover",pe_p6:"Study fund",
+ pe_flags:"Findings",pe_f_dup:"Overlapping life cover in two policies",pe_f_fee:"High management fee on {p}",pe_f_gap:"No disability cover found",pe_none:"No issues found",
+ pe_prep:"Prepare review for the agent",pe_done:"Review task created (simulated)",pe_note:"Fees and benchmarks are illustrative."
+});
+Object.assign(I.he,{
+ sim:"הדמיה: אין חיבור אמיתי. הנתונים בדויים.",
+ tab_integ:"אינטגרציות",tab_intake:"קליטה (פקס, מייל)",tab_wa:"וואטסאפ",tab_call:"שיחה חיה",tab_pension:"פנסיה (מסלקה)",
+ t7:"לשוניות: תיבת המשימות ועוד אינטגרציות מדומות (קליטה, וואטסאפ, שיחה חיה, פנסיה, סנכרון).",
+ au_sync:"סנכרון: {n}",au_intake:"קליטה עובדה: {a}",au_wa:"נשלחה תשובה בוואטסאפ אל {c}",au_wab:"קמפיין נחסם בשער ההסכמה עבור {c}",au_wao:"הצעת קמפיין נשלחה אל {c} (הסכמה מתועדת)",au_pe:"נשלחה בקשה למסלקה עבור {c}",au_pe2:"נוצרה משימת סקירה עבור {c}",
+ ig_intro:"כל כרטיס הוא אינטגרציה מהאפיון. לחצו סנכרון עכשיו כדי לראות מה היא הייתה עושה. שום דבר לא יוצא מהדף.",
+ ig_status:"מחובר (הדמיה)",ig_last:"סנכרון אחרון",ig_never:"טרם",ig_sync:"סנכרון עכשיו",
+ ig_wa:"WhatsApp Business API",ig_wa_d:"הודעות דו־כיווניות עם לקוחות, צילומי מסמכים, תזכורות",ig_r_wa:"12 הודעות נכנסו, 3 צילומי מסמכים הועברו לקליטה",
+ ig_mail:"Microsoft 365 / Google Workspace",ig_mail_d:"קליטת דואר ויומן",ig_r_mail:"5 מיילים סווגו, 4 תויקו אוטומטית",
+ ig_fax:"פקס בענן",ig_fax_d:"פקסים נכנסים כקובץ PDF",ig_r_fax:"2 פקסים עובדו, 1 הועבר לבדיקה",
+ ig_tel:"טלפוניה ודיבור",ig_tel_d:"אודיו של שיחות וכתוביות חיות",ig_r_tel:"שיחה אחת תומללה עם כתוביות",
+ ig_mis:"מסלקה והר הביטוח",ig_mis_d:"נתוני פנסיה וביטוח",ig_r_mis:"הבקשה בתור, תשובה בעוד כ־3 ימי עסקים",
+ ig_sys:"מערכת הסוכנות הקיימת (שורנס / עתיד)",ig_sys_d:"סנכרון דו־כיווני של לקוחות ופוליסות",ig_r_sys:"סנכרון יומי הושלם, ראו את הדוגמה למטה",
+ ig_inv:"חשבונית ירוקה וקומסיין",ig_inv_d:"חשבוניות וחתימה דיגיטלית",ig_r_inv:"נוצרו 2 חשבוניות, מסמך אחד נשלח לחתימה",
+
+ ig_sf:"Salesforce (Financial Services Cloud)",ig_sf_d:"בשימוש חברות ביטוח גדולות בישראל (דווח: מגדל, הראל). סנכרון דו־כיווני של חשבונות, פוליסות ומשימות",ig_r_sf:"סונכרנו: 6 חשבונות, 9 פוליסות, 3 משימות נדחפו",
+ ig_sys_pick:"מערכת לדו־קיום",ig_sys_old:"שורנס / עתיד (מערכות לסוכנויות)",ig_sys_sf:"Salesforce (Financial Services Cloud)",
+ ig_map_h:"מיפוי שדות ל־Salesforce (להמחשה)",ig_map_a:"ansurance",ig_map_s:"אובייקט ב־Salesforce",
+ map_client:"לקוח",map_policy:"פוליסה",map_lead:"ליד או תגובה לקמפיין",map_case:"תביעה או תלונה",map_task:"פריט בתיבת המשימות",map_doc:"מסמך",map_cons:"הסכמה לדיוור שיווקי",
+ ig_sf_note:"בעיתונות העברית דווח על Salesforce במגדל (פרויקט Salesforce ראשון בענף הביטוח בישראל, שבנתה קלאודטק) ובהראל. סוכנויות קטנות משתמשות לרוב בשורנס או בעתיד. זהו מיפוי להמחשה, לא מחבר שנבדק.",
+ ig_co_h:"דוגמת דו־קיום: המערכת הקיימת ו־ansurance",
+ ig_co_rule:"כלל התנגשות: המערכת הקיימת קובעת בנתוני פוליסה. ansurance קובעת במסמכים, בהסכמות ובמשימות. שאר ההתנגשויות הופכות למשימה ידנית.",
+ ig_co_run:"הרצת סנכרון יומי",ig_co_hint:"לחצו כדי למשוך את השינויים מאז ההרצה האחרונה.",ig_chg:"שינוי",ig_win:"הכרעה",
+ ig_w_old:"המערכת הקיימת",ig_w_new:"ansurance",ig_w_man:"משימה ידנית",
+ ig_c1:"הפרמיה שונתה מ־412 ל־436",ig_c2:"מועד החידוש הוזז לאחד בחודש",ig_c3:"נרשמה הסרה מדיוור שיווקי",ig_c4:"צורף מסמך חדש (תעודת זהות)",ig_c5:"מספר הטלפון שונה בין שתי המערכות",
+ ig_co_sum:"{n} שינויים נמשכו, {m} דורשים משימה ידנית",
+ in_intro:"בחרו פריט נכנס ולחצו עיבוד. בדיקת תעודת הזהות וחיפוש הלקוח רצים באמת בדפדפן. טקסט ה־OCR כתוב מראש.",
+ in_i1:"פקס: סריקת תעודת זהות",in_i2:"וואטסאפ: צילום רישיון נהיגה",in_i3:"מייל: קובץ PDF של פוליסה",in_i4:"פקס: תעודת זהות מטושטשת (מדפסת מחטים)",in_i5:"מייל: מכתב עם שם משפחה בלבד",
+ in_k_id:"תעודת זהות",in_k_lic:"רישיון נהיגה",in_k_pol:"פוליסה",in_k_let:"מכתב",
+ in_go:"עיבוד",in_try:"נסו מספר זהות",in_check:"בדיקה",in_valid:"מספר תקין. לקוח: {c}",in_valid_no:"מבנה תקין, אין לקוח עם המספר הזה",in_invalid:"ספרת הביקורת שגויה: כנראה טעות הקלדה או שגיאת OCR",in_hint:"דוגמאות למספרי זהות בתיק מופיעות בחלונית הפרטים של תיבת המשימות.",
+ in_s1:"קליטה: המקור נשמר, hash {h}",in_s2:"דיגיטציה: נקרא טקסט OCR",in_s3:"סיווג: {k}",in_s4:"חילוץ: {f}",in_s5:"בדיקת ספרת ביקורת של תעודת הזהות: {r}",in_s6:"שיוך: {a}",in_s7:"ניתוב: {r}",
+ in_ok:"תקין",in_fail:"נכשלה",in_none:"לא נמצא מספר זהות",
+ in_a_id:"הותאם לפי מספר זהות אל {c}",in_a_pol:"הותאם לפי מספר פוליסה אל {c}",in_a_none:"שם בלבד: שני מועמדים ({a}, {b}), לעולם לא מתייקים לפי שם בלבד",in_a_bad:"ספרות הזהות לא אמינות, אין התאמה",
+ in_r_auto:"תויק אוטומטית אצל {c} (ביטחון {p}%)",in_r_rev:"הועבר לתור הבדיקה",in_r_un:"הועבר לתור ללא שיוך",
+ wa_cons:"הסכמה לדיוור שיווקי",wa_cons_no:"לא ניתנה: הודעות שירות בלבד",wa_cons_yes:"ניתנה (הסכמה מתועדת)",
+ wa_qr:"תשובה: כותבים בשפה שלכם, הלקוח מקבל {l}",wa_sentto:"נשלח ללקוח (שפה: {l})",wa_yours:"הטקסט שלכם",
+ wa_offer:"שליחת הצעת מוצר",wa_blocked:"נחסם: אין הסכמה לדיוור שיווקי (סעיף 30א לחוק התקשורת). דבר לא נשלח.",wa_optin:"הלקוח נתן הסכמה לדיוור שיווקי",
+ wa_ad:"פרסומת",wa_offer_txt:"השקיעו בקופת גמל להשקעה לפני תקרת השנה. השיבו הסר להסרה.",wa_sent:"נשלח (הדמיה)",
+ wa_q1:"כן, אעביר את התשלום לראשון בחודש מהחודש הבא ואאשר כאן.",wa_q2:"אנא שלחו צילום של טופס הוראת הקבע מהבנק.",
+ ca_intro:"לחצו התחל. הכתוביות בשפה שבחרתם. שורות עם דגל כוללות סכומים או תאריכים ויסומנו לאישור.",
+ ca_start:"התחל",ca_pause:"השהיה",ca_restart:"מההתחלה",ca_agent:"סוכן",ca_client:"לקוח",ca_rec:"הודעה על הקלטה נשמעה ונרשמה",ca_flag:"לאישור",ca_note:"תרגום אוטומטי, עלול לכלול שגיאות.",ca_end:"סוף הדוגמה",ca_spoken:"נאמר ב: {l}",
+ pe_intro:"בחרו לקוח. הבקשה חסומה עד שיש הרשאה חתומה בתיק. התוצאות בדויות.",
+ pe_client:"לקוח",pe_auth:"הרשאה חתומה בתיק",pe_signreq:"שליחת הרשאה לחתימה דיגיטלית",pe_signed:"נחתם",
+ pe_req:"שליחת בקשה למסלקה ולהר הביטוח",pe_blocked:"חסום: אין הרשאה חתומה",pe_pending:"הבקשה נשלחה. הגופים משיבים תוך כ־3 ימי עסקים.",pe_ff:"דילוג של 3 ימים",
+ pe_res:"תוצאות (עודכן {d})",pe_ins:"גוף",pe_prod:"מוצר",pe_prem:"פרמיה חודשית",pe_fee:"דמי ניהול",
+ pe_p1:"קרן פנסיה",pe_p2:"ביטוח מנהלים",pe_p3:"קופת גמל",pe_p4:"ביטוח חיים",pe_p5:"אובדן כושר עבודה",pe_p6:"קרן השתלמות",
+ pe_flags:"ממצאים",pe_f_dup:"כיסוי חיים כפול בשתי פוליסות",pe_f_fee:"דמי ניהול גבוהים ב{p}",pe_f_gap:"לא נמצא כיסוי אובדן כושר עבודה",pe_none:"לא נמצאו ממצאים",
+ pe_prep:"הכנת סקירה לסוכן",pe_done:"נוצרה משימת סקירה (הדמיה)",pe_note:"דמי הניהול וההשוואות להמחשה בלבד."
+});
+Object.assign(I.ar,{sim:"محاكاة: لا يوجد اتصال حقيقي. البيانات وهمية.",tab_integ:"التكاملات",tab_intake:"الاستقبال (فاكس، بريد)",tab_wa:"واتساب",tab_call:"مكالمة حية",tab_pension:"التقاعد (المسلكة)"});
+Object.assign(I.ru,{sim:"Симуляция: реального подключения нет. Данные вымышленные.",tab_integ:"Интеграции",tab_intake:"Приём (факс, почта)",tab_wa:"WhatsApp",tab_call:"Живой звонок",tab_pension:"Пенсия (клиринг)"});
+Object.assign(I.fr,{sim:"Simulation : aucune connexion réelle. Données fictives.",tab_integ:"Intégrations",tab_intake:"Réception (fax, e-mail)",tab_wa:"WhatsApp",tab_call:"Appel en direct",tab_pension:"Retraite (compensation)"});
+/* quick replies and offer text in the other languages (call script and replies carry the translation point) */
+var WAQ={
+ q1:{en:I.en.wa_q1,he:I.he.wa_q1,ar:"نعم، سأنقل الدفع إلى أول الشهر ابتداءً من الشهر القادم وسأؤكد هنا.",ru:"Да, перенесу платёж на 1-е число со следующего месяца и подтвержу здесь.",fr:"Oui, je déplace le paiement au 1er du mois dès le mois prochain et je confirme ici."},
+ q2:{en:I.en.wa_q2,he:I.he.wa_q2,ar:"يرجى إرسال صورة لنموذج الأمر الدائم من البنك.",ru:"Пришлите, пожалуйста, фото формы постоянного поручения из вашего банка.",fr:"Merci d'envoyer une photo du formulaire d'ordre permanent de votre banque."}
+};
+var LNAME={en:"English",he:"עברית",ar:"العربية",ru:"Русский",fr:"Français"};
+var CALL=[
+ {who:"agent",from:"he",flag:0,he:"שלום, כאן סוכנות הביטוח. אפשר להקליט את השיחה לצורך שירות?",en:"Hello, this is the insurance agency. May I record the call for service purposes?",ru:"Здравствуйте, это страховое агентство. Можно записать разговор в целях обслуживания?",ar:"مرحبًا، هنا وكالة التأمين. هل يمكنني تسجيل المكالمة لأغراض الخدمة؟",fr:"Bonjour, ici l'agence d'assurance. Puis-je enregistrer l'appel à des fins de service ?"},
+ {who:"client",from:"ru",flag:0,he:"שלום. כן, אפשר.",en:"Hello. Yes, you may.",ru:"Здравствуйте. Да, можно.",ar:"مرحبًا. نعم، يمكنك ذلك.",fr:"Bonjour. Oui, vous pouvez."},
+ {who:"agent",from:"he",flag:1,he:"ביטוח הרכב שלך מסתיים בעוד שמונה ימים. רוצה שנבדוק מחיר?",en:"Your car insurance ends in eight days. Do you want us to check the price?",ru:"Ваша автостраховка заканчивается через восемь дней. Хотите, проверим цену?",ar:"ينتهي تأمين سيارتك بعد ثمانية أيام. هل تريد أن نتحقق من السعر؟",fr:"Votre assurance auto se termine dans huit jours. Voulez-vous que nous vérifiions le prix ?"},
+ {who:"client",from:"ru",flag:0,he:"כן, בבקשה. וגם אני צריך להוסיף נהג שני.",en:"Yes, please. And I need to add a second driver.",ru:"Да, пожалуйста. И мне нужно добавить второго водителя.",ar:"نعم، من فضلك. وأحتاج أيضًا إلى إضافة سائق ثانٍ.",fr:"Oui, s'il vous plaît. Et je dois ajouter un deuxième conducteur."},
+ {who:"agent",from:"he",flag:1,he:"בסדר. אשלח לך הצעה בווטסאפ עד מחר בצהריים.",en:"Fine. I will send you an offer on WhatsApp by tomorrow noon.",ru:"Хорошо. Я пришлю вам предложение в WhatsApp до завтрашнего полудня.",ar:"حسنًا. سأرسل لك عرضًا عبر واتساب حتى ظهر الغد.",fr:"D'accord. Je vous enverrai une offre sur WhatsApp d'ici demain midi."},
+ {who:"client",from:"ru",flag:0,he:"תודה, אני מחכה.",en:"Thank you, I'll wait.",ru:"Спасибо, жду.",ar:"شكرًا، سأنتظر.",fr:"Merci, j'attends."}
+];
+var TOKEN=0,CALLH=null;
+S.sync={};S.syncRes={};S.co=null;S.coSys="old";S.intake={sel:0,steps:[],busy:false};S.wa={msgs:[],optin:false,blocked:false};S.call={i:0,run:false};S.pe={client:"Dana Levi",signed:false,sent:false,ready:false,date:""};
+function sim(){return '<p class="note"><span class="sim">'+esc(t("sim"))+'</span></p>'}
+function clientId(cl){if(!IDS[cl])IDS[cl]=idNum(rng(fnv(cl).split("").reduce(function(a,c){return a*31+c.charCodeAt(0)|0},7)));return IDS[cl]}
+function idValid(s){if(!/^\d{9}$/.test(s))return false;var sum=0;for(var i=0;i<9;i++){var x=+s[i]*(i%2?2:1);sum+=x>9?x-9:x}return sum%10===0}
+function byId(id){for(var i=0;i<NAMES.length;i++)if(clientId(NAMES[i])===id)return NAMES[i];return null}
+function polNo(cl){return "POL-"+(100000+parseInt(fnv(cl),16)%900000)}
+function nowStr(){return new Date().toTimeString().slice(0,8)}
+function stopCall(){if(CALLH){clearInterval(CALLH);CALLH=null}S.call.run=false}
+
+/* --- Integrations overview + coexistence --- */
+var CARDS=["wa","mail","fax","tel","mis","sys","sf","inv"];
+function renderInteg(){
+  var h=sim()+'<p class="note">'+esc(t("ig_intro"))+'</p><div class="cards">';
+  CARDS.forEach(function(c){
+    h+='<div class="card icard"><b>'+esc(t("ig_"+c))+'</b><div class="d">'+esc(t("ig_"+c+"_d"))+'</div><div class="st">● '+esc(t("ig_status"))+'</div><div class="d">'+esc(t("ig_last"))+': '+esc(S.sync[c]||t("ig_never"))+'</div>'+(S.syncRes[c]?'<div class="res">'+esc(S.syncRes[c])+'</div>':'')+'<div class="actions"><button class="btn primary" data-c="'+c+'">'+esc(t("ig_sync"))+'</button></div></div>';
+  });
+  h+='</div><div class="card" style="padding:16px;margin-top:16px"><h2 style="margin:0 0 6px;font-size:17px">'+esc(t("ig_co_h"))+'</h2><p class="note">'+esc(t("ig_co_rule"))+'</p><label>'+esc(t("ig_sys_pick"))+' <select id="coSys"><option value="old"'+(S.coSys==="old"?" selected":"")+'>'+esc(t("ig_sys_old"))+'</option><option value="sf"'+(S.coSys==="sf"?" selected":"")+'>'+esc(t("ig_sys_sf"))+'</option></select></label> <button class="btn primary" id="coRun">'+esc(t("ig_co_run"))+'</button>';
+  if(!S.co)h+='<p class="note" style="margin-top:10px">'+esc(t("ig_co_hint"))+'</p>';
+  else{
+    var man=S.co.filter(function(r){return r.w==="man"}).length;
+    h+='<p class="summary" style="margin-top:12px">'+esc(t("ig_co_sum",{n:S.co.length,m:man}))+'</p><table class="tbl"><thead><tr><th>'+esc(t("client"))+'</th><th>'+esc(t("ig_chg"))+'</th><th>'+esc(t("ig_win"))+'</th></tr></thead><tbody>';
+    S.co.forEach(function(r){h+='<tr><td dir="auto">'+esc(nm(r.c))+'</td><td>'+esc(t("ig_c"+r.k))+'</td><td><span class="badge '+(r.w==="man"?"a":"")+'">'+esc(t("ig_w_"+r.w))+'</span></td></tr>'});
+    h+='</tbody></table>';
+  }
+  if(S.coSys==="sf"){
+    var M=[["client","Account (Person Account)"],["policy","InsurancePolicy (Financial Services Cloud for Insurance)"],["lead","Lead"],["case","Case"],["task","Task"],["doc","ContentVersion linked to the Account"],["cons","Individual + ContactPointTypeConsent"]];
+    h+='<h3 style="margin:16px 0 6px">'+esc(t("ig_map_h"))+'</h3><table class="tbl"><thead><tr><th>'+esc(t("ig_map_a"))+'</th><th>'+esc(t("ig_map_s"))+'</th></tr></thead><tbody>';
+    M.forEach(function(r){h+='<tr><td>'+esc(t("map_"+r[0]))+'</td><td dir="ltr">'+esc(r[1])+'</td></tr>'});
+    h+='</tbody></table><p class="note" style="margin-top:8px">'+esc(t("ig_sf_note"))+'</p>';
+  }
+  h+='</div>';
+  $("main").innerHTML=h;
+  document.querySelectorAll("[data-c]").forEach(function(b){b.onclick=function(){syncCard(b.dataset.c)}});
+  $("coSys").onchange=function(){S.coSys=this.value;renderInteg()};
+  $("coRun").onclick=function(){syncCard(S.coSys==="sf"?"sf":"sys")};
+}
+function syncCard(c){
+  S.sync[c]=nowStr();S.syncRes[c]=t("ig_r_"+c);
+  if(c==="sys"||c==="sf"){S.coSys=c==="sf"?"sf":"old";
+    var w=["old","old","new","new","man"];
+    S.co=[0,1,2,3,4].map(function(i){return {c:NAMES[(i*3+1)%NAMES.length],k:i+1,w:w[i]}});
+  }
+  logAudit(roleName(S.role),t("au_sync",{n:t("ig_"+c)}));toast("✓ "+t("ig_r_"+c));renderInteg();
+}
+
+/* --- Intake pipeline --- */
+var INTAKE=[
+ {ch:"fx",k:"id",c:"Dana Levi"},{ch:"wa",k:"lic",c:"Omar Khoury"},{ch:"em",k:"pol",c:"Rachel Peretz"},
+ {ch:"fx",k:"id",c:"Sophie Benhamou",bad:1},{ch:"em",k:"let",c:null,sur:"Haddad",cand:["Karim Haddad","فاطمة حداد"]}
+];
+function renderIntake(){
+  var it=INTAKE[S.intake.sel],h=sim()+'<p class="note">'+esc(t("in_intro"))+'</p><div class="grid"><div class="card" style="padding:10px">';
+  INTAKE.forEach(function(x,i){h+='<button class="row" data-i="'+i+'" aria-current="'+(i===S.intake.sel)+'"><div class="t"><span class="badge">'+esc(t("ch_"+x.ch))+'</span><span class="cl">'+esc(t("in_i"+(i+1)))+'</span></div></button>'});
+  h+='<div class="actions"><button class="btn primary" id="inGo"'+(S.intake.busy?" disabled":"")+'>'+esc(t("in_go"))+'</button></div>';
+  h+='<hr style="border:0;border-top:1px solid var(--line);margin:14px 0"><label>'+esc(t("in_try"))+'<br><input id="idIn" inputmode="numeric" maxlength="9" dir="ltr" placeholder="123456789" style="margin-top:4px"></label> <button class="btn" id="idBtn">'+esc(t("in_check"))+'</button><div id="idOut" class="note" style="margin-top:8px"></div></div>';
+  h+='<div class="card detail" id="steps">';
+  S.intake.steps.forEach(function(s,i){h+='<div class="step"><span class="tick">✓</span> '+esc(s)+'</div>'});
+  if(!S.intake.steps.length)h+='<div class="empty">'+esc(t("pick"))+'</div>';
+  h+='</div></div>';
+  $("main").innerHTML=h;
+  document.querySelectorAll("[data-i]").forEach(function(b){b.onclick=function(){S.intake.sel=+b.dataset.i;S.intake.steps=[];S.intake.busy=false;TOKEN++;renderIntake()}});
+  $("inGo").onclick=runIntake;
+  $("idBtn").onclick=function(){
+    var v=$("idIn").value.trim(),o=$("idOut");
+    if(!idValid(v)){o.textContent=t("in_invalid");o.style.color="var(--red)";return}
+    var c=byId(v);o.textContent=c?t("in_valid",{c:nm(c)}):t("in_valid_no");o.style.color=c?"var(--green)":"var(--amber)";
+  };
+  $("idIn").placeholder=clientId("Dana Levi");
+}
+function runIntake(){
+  var x=INTAKE[S.intake.sel],tok=++TOKEN,steps=[],id=null,ocr="",k=t("in_k_"+x.k),route,conf=0,att,ok=null;
+  if(x.c){id=clientId(x.c);if(x.bad){id=id.slice(0,3)+((+id[3]+1)%10)+id.slice(4)}}
+  steps.push(t("in_s1",{h:fnv(x.ch+x.k+(x.c||x.sur))}));
+  steps.push(t("in_s2"));steps.push(t("in_s3",{k:k}));
+  if(x.k==="pol"){var pn=polNo(x.c);steps.push(t("in_s4",{f:pn}));att=t("in_a_pol",{c:nm(x.c)});conf=97;route=t("in_r_auto",{c:nm(x.c),p:conf})}
+  else if(x.sur){steps.push(t("in_s4",{f:x.sur}));steps.push(t("in_s5",{r:t("in_none")}));att=t("in_a_none",{a:nm(x.cand[0]),b:nm(x.cand[1])});route=t("in_r_rev")}
+  else{
+    steps.push(t("in_s4",{f:id}));ok=idValid(id);steps.push(t("in_s5",{r:ok?t("in_ok"):t("in_fail")}));
+    if(ok){att=t("in_a_id",{c:nm(x.c)});conf=99;route=t("in_r_auto",{c:nm(x.c),p:conf})}
+    else{att=t("in_a_bad");route=t("in_r_un")}
+  }
+  steps.push(t("in_s6",{a:att}));steps.push(t("in_s7",{r:route}));
+  S.intake.steps=[];S.intake.busy=true;renderIntake();
+  var i=0;(function nxt(){
+    if(tok!==TOKEN)return;
+    if(i>=steps.length){S.intake.busy=false;logAudit(roleName(S.role),t("au_intake",{a:t("in_i"+(S.intake.sel+1))}));renderIntake();return}
+    S.intake.steps.push(steps[i++]);renderIntake();setTimeout(nxt,550);
+  })();
+}
+
+/* --- WhatsApp chat --- */
+function renderWa(){
+  var cl="أحمد صالح",m=MSGS[1],tr=m.tr[S.lang];
+  var h=sim()+'<div class="grid"><div class="card" style="padding:14px"><h2 style="margin:0 0 4px;font-size:17px" dir="auto">'+esc(nm(cl))+'</h2>';
+  h+='<div class="note">'+esc(t("wa_cons"))+': <b style="color:'+(S.wa.optin?"var(--green)":"var(--red)")+'">'+esc(S.wa.optin?t("wa_cons_yes"):t("wa_cons_no"))+'</b></div><div class="chat">';
+  h+='<div class="bub in"><span dir="auto">'+esc(m.orig)+'</span>'+(m.from!==S.lang&&tr?'<small>'+esc(tr)+'</small>':'')+'</div>';
+  S.wa.msgs.forEach(function(x){
+    if(x.type==="q")h+='<div class="bub out"><span dir="auto">'+esc(WAQ[x.k].ar)+'</span><small>'+esc(t("wa_yours"))+': '+esc(WAQ[x.k][S.lang]||WAQ[x.k].en)+'<br>'+esc(t("wa_sentto",{l:LNAME.ar}))+' ✓✓</small></div>';
+    else h+='<div class="bub out ad"><b>'+esc(t("wa_ad"))+'</b><br>'+esc(t("wa_offer_txt"))+'<small>'+esc(t("wa_sent"))+' ✓✓</small></div>';
+  });
+  h+='</div>';
+  if(S.wa.blocked)h+='<div class="alert">'+esc(t("wa_blocked"))+'</div>';
+  h+='</div><div class="card" style="padding:14px"><b>'+esc(t("wa_qr",{l:LNAME.ar}))+'</b><div class="actions"><button class="btn" data-q="q1">'+esc(WAQ.q1[S.lang]||WAQ.q1.en)+'</button><button class="btn" data-q="q2">'+esc(WAQ.q2[S.lang]||WAQ.q2.en)+'</button></div><hr style="border:0;border-top:1px solid var(--line);margin:14px 0"><label><input type="checkbox" id="optin"'+(S.wa.optin?" checked":"")+'> '+esc(t("wa_optin"))+'</label><div class="actions"><button class="btn primary" id="offer">'+esc(t("wa_offer"))+'</button></div></div></div>';
+  $("main").innerHTML=h;
+  document.querySelectorAll("[data-q]").forEach(function(b){b.onclick=function(){S.wa.msgs.push({type:"q",k:b.dataset.q});S.wa.blocked=false;logAudit(roleName(S.role),t("au_wa",{c:nm(cl)}));renderWa()}});
+  $("optin").onchange=function(){S.wa.optin=this.checked;S.wa.blocked=false;renderWa()};
+  $("offer").onclick=function(){
+    if(!S.wa.optin){S.wa.blocked=true;logAudit(roleName(S.role),t("au_wab",{c:nm(cl)}));toast(t("wa_blocked"))}
+    else{S.wa.blocked=false;S.wa.msgs.push({type:"o"});logAudit(roleName(S.role),t("au_wao",{c:nm(cl)}))}
+    renderWa();
+  };
+}
+
+/* --- Live call with subtitles --- */
+function renderCall(){
+  var h=sim()+'<p class="note">'+esc(t("ca_intro"))+'</p><div class="card" style="padding:14px"><div class="actions" style="margin:0 0 10px"><button class="btn primary" id="caGo">'+esc(S.call.run?t("ca_pause"):t("ca_start"))+'</button><button class="btn" id="caRe">'+esc(t("ca_restart"))+'</button></div>';
+  if(S.call.i>0)h+='<div class="note">🎙 '+esc(t("ca_rec"))+'</div>';
+  h+='<div class="subs">';
+  CALL.slice(0,S.call.i).forEach(function(l){
+    h+='<div class="sub '+l.who+'"><small>'+esc(t(l.who==="agent"?"ca_agent":"ca_client"))+' · '+esc(t("ca_spoken",{l:LNAME[l.from]}))+(l.flag?' · <span class="flag">⚑ '+esc(t("ca_flag"))+'</span>':'')+'</small><div class="txt" dir="auto">'+esc(l[S.lang]||l.en)+'</div>'+(l.from!==S.lang?'<small dir="auto">'+esc(l[l.from])+'</small>':'')+'</div>';
+  });
+  if(S.call.i>=CALL.length)h+='<div class="note">'+esc(t("ca_end"))+'</div>';
+  h+='</div><p class="note">'+esc(t("ca_note"))+'</p></div>';
+  $("main").innerHTML=h;
+  $("caGo").onclick=function(){
+    if(S.call.run){stopCall();renderCall();return}
+    if(S.call.i>=CALL.length)S.call.i=0;
+    S.call.run=true;if(S.call.i===0)S.call.i=1;renderCall();
+    CALLH=setInterval(function(){
+      if(S.tab!=="call"){stopCall();return}
+      if(S.call.i>=CALL.length){stopCall();renderCall();return}
+      S.call.i++;renderCall();
+    },2300);
+  };
+  $("caRe").onclick=function(){stopCall();S.call.i=0;renderCall()};
+}
+
+/* --- Pension: Mislaka / Har HaBituach --- */
+var PCLIENTS=["Dana Levi","Omar Khoury","Ирина Волкова","אבי מזרחי","Marie Dubois"];
+function pData(name){
+  var r=rng(parseInt(fnv(name),16)),prods=["p1","p3"];
+  if(r()<0.6)prods.push("p2");prods.push("p4");if(r()<0.5)prods.push("p4");if(r()<0.5)prods.push("p5");if(r()<0.6)prods.push("p6");
+  return prods.map(function(p){return {p:p,ins:"ABCDE"[Math.floor(r()*5)],prem:Math.round(150+r()*900),fee:(p==="p4"||p==="p5")?null:+(0.1+r()*1.1).toFixed(2)}});
+}
+function renderPension(){
+  var P=S.pe,h=sim()+'<p class="note">'+esc(t("pe_intro"))+'</p><div class="card" style="padding:14px"><label>'+esc(t("pe_client"))+' <select id="peC">';
+  PCLIENTS.forEach(function(c){h+='<option value="'+esc(c)+'"'+(c===P.client?" selected":"")+'>'+esc(nm(c))+'</option>'});
+  h+='</select></label><div class="step" style="margin-top:12px">'+(P.signed?'<span class="tick">✓</span> '+esc(t("pe_auth"))+' ('+esc(t("pe_signed"))+')':'<button class="btn" id="peSign">'+esc(t("pe_signreq"))+'</button>')+'</div>';
+  h+='<div class="actions"><button class="btn primary" id="peReq">'+esc(t("pe_req"))+'</button></div>';
+  if(!P.signed&&!P.sent)h+='<p class="note">'+esc(t("pe_blocked"))+'</p>';
+  if(P.sent&&!P.ready)h+='<p class="note">'+esc(t("pe_pending"))+'</p><button class="btn" id="peFf">'+esc(t("pe_ff"))+'</button>';
+  if(P.ready){
+    var rows=pData(P.client),life=rows.filter(function(r){return r.p==="p4"}).length,flags=[];
+    if(life>1)flags.push(t("pe_f_dup"));
+    var hi=rows.filter(function(r){return r.fee!==null&&r.fee>0.6})[0];if(hi)flags.push(t("pe_f_fee",{p:t("pe_"+hi.p)}));
+    if(!rows.some(function(r){return r.p==="p5"}))flags.push(t("pe_f_gap"));
+    h+='<h3 style="margin:14px 0 6px">'+esc(t("pe_res",{d:P.date}))+'</h3><table class="tbl"><thead><tr><th>'+esc(t("pe_ins"))+'</th><th>'+esc(t("pe_prod"))+'</th><th>'+esc(t("pe_prem"))+'</th><th>'+esc(t("pe_fee"))+'</th></tr></thead><tbody>';
+    rows.forEach(function(r){h+='<tr><td>'+r.ins+'</td><td>'+esc(t("pe_"+r.p))+'</td><td dir="ltr">₪'+r.prem+'</td><td dir="ltr">'+(r.fee===null?"-":r.fee+"%")+'</td></tr>'});
+    h+='</tbody></table><h3 style="margin:14px 0 6px">'+esc(t("pe_flags"))+'</h3>';
+    if(flags.length)flags.forEach(function(f){h+='<div class="alert">'+esc(f)+'</div>'});else h+='<div class="note">'+esc(t("pe_none"))+'</div>';
+    h+='<div class="actions"><button class="btn primary" id="pePrep">'+esc(t("pe_prep"))+'</button></div><p class="note">'+esc(t("pe_note"))+'</p>';
+  }
+  h+='</div>';
+  $("main").innerHTML=h;
+  $("peC").onchange=function(){S.pe={client:this.value,signed:false,sent:false,ready:false,date:""};renderPension()};
+  if($("peSign"))$("peSign").onclick=function(){S.pe.signed=true;renderPension()};
+  $("peReq").onclick=function(){
+    if(!S.pe.signed){toast(t("pe_blocked"));return}
+    S.pe.sent=true;logAudit(roleName(S.role),t("au_pe",{c:nm(S.pe.client)}));renderPension();
+  };
+  if($("peFf"))$("peFf").onclick=function(){S.pe.ready=true;S.pe.date=new Date().toISOString().slice(0,10);renderPension()};
+  if($("pePrep"))$("pePrep").onclick=function(){logAudit(roleName(S.role),t("au_pe2",{c:nm(S.pe.client)}));toast("✓ "+t("pe_done"))};
+}
+
 /* ---------- Show me tour ---------- */
 function stopTour(){
   if(!S.tour)return;clearInterval(S.tour.h);["tourRing","tourTip"].forEach(function(i){var e=$(i);if(e)e.remove()});S.tour=null;
 }
 function startTour(){
   stopTour();S.tab="inbox";render();
-  var steps=[["roleSel","t1"],["langSel","t2"],["themeBtn","t3"],["chips","t4"],["strip","t5"],["list","t6"]],i=0;
+  var steps=[["roleSel","t1"],["tabs","t7"],["langSel","t2"],["themeBtn","t3"],["chips","t4"],["strip","t5"],["list","t6"]],i=0;
   var ring=document.createElement("div");ring.className="tour-ring";ring.id="tourRing";
   var tip=document.createElement("div");tip.className="tour-tip";tip.id="tourTip";
   document.body.appendChild(ring);document.body.appendChild(tip);

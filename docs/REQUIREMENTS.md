@@ -307,6 +307,7 @@ Many Israeli agencies already run an agency management system and will not switc
 | Atid (cloud agency software) | Cloud office management; clearing house requests for pre-advice and production download; automatic interfaces to WhatsApp, SMS, call recordings and Har HaBituach |
 | Aloni | Ingests material from all insurers and funds, including clearing house data; Har HaBituach connection and product simulators |
 | BAFI | Office management, car insurance simulator, online clearing house (vendor page is old, check it is current) |
+| Salesforce (Financial Services Cloud) | Hebrew press reports it at large insurers: Migdal (described as the first Salesforce insurance project in Israel, built by Cloudtech) and Harel (360-degree customer view). One vendor blog adds Phoenix, unverified. Small agencies rarely run it, so treat it as the integration for a larger agency or for insurer-side data. Illustrative mapping: client to Account, policy to InsurancePolicy, lead to Lead, claim or complaint to Case, Inbox item to Task, document to ContentVersion, marketing consent to Individual and ContactPointTypeConsent |
 | Sapiens IDITSuite | Insurer-grade core suite with open APIs (API Conductor), also used by brokers; more relevant to insurers than to a five-agent agency |
 
 Example scenario (coexistence, ansurance as the front layer, a system such as Surense or Atid kept as the system of record for the first phase):
@@ -373,6 +374,8 @@ Sources:
 - [Aloni Software](https://www.aloni.org.il/)
 - [Start Point: CRM for insurance agents, 2026 comparison](https://start-point.co.il/crm-for-insurance-agents/)
 - [Sapiens IDITSuite](https://sapiens.com/property-and-casualty/iditsuite/)
+- [Salesforce CRM at Migdal (pc.co.il)](https://www.pc.co.il/featured/323342/)
+- [Harel and Salesforce Israel CRM platform (ice.co.il)](https://www.ice.co.il/digital-140/news/article/1015517)
 - [Israeli Anti-SPAM Legislation Amended for the First Time (Lexology)](https://www.lexology.com/library/detail.aspx?g=dfa80306-8bc5-4ac3-b01e-193ccd49dbb8)
 - [WhatsApp marketing rules in Israel 2026](https://quickwa.com/blog/whatsapp-marketing-rules-israel)
 - [gov.il: FAQ about spam mail](https://www.gov.il/en/departments/faq/17052018_7)
