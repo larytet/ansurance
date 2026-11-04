@@ -361,6 +361,25 @@ var MSGS=[
 ];
 var NAMES=["יוסי כהן","Dana Levi","فاطمة حداد","Omar Khoury","Ирина Волкова","Sergey Petrov","Marie Dubois","אבי מזרחי","Nadia Mansour","Леонид Кац","Rachel Peretz","أحمد صالح","Sophie Benhamou","Борис Рабин","מרים אזולאי","Tamer Nasser","Elena Shapiro","David Biton","Yael Friedman","Karim Haddad"];
 
+/* transliterations: native name -> Hebrew and Latin forms */
+var TR={
+ "יוסי כהן":{en:"Yossi Cohen"},"Dana Levi":{he:"דנה לוי"},"فاطمة حداد":{he:"פאטמה חדאד",en:"Fatima Haddad"},
+ "Omar Khoury":{he:"עומר חורי"},"Ирина Волкова":{he:"אירינה וולקובה",en:"Irina Volkova"},"Sergey Petrov":{he:"סרגיי פטרוב"},
+ "Marie Dubois":{he:"מארי דובואה"},"אבי מזרחי":{en:"Avi Mizrahi"},"Nadia Mansour":{he:"נדיה מנסור"},
+ "Леонид Кац":{he:"לאוניד קץ",en:"Leonid Kats"},"Rachel Peretz":{he:"רחל פרץ"},"أحمد صالح":{he:"אחמד סאלח",en:"Ahmad Saleh"},
+ "Sophie Benhamou":{he:"סופי בן חמו"},"Борис Рабин":{he:"בוריס רבין",en:"Boris Rabin"},"מרים אזולאי":{en:"Miriam Azoulay"},
+ "Tamer Nasser":{he:"תאמר נאסר"},"Elena Shapiro":{he:"אלנה שפירו"},"David Biton":{he:"דוד ביטון"},
+ "Yael Friedman":{he:"יעל פרידמן"},"Karim Haddad":{he:"כרים חדאד"}
+};
+function script(x){return /[\u0590-\u05FF]/.test(x)?"he":/[\u0600-\u06FF]/.test(x)?"ar":/[\u0400-\u04FF]/.test(x)?"ru":"en"}
+/* name shown in the current UI language: native form plus a transliteration in the UI script (Hebrew for he, Latin otherwise) */
+function nm(n){
+  var own=script(n),ui=S.lang==="he"?"he":S.lang==="ar"?"ar":S.lang==="ru"?"ru":"en";
+  if(own===ui)return n;
+  var x=TR[n]&&TR[n][S.lang==="he"?"he":"en"];
+  return x?n+" ("+x+")":n;
+}
+
 /* ---------- data ---------- */
 var ROLES=["agent","back","mgr"];
 var TYPES={
@@ -470,10 +489,10 @@ function drawList(){
     var inLens=idx>=S.lens&&idx<S.lens+LENS,b=document.createElement("button");
     if(inLens){
       b.className="row "+uc(it.urg);b.setAttribute("aria-current",String(S.sel===it.id));
-      b.innerHTML='<div class="t"><span class="badge '+uc(it.urg)+'">'+esc(t("ty_"+it.type))+'</span><span class="cl">'+esc(it.client)+'</span><span class="age">'+esc(age(it.mins))+'</span></div><div class="d">'+esc(t("d_"+it.type,{n:it.n}))+'</div>';
+      b.innerHTML='<div class="t"><span class="badge '+uc(it.urg)+'">'+esc(t("ty_"+it.type))+'</span><span class="cl" dir="auto">'+esc(nm(it.client))+'</span><span class="age">'+esc(age(it.mins))+'</span></div><div class="d">'+esc(t("d_"+it.type,{n:it.n}))+'</div>';
       b.onclick=function(){S.sel=it.id;drawList();drawDetail()};
     }else{
-      b.className="sq "+uc(it.urg);b.title=it.client+" - "+t("ty_"+it.type);b.setAttribute("aria-label",b.title);
+      b.className="sq "+uc(it.urg);b.title=nm(it.client)+" - "+t("ty_"+it.type);b.setAttribute("aria-label",b.title);
       b.onclick=function(){S.lens=Math.max(0,Math.min(vis.length-LENS,idx-Math.floor(LENS/2)));drawList();syncLens()};
     }
     list.appendChild(b);
@@ -511,12 +530,12 @@ function findSel(){var a=S.items[S.role];for(var i=0;i<a.length;i++)if(a[i].id==
 function drawDetail(){
   var d=$("detail"),it=findSel();if(!d)return;
   if(!it){d.innerHTML='<div class="empty">'+esc(t("pick"))+'</div>';return}
-  var T=TYPES[it.type],h='<span class="badge '+uc(it.urg)+'">'+esc(t("ty_"+it.type))+'</span><h2>'+esc(it.client)+'</h2><div>'+esc(t("d_"+it.type,{n:it.n}))+'</div>';
+  var T=TYPES[it.type],h='<span class="badge '+uc(it.urg)+'">'+esc(t("ty_"+it.type))+'</span><h2 dir="auto">'+esc(nm(it.client))+'</h2><div>'+esc(t("d_"+it.type,{n:it.n}))+'</div>';
   h+='<dl class="kv"><dt>'+t("idn")+'</dt><dd dir="ltr">'+it.idn+'</dd><dt>'+t("channel")+'</dt><dd>'+esc(t("ch_"+it.ch))+'</dd><dt>'+t("age")+'</dt><dd>'+esc(age(it.mins))+'</dd><dt>'+t("urg")+'</dt><dd>'+esc(t("u"+it.urg))+'</dd></dl>';
   if(T.intake){
     var pct=Math.round(it.conf*100);
     h+='<div class="doc" aria-hidden="true"><i></i><i></i><i></i><i></i></div><div>'+esc(t("match"))+': <b>'+pct+'%</b></div><div class="conf"><div style="width:'+pct+'%;background:'+(pct>=95?"var(--green)":pct>=50?"var(--amber)":"var(--red)")+'"></div></div>';
-    if(it.type==="review")h+='<p class="note" style="margin-top:8px">'+esc(it.client)+' / '+esc(it.alt)+'</p>';
+    if(it.type==="review")h+='<p class="note" style="margin-top:8px">'+esc(nm(it.client))+' / '+esc(nm(it.alt))+'</p>';
   }
   if(it.msg){
     var m=it.msg,tr=m.tr[S.lang];
@@ -529,8 +548,8 @@ function drawDetail(){
   others.forEach(function(r){h+='<button class="btn" data-r="'+r+'">'+esc(t("reassign",{r:roleName(r)}))+'</button>'});
   h+='</div><div class="actions"><select id="why" aria-label="'+esc(t("reason"))+'"><option value="">'+esc(t("reason"))+'…</option><option>'+esc(t("r1"))+'</option><option>'+esc(t("r2"))+'</option><option>'+esc(t("r3"))+'</option></select><button class="btn" id="dis" disabled>'+esc(t("dismiss"))+'</button></div>';
   d.innerHTML=h;
-  $("go").onclick=function(){removeSel(it);S.done[S.role]++;logAudit(roleName(S.role),t("done",{a:t("ty_"+it.type)})+" / "+it.client);toast("✓ "+t("done",{a:t("ty_"+it.type)}))};
-  d.querySelectorAll("[data-r]").forEach(function(b){b.onclick=function(){var r=b.dataset.r;removeSel(it);it.role=r;S.items[r].unshift(it);logAudit(roleName(S.role),t("reassigned",{r:roleName(r)})+" / "+it.client);toast(t("reassigned",{r:roleName(r)}))}});
+  $("go").onclick=function(){removeSel(it);S.done[S.role]++;logAudit(roleName(S.role),t("done",{a:t("ty_"+it.type)})+" / "+nm(it.client));toast("✓ "+t("done",{a:t("ty_"+it.type)}))};
+  d.querySelectorAll("[data-r]").forEach(function(b){b.onclick=function(){var r=b.dataset.r;removeSel(it);it.role=r;S.items[r].unshift(it);logAudit(roleName(S.role),t("reassigned",{r:roleName(r)})+" / "+nm(it.client));toast(t("reassigned",{r:roleName(r)}))}});
   $("why").onchange=function(){$("dis").disabled=!$("why").value};
   $("dis").onclick=function(){removeSel(it);logAudit(roleName(S.role),t("dismissed")+" ("+$("why").value+") / "+it.client);toast(t("dismissed"))};
 }
