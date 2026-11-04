@@ -1,0 +1,600 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ansurance - Inbox mock</title>
+<meta name="description" content="Clickable mock of the ansurance CRM Inbox for a small Israeli insurance agency. Fictional data.">
+<style>
+:root{
+  --bg:#f5f6f8;--panel:#fff;--ink:#14202b;--muted:#5c6b7a;--line:#dde2e8;
+  --accent:#1f6feb;--accent-soft:#dbe8fd;--red:#d1313f;--red-soft:#fbe3e5;--amber:#b7791f;--amber-soft:#fbefd5;
+  --green:#1a7f4b;--green-soft:#dcf2e6;--shadow:0 1px 2px rgba(0,0,0,.06),0 4px 14px rgba(0,0,0,.05);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1720;--panel:#17212c;--ink:#e6edf3;--muted:#9aa9b8;--line:#2a3745;
+    --accent:#5aa2ff;--accent-soft:#1d3552;--red:#ff6b78;--red-soft:#3a1f25;--amber:#e3b04b;--amber-soft:#3a2f17;
+    --green:#4cc38a;--green-soft:#173a2a;--shadow:0 1px 2px rgba(0,0,0,.4);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f1720;--panel:#17212c;--ink:#e6edf3;--muted:#9aa9b8;--line:#2a3745;
+  --accent:#5aa2ff;--accent-soft:#1d3552;--red:#ff6b78;--red-soft:#3a1f25;--amber:#e3b04b;--amber-soft:#3a2f17;
+  --green:#4cc38a;--green-soft:#173a2a;--shadow:0 1px 2px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+button,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+header{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+.logo{font-weight:700;font-size:18px;letter-spacing:.2px}
+.logo span{color:var(--accent)}
+.sp{flex:1}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{background:transparent;border:0;padding:6px 12px;border-inline-end:1px solid var(--line)}
+.seg button:last-child{border-inline-end:0}
+.seg button[aria-pressed="true"]{background:var(--accent);color:#fff}
+select,.btn{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px 10px}
+.btn:hover,select:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:disabled{opacity:.5;cursor:default}
+nav.tabs{display:flex;gap:4px;padding:8px 16px 0;border-bottom:1px solid var(--line);background:var(--panel)}
+nav.tabs button{background:transparent;border:0;border-bottom:3px solid transparent;padding:8px 14px;color:var(--muted)}
+nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent);font-weight:600}
+main{padding:16px;max-width:1280px;margin:0 auto}
+.note{color:var(--muted);font-size:13px;margin:0 0 12px}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+.chip{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:4px 12px;font-size:13px}
+.chip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent)}
+.chip b{margin-inline-start:6px;color:var(--muted);font-weight:600}
+.summary{font-weight:600;margin-bottom:8px}
+.summary .u{color:var(--red)}
+.grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow)}
+.strip{position:relative;display:flex;gap:1px;height:34px;padding:6px;margin-bottom:8px;touch-action:none;user-select:none}
+.strip .bar{flex:1;min-width:2px;border-radius:1px;background:var(--line);align-self:stretch}
+.strip .bar.r{background:var(--red)}.strip .bar.a{background:var(--amber)}
+.lens{position:absolute;top:2px;bottom:2px;border:2px solid var(--accent);background:var(--accent-soft);opacity:.55;border-radius:4px;cursor:grab}
+.lens:active{cursor:grabbing}
+.lensinfo{display:flex;justify-content:space-between;color:var(--muted);font-size:12px;margin:0 4px 8px}
+.list{padding:8px;outline:none}
+.row{display:block;width:100%;text-align:start;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:9px 12px;margin-bottom:6px;border-inline-start:5px solid var(--line)}
+.row.r{border-inline-start-color:var(--red)}.row.a{border-inline-start-color:var(--amber)}
+.row[aria-current="true"]{background:var(--accent-soft);border-color:var(--accent)}
+.row .t{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.row .cl{font-weight:600}
+.row .age{margin-inline-start:auto;color:var(--muted);font-size:12px}
+.row .d{color:var(--muted);font-size:13px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sq{display:block;width:100%;height:5px;margin:1px 0;padding:0;border:0;border-radius:2px;background:var(--line)}
+.sq.r{background:var(--red)}.sq.a{background:var(--amber)}
+.sq:hover{filter:brightness(1.2);height:7px}
+.badge{display:inline-block;font-size:12px;padding:1px 9px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font-weight:600}
+.badge.r{background:var(--red-soft);color:var(--red)}.badge.a{background:var(--amber-soft);color:var(--amber)}
+.detail{padding:16px;position:sticky;top:120px}
+.detail h2{margin:0 0 4px;font-size:18px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;margin:12px 0;font-size:14px}
+.kv dt{color:var(--muted)}.kv dd{margin:0}
+.doc{border:1px dashed var(--line);border-radius:8px;padding:10px;margin:10px 0}
+.doc i{display:block;height:6px;background:var(--line);border-radius:3px;margin:6px 0}
+.doc i:nth-child(2){width:80%}.doc i:nth-child(3){width:90%}.doc i:nth-child(4){width:55%}
+.conf{height:8px;border-radius:4px;background:var(--line);overflow:hidden;margin-top:4px}
+.conf>div{height:100%;background:var(--green)}
+.msg{border-radius:8px;padding:8px 10px;margin:6px 0;background:var(--bg);border:1px solid var(--line)}
+.msg small{display:block;color:var(--muted);margin-bottom:2px}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;align-items:center}
+.empty{padding:34px;text-align:center;color:var(--muted)}
+.empty.ok{color:var(--green);font-weight:600}
+.toast{position:fixed;inset-inline:0;bottom:18px;margin:auto;width:max-content;max-width:90vw;background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:10px;opacity:0;transform:translateY(8px);transition:.2s;pointer-events:none;z-index:60}
+.toast.on{opacity:1;transform:none}
+.audit{padding:14px}
+.audit table{width:100%;border-collapse:collapse;font-size:13px}
+.audit td,.audit th{padding:6px 8px;border-bottom:1px solid var(--line);text-align:start;vertical-align:top}
+.audit code{font-size:12px;color:var(--muted)}
+.audit tr.bad td{background:var(--red-soft)}
+.tour-ring{position:fixed;border:3px solid var(--accent);border-radius:10px;box-shadow:0 0 0 9999px rgba(0,0,0,.35);pointer-events:none;z-index:50;transition:all .35s}
+.tour-tip{position:fixed;z-index:51;max-width:300px;background:var(--panel);border:1px solid var(--accent);border-radius:10px;padding:10px 12px;box-shadow:var(--shadow);font-size:14px}
+.tour-tip small{display:block;color:var(--muted);margin-top:4px}
+footer{padding:20px;text-align:center;color:var(--muted);font-size:12px}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">an<span>surance</span></div>
+  <div class="seg" id="roleSel" role="group"></div>
+  <div class="sp"></div>
+  <select id="langSel" aria-label="Language">
+    <option value="en">English</option>
+    <option value="he">עברית</option>
+    <option value="ar">العربية</option>
+    <option value="ru">Русский</option>
+    <option value="fr">Français</option>
+  </select>
+  <button class="btn" id="themeBtn" aria-label="Theme"></button>
+  <button class="btn" id="tourBtn"></button>
+</header>
+<nav class="tabs" id="tabs" role="tablist"></nav>
+<main id="main"></main>
+<footer id="foot"></footer>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+"use strict";
+/* ---------- i18n ---------- */
+var LANGS=["en","he","ar","ru","fr"];
+var RTL={he:1,ar:1};
+var I={
+en:{
+ role_agent:"Agent",role_back:"Back-office",role_mgr:"Manager",
+ tab_inbox:"Inbox",tab_trust:"Trust (audit)",all:"All",
+ sum:"{n} pending · {a} urgent · {d} done today",empty:"All done.",
+ win:"{a}–{b} of {n}",lenshint:"Drag the lens, scroll, or use arrow keys. Click a thin bar to jump. Red is urgent, amber is important.",
+ pick:"Select an item to see details.",ago_m:"{n} min ago",ago_h:"{n} h ago",ago_d:"{n} d ago",
+ client:"Client",idn:"ID number",channel:"Channel",age:"Received",urg:"Priority",u2:"Urgent",u1:"Important",u0:"Normal",
+ match:"Match confidence",orig:"Original",trans:"Translation (machine, check before relying)",
+ dismiss:"Dismiss",reason:"Reason",r1:"Not relevant",r2:"Duplicate",r3:"Handled elsewhere",
+ reassign:"Send to {r}",reassigned:"Sent to {r}",done:"Done: {a}",dismissed:"Dismissed",
+ a_review:"Confirm filing",a_approve:"Approve",a_call:"Call client",a_send:"Send to insurer",a_open:"Open and resolve",a_reply:"Reply",a_assign:"Assign owner",a_confirm:"Confirm",
+ ch_wa:"WhatsApp",ch_em:"Email",ch_fx:"Fax",ch_ph:"Phone",ch_sy:"System",
+ theme_l:"Light",theme_d:"Dark",tour:"Show me",tourstop:"Stop",
+ t1:"Switch role. Each role has its own Inbox.",t2:"Language. Hebrew and Arabic flip the whole layout.",t3:"Light or dark theme.",
+ t4:"Filter the Inbox by type.",t5:"The Lens: drag it over a long list. Items outside it are squashed. Red is urgent.",t6:"Open an item to see its details and one main action.",
+ t_stop:"Esc to stop",
+ foot:"Demo with fictional data. Nothing is sent, filed or stored. Machine translation can be wrong.",
+ verify:"Verify chain",ok:"Chain intact, {n} entries",bad:"Chain broken from entry {n}",tamper:"Tamper with an entry (demo)",restore:"Restore",
+ trusthint:"Each entry contains the hash of the previous one. Any change shows up.",
+ who:"Who",what:"What",when:"When",hash:"Hash",
+ ty_renewal:"Renewal",ty_reply:"Client reply",ty_filed:"Auto-filed",ty_unsigned:"Unsigned",ty_callback:"Callback",ty_claim:"Claim update",ty_campaign:"Campaign reply",
+ ty_review:"Review filing",ty_unassigned:"Unassigned",ty_submit:"To submit",ty_endorse:"Endorsement",ty_claimgap:"Claim documents",ty_commission:"Commission gap",ty_sendfail:"Send failed",
+ ty_approval:"Approval",ty_complaint:"Complaint",ty_compliance:"Compliance",ty_misfile:"Misfiled doc",ty_campaign2:"Campaign approval",ty_leak:"Retention leak",
+ d_renewal:"Car policy renews in {n} days. Review the price and call the client.",
+ d_reply:"The client wrote on WhatsApp. Translation shown below.",
+ d_filed:"Document filed automatically to this client (ID number match). Confirm or correct.",
+ d_unsigned:"Application sent for e-signature {n} days ago, still unsigned.",
+ d_callback:"Client asked to be called back about a policy change.",
+ d_claim:"The insurer replied on the claim. Update the client.",
+ d_campaign:"Client replied to the pension-rules notice and wants a review.",
+ d_review:"Document matched with medium confidence. Confirm the suggested client or pick another.",
+ d_unassigned:"No client could be matched (fax). Find the owner or ask for more data.",
+ d_submit:"Signed application is ready to submit to the insurer.",
+ d_endorse:"Mid-term change requested: add a driver. Process it with the insurer.",
+ d_claimgap:"Claim is missing {n} of 6 documents. Ask the client.",
+ d_commission:"An insurer statement line does not match the expected commission.",
+ d_sendfail:"A campaign message to this client failed (number not on WhatsApp). Choose another channel.",
+ d_approval:"KYC case flagged: large single premium. Approve, or ask for the source of funds.",
+ d_complaint:"Complaint open {n} days, over the response target.",
+ d_compliance:"Agent licence continuing education is due in {n} days.",
+ d_misfile:"A document was reported as filed to the wrong client. Check the privacy log.",
+ d_campaign2:"Product-offer campaign waits for approval. Audience: {n} clients.",
+ d_leak:"{n} policies passed their renewal date without an outcome."
+},
+he:{
+ role_agent:"סוכן",role_back:"גב משרד",role_mgr:"מנהל",
+ tab_inbox:"תיבת משימות",tab_trust:"אמון (יומן ביקורת)",all:"הכל",
+ sum:"{n} ממתינים · {a} דחופים · {d} הושלמו היום",empty:"הכול טופל.",
+ win:"{a}–{b} מתוך {n}",lenshint:"גררו את העדשה, גללו או השתמשו בחצים. לחיצה על פס דק מקפיצה אליו. אדום דחוף, כתום חשוב.",
+ pick:"בחרו פריט להצגת פרטים.",ago_m:"לפני {n} דק׳",ago_h:"לפני {n} שע׳",ago_d:"לפני {n} ימים",
+ client:"לקוח",idn:"מספר זהות",channel:"ערוץ",age:"התקבל",urg:"עדיפות",u2:"דחוף",u1:"חשוב",u0:"רגיל",
+ match:"רמת ביטחון בהתאמה",orig:"מקור",trans:"תרגום (אוטומטי, יש לבדוק)",
+ dismiss:"דחייה",reason:"סיבה",r1:"לא רלוונטי",r2:"כפילות",r3:"טופל במקום אחר",
+ reassign:"העברה אל {r}",reassigned:"הועבר אל {r}",done:"בוצע: {a}",dismissed:"נדחה",
+ a_review:"אישור שיוך",a_approve:"אישור",a_call:"התקשרו ללקוח",a_send:"שליחה לחברת הביטוח",a_open:"פתיחה וטיפול",a_reply:"מענה",a_assign:"שיוך אחראי",a_confirm:"אישור",
+ ch_wa:"וואטסאפ",ch_em:"אימייל",ch_fx:"פקס",ch_ph:"טלפון",ch_sy:"מערכת",
+ theme_l:"בהיר",theme_d:"כהה",tour:"הראו לי",tourstop:"עצירה",
+ t1:"החלפת תפקיד. לכל תפקיד תיבת משימות משלו.",t2:"שפה. בעברית ובערבית כל הממשק מתהפך.",t3:"ערכת נושא בהירה או כהה.",
+ t4:"סינון התיבה לפי סוג.",t5:"העדשה: גררו אותה על רשימה ארוכה. פריטים מחוצה לה מכווצים. אדום הוא דחוף.",t6:"פתחו פריט כדי לראות פרטים ופעולה ראשית אחת.",
+ t_stop:"Esc לעצירה",
+ foot:"הדגמה עם נתונים בדויים. דבר אינו נשלח, מתויק או נשמר. תרגום אוטומטי עלול לטעות.",
+ verify:"אימות השרשרת",ok:"השרשרת תקינה, {n} רשומות",bad:"השרשרת שבורה מרשומה {n}",tamper:"שינוי רשומה (הדגמה)",restore:"שחזור",
+ trusthint:"כל רשומה כוללת את ה-hash של הקודמת. כל שינוי מתגלה.",
+ who:"מי",what:"מה",when:"מתי",hash:"Hash",
+ ty_renewal:"חידוש",ty_reply:"תגובת לקוח",ty_filed:"תויק אוטומטית",ty_unsigned:"לא נחתם",ty_callback:"חזרה ללקוח",ty_claim:"עדכון תביעה",ty_campaign:"תגובה לקמפיין",
+ ty_review:"בדיקת תיוק",ty_unassigned:"לא משויך",ty_submit:"להגשה",ty_endorse:"תוספת לפוליסה",ty_claimgap:"מסמכי תביעה",ty_commission:"פער עמלה",ty_sendfail:"שליחה נכשלה",
+ ty_approval:"אישור",ty_complaint:"תלונה",ty_compliance:"ציות",ty_misfile:"מסמך בתיק שגוי",ty_campaign2:"אישור קמפיין",ty_leak:"נשירת לקוחות",
+ d_renewal:"פוליסת הרכב מתחדשת בעוד {n} ימים. בדקו מחיר והתקשרו ללקוח.",
+ d_reply:"הלקוח כתב בוואטסאפ. התרגום מוצג למטה.",
+ d_filed:"מסמך תויק אוטומטית ללקוח זה (התאמה לפי מספר זהות). אשרו או תקנו.",
+ d_unsigned:"הבקשה נשלחה לחתימה דיגיטלית לפני {n} ימים ועדיין לא נחתמה.",
+ d_callback:"הלקוח ביקש שיחזרו אליו בנוגע לשינוי בפוליסה.",
+ d_claim:"חברת הביטוח השיבה בתביעה. עדכנו את הלקוח.",
+ d_campaign:"הלקוח השיב להודעה על כללי הפנסיה ומבקש סקירה.",
+ d_review:"המסמך הותאם ברמת ביטחון בינונית. אשרו את הלקוח המוצע או בחרו אחר.",
+ d_unassigned:"לא נמצא לקוח מתאים (פקס). אתרו את הבעלים או בקשו מידע נוסף.",
+ d_submit:"הבקשה החתומה מוכנה להגשה לחברת הביטוח.",
+ d_endorse:"התבקש שינוי באמצע התקופה: הוספת נהג. טפלו מול חברת הביטוח.",
+ d_claimgap:"בתביעה חסרים {n} מתוך 6 מסמכים. פנו ללקוח.",
+ d_commission:"שורה בדוח חברת הביטוח אינה תואמת לעמלה הצפויה.",
+ d_sendfail:"הודעת קמפיין ללקוח זה נכשלה (המספר אינו בוואטסאפ). בחרו ערוץ אחר.",
+ d_approval:"תיק KYC סומן: פרמיה חד־פעמית גדולה. אשרו או בקשו מקור כספים.",
+ d_complaint:"תלונה פתוחה {n} ימים, מעבר ליעד המענה.",
+ d_compliance:"השתלמות חובה לרישיון הסוכן בעוד {n} ימים.",
+ d_misfile:"דווח על מסמך שתויק ללקוח שגוי. בדקו את יומן הפרטיות.",
+ d_campaign2:"קמפיין הצעת מוצר ממתין לאישור. קהל: {n} לקוחות.",
+ d_leak:"{n} פוליסות עברו את מועד החידוש ללא תוצאה."
+},
+ar:{
+ role_agent:"وكيل",role_back:"المكتب الخلفي",role_mgr:"المدير",
+ tab_inbox:"الوارد",tab_trust:"الثقة (التدقيق)",all:"الكل",
+ sum:"{n} قيد الانتظار · {a} عاجلة · {d} أُنجزت اليوم",empty:"تم الانتهاء من كل شيء.",
+ win:"{a}–{b} من {n}",lenshint:"اسحب العدسة أو مرّر أو استخدم الأسهم. انقر على شريط رفيع للانتقال. الأحمر عاجل والبرتقالي مهم.",
+ pick:"اختر عنصرًا لعرض التفاصيل.",ago_m:"منذ {n} د",ago_h:"منذ {n} س",ago_d:"منذ {n} يوم",
+ client:"العميل",idn:"رقم الهوية",channel:"القناة",age:"وصل",urg:"الأولوية",u2:"عاجل",u1:"مهم",u0:"عادي",
+ match:"ثقة المطابقة",orig:"الأصل",trans:"الترجمة (آلية، تحقق قبل الاعتماد)",
+ dismiss:"تجاهل",reason:"السبب",r1:"غير ذي صلة",r2:"مكرر",r3:"عولج في مكان آخر",
+ reassign:"إرسال إلى {r}",reassigned:"أُرسل إلى {r}",done:"تم: {a}",dismissed:"تم التجاهل",
+ a_review:"تأكيد الإيداع",a_approve:"موافقة",a_call:"اتصل بالعميل",a_send:"إرسال إلى شركة التأمين",a_open:"فتح ومعالجة",a_reply:"رد",a_assign:"تعيين مسؤول",a_confirm:"تأكيد",
+ ch_wa:"واتساب",ch_em:"بريد إلكتروني",ch_fx:"فاكس",ch_ph:"هاتف",ch_sy:"النظام",
+ theme_l:"فاتح",theme_d:"داكن",tour:"أرني",tourstop:"إيقاف",
+ t1:"غيّر الدور. لكل دور صندوق وارد خاص.",t2:"اللغة. العبرية والعربية تقلبان الواجهة كاملة.",t3:"سمة فاتحة أو داكنة.",
+ t4:"صفِّ الوارد حسب النوع.",t5:"العدسة: اسحبها فوق قائمة طويلة. العناصر خارجها مضغوطة. الأحمر عاجل.",t6:"افتح عنصرًا لرؤية تفاصيله والإجراء الرئيسي.",
+ t_stop:"Esc للإيقاف",
+ foot:"عرض تجريبي ببيانات وهمية. لا يُرسل أو يُحفظ أي شيء. الترجمة الآلية قد تخطئ.",
+ verify:"تحقق من السلسلة",ok:"السلسلة سليمة، {n} إدخالات",bad:"السلسلة مكسورة من الإدخال {n}",tamper:"العبث بإدخال (تجريبي)",restore:"استعادة",
+ trusthint:"يحتوي كل إدخال على بصمة الإدخال السابق. أي تغيير يظهر.",
+ who:"من",what:"ماذا",when:"متى",hash:"البصمة",
+ ty_renewal:"تجديد",ty_reply:"رد العميل",ty_filed:"أُرشف تلقائيًا",ty_unsigned:"غير موقّع",ty_callback:"معاودة اتصال",ty_claim:"تحديث مطالبة",ty_campaign:"رد على حملة",
+ ty_review:"مراجعة الأرشفة",ty_unassigned:"غير مسند",ty_submit:"للتقديم",ty_endorse:"ملحق",ty_claimgap:"مستندات المطالبة",ty_commission:"فرق عمولة",ty_sendfail:"فشل الإرسال",
+ ty_approval:"موافقة",ty_complaint:"شكوى",ty_compliance:"الامتثال",ty_misfile:"مستند في ملف خاطئ",ty_campaign2:"موافقة حملة",ty_leak:"تسرّب العملاء",
+ d_renewal:"تُجدَّد بوليصة السيارة بعد {n} أيام. راجع السعر واتصل بالعميل.",
+ d_reply:"كتب العميل عبر واتساب. الترجمة معروضة أدناه.",
+ d_filed:"أُرشف المستند تلقائيًا لهذا العميل (مطابقة رقم الهوية). أكّد أو صحّح.",
+ d_unsigned:"أُرسل الطلب للتوقيع الإلكتروني قبل {n} أيام ولم يُوقَّع بعد.",
+ d_callback:"طلب العميل أن يُتصل به بشأن تعديل على البوليصة.",
+ d_claim:"ردّت شركة التأمين على المطالبة. أبلغ العميل.",
+ d_campaign:"ردّ العميل على إشعار قواعد التقاعد ويريد مراجعة.",
+ d_review:"طُوبق المستند بثقة متوسطة. أكّد العميل المقترح أو اختر آخر.",
+ d_unassigned:"تعذّرت مطابقة أي عميل (فاكس). ابحث عن المالك أو اطلب مزيدًا من البيانات.",
+ d_submit:"الطلب الموقّع جاهز للتقديم إلى شركة التأمين.",
+ d_endorse:"طُلب تغيير أثناء المدة: إضافة سائق. عالجه مع شركة التأمين.",
+ d_claimgap:"ينقص المطالبة {n} من 6 مستندات. اسأل العميل.",
+ d_commission:"سطر في كشف شركة التأمين لا يطابق العمولة المتوقعة.",
+ d_sendfail:"فشلت رسالة حملة لهذا العميل (الرقم ليس على واتساب). اختر قناة أخرى.",
+ d_approval:"حالة KYC مُعلَّمة: قسط وحيد كبير. وافق أو اطلب مصدر الأموال.",
+ d_complaint:"شكوى مفتوحة منذ {n} أيام، تجاوزت هدف الرد.",
+ d_compliance:"التدريب المستمر لرخصة الوكيل مستحق بعد {n} أيام.",
+ d_misfile:"أُبلغ عن مستند أُرشف لعميل خاطئ. راجع سجل الخصوصية.",
+ d_campaign2:"حملة عرض منتج بانتظار الموافقة. الجمهور: {n} عميلًا.",
+ d_leak:"{n} بوالص تجاوزت تاريخ التجديد دون نتيجة."
+},
+ru:{
+ role_agent:"Агент",role_back:"Бэк-офис",role_mgr:"Менеджер",
+ tab_inbox:"Входящие",tab_trust:"Доверие (аудит)",all:"Все",
+ sum:"{n} в ожидании · {a} срочных · {d} сделано сегодня",empty:"Всё сделано.",
+ win:"{a}–{b} из {n}",lenshint:"Перетащите линзу, прокрутите или используйте стрелки. Нажмите на тонкую полосу, чтобы перейти. Красный - срочно, жёлтый - важно.",
+ pick:"Выберите элемент, чтобы увидеть детали.",ago_m:"{n} мин назад",ago_h:"{n} ч назад",ago_d:"{n} дн назад",
+ client:"Клиент",idn:"Номер удостоверения",channel:"Канал",age:"Получено",urg:"Приоритет",u2:"Срочно",u1:"Важно",u0:"Обычный",
+ match:"Уверенность сопоставления",orig:"Оригинал",trans:"Перевод (машинный, проверьте)",
+ dismiss:"Отклонить",reason:"Причина",r1:"Не относится",r2:"Дубликат",r3:"Решено в другом месте",
+ reassign:"Передать: {r}",reassigned:"Передано: {r}",done:"Готово: {a}",dismissed:"Отклонено",
+ a_review:"Подтвердить подшивку",a_approve:"Одобрить",a_call:"Позвонить клиенту",a_send:"Отправить страховщику",a_open:"Открыть и решить",a_reply:"Ответить",a_assign:"Назначить ответственного",a_confirm:"Подтвердить",
+ ch_wa:"WhatsApp",ch_em:"Эл. почта",ch_fx:"Факс",ch_ph:"Телефон",ch_sy:"Система",
+ theme_l:"Светлая",theme_d:"Тёмная",tour:"Покажите",tourstop:"Стоп",
+ t1:"Смена роли. У каждой роли свои входящие.",t2:"Язык. Для иврита и арабского весь интерфейс зеркально переворачивается.",t3:"Светлая или тёмная тема.",
+ t4:"Фильтр входящих по типу.",t5:"Линза: перетаскивайте её по длинному списку. Остальные элементы сжаты. Красный - срочно.",t6:"Откройте элемент, чтобы увидеть детали и главное действие.",
+ t_stop:"Esc - остановить",
+ foot:"Демо с вымышленными данными. Ничего не отправляется и не сохраняется. Машинный перевод может ошибаться.",
+ verify:"Проверить цепочку",ok:"Цепочка цела, записей: {n}",bad:"Цепочка нарушена с записи {n}",tamper:"Подделать запись (демо)",restore:"Восстановить",
+ trusthint:"Каждая запись содержит хеш предыдущей. Любое изменение видно.",
+ who:"Кто",what:"Что",when:"Когда",hash:"Хеш",
+ ty_renewal:"Продление",ty_reply:"Ответ клиента",ty_filed:"Подшито автоматически",ty_unsigned:"Не подписано",ty_callback:"Перезвонить",ty_claim:"Обновление по убытку",ty_campaign:"Ответ на рассылку",
+ ty_review:"Проверка подшивки",ty_unassigned:"Не назначено",ty_submit:"К отправке",ty_endorse:"Изменение полиса",ty_claimgap:"Документы по убытку",ty_commission:"Расхождение комиссии",ty_sendfail:"Сбой отправки",
+ ty_approval:"Одобрение",ty_complaint:"Жалоба",ty_compliance:"Комплаенс",ty_misfile:"Документ не тому клиенту",ty_campaign2:"Одобрение рассылки",ty_leak:"Потеря клиентов",
+ d_renewal:"Автополис продлевается через {n} дн. Проверьте цену и позвоните клиенту.",
+ d_reply:"Клиент написал в WhatsApp. Перевод показан ниже.",
+ d_filed:"Документ подшит автоматически к этому клиенту (по номеру удостоверения). Подтвердите или исправьте.",
+ d_unsigned:"Заявка отправлена на электронную подпись {n} дн назад, всё ещё не подписана.",
+ d_callback:"Клиент просит перезвонить по изменению полиса.",
+ d_claim:"Страховщик ответил по убытку. Сообщите клиенту.",
+ d_campaign:"Клиент ответил на уведомление о правилах пенсии и хочет обзор.",
+ d_review:"Документ сопоставлен со средней уверенностью. Подтвердите предложенного клиента или выберите другого.",
+ d_unassigned:"Клиента найти не удалось (факс). Найдите владельца или запросите данные.",
+ d_submit:"Подписанная заявка готова к отправке страховщику.",
+ d_endorse:"Запрошено изменение в середине срока: добавить водителя. Оформите у страховщика.",
+ d_claimgap:"По убытку не хватает {n} из 6 документов. Запросите у клиента.",
+ d_commission:"Строка в отчёте страховщика не совпадает с ожидаемой комиссией.",
+ d_sendfail:"Сообщение рассылки этому клиенту не доставлено (номера нет в WhatsApp). Выберите другой канал.",
+ d_approval:"Случай KYC отмечен: крупная разовая премия. Одобрите или запросите источник средств.",
+ d_complaint:"Жалоба открыта {n} дн, срок ответа превышен.",
+ d_compliance:"Обязательное обучение для лицензии агента через {n} дн.",
+ d_misfile:"Сообщено о документе, подшитом не тому клиенту. Проверьте журнал приватности.",
+ d_campaign2:"Рассылка с предложением продукта ждёт одобрения. Аудитория: {n} клиентов.",
+ d_leak:"{n} полисов прошли дату продления без результата."
+},
+fr:{
+ role_agent:"Agent",role_back:"Back-office",role_mgr:"Responsable",
+ tab_inbox:"Boîte de réception",tab_trust:"Confiance (audit)",all:"Tout",
+ sum:"{n} en attente · {a} urgents · {d} traités aujourd'hui",empty:"Tout est traité.",
+ win:"{a}–{b} sur {n}",lenshint:"Faites glisser la loupe, faites défiler ou utilisez les flèches. Cliquez sur une barre fine pour y aller. Rouge : urgent, orange : important.",
+ pick:"Choisissez un élément pour voir le détail.",ago_m:"il y a {n} min",ago_h:"il y a {n} h",ago_d:"il y a {n} j",
+ client:"Client",idn:"N° d'identité",channel:"Canal",age:"Reçu",urg:"Priorité",u2:"Urgent",u1:"Important",u0:"Normal",
+ match:"Confiance de l'association",orig:"Original",trans:"Traduction (automatique, à vérifier)",
+ dismiss:"Écarter",reason:"Motif",r1:"Sans objet",r2:"Doublon",r3:"Traité ailleurs",
+ reassign:"Envoyer à {r}",reassigned:"Envoyé à {r}",done:"Fait : {a}",dismissed:"Écarté",
+ a_review:"Confirmer le classement",a_approve:"Approuver",a_call:"Appeler le client",a_send:"Envoyer à l'assureur",a_open:"Ouvrir et résoudre",a_reply:"Répondre",a_assign:"Désigner un responsable",a_confirm:"Confirmer",
+ ch_wa:"WhatsApp",ch_em:"E-mail",ch_fx:"Fax",ch_ph:"Téléphone",ch_sy:"Système",
+ theme_l:"Clair",theme_d:"Sombre",tour:"Montre-moi",tourstop:"Arrêter",
+ t1:"Changez de rôle. Chaque rôle a sa propre boîte.",t2:"Langue. L'hébreu et l'arabe inversent toute la mise en page.",t3:"Thème clair ou sombre.",
+ t4:"Filtrez la boîte par type.",t5:"La loupe : faites-la glisser sur une longue liste. Le reste est écrasé. Rouge : urgent.",t6:"Ouvrez un élément pour voir le détail et l'action principale.",
+ t_stop:"Échap pour arrêter",
+ foot:"Démo avec des données fictives. Rien n'est envoyé, classé ni stocké. La traduction automatique peut se tromper.",
+ verify:"Vérifier la chaîne",ok:"Chaîne intacte, {n} entrées",bad:"Chaîne rompue à partir de l'entrée {n}",tamper:"Falsifier une entrée (démo)",restore:"Restaurer",
+ trusthint:"Chaque entrée contient l'empreinte de la précédente. Toute modification se voit.",
+ who:"Qui",what:"Quoi",when:"Quand",hash:"Empreinte",
+ ty_renewal:"Renouvellement",ty_reply:"Réponse client",ty_filed:"Classé auto",ty_unsigned:"Non signé",ty_callback:"Rappel",ty_claim:"Suivi de sinistre",ty_campaign:"Réponse campagne",
+ ty_review:"Contrôle de classement",ty_unassigned:"Non attribué",ty_submit:"À transmettre",ty_endorse:"Avenant",ty_claimgap:"Pièces du sinistre",ty_commission:"Écart de commission",ty_sendfail:"Échec d'envoi",
+ ty_approval:"Approbation",ty_complaint:"Réclamation",ty_compliance:"Conformité",ty_misfile:"Pièce mal classée",ty_campaign2:"Validation de campagne",ty_leak:"Fuite de portefeuille",
+ d_renewal:"La police auto se renouvelle dans {n} jours. Vérifiez le prix et appelez le client.",
+ d_reply:"Le client a écrit sur WhatsApp. Traduction ci-dessous.",
+ d_filed:"Document classé automatiquement chez ce client (numéro d'identité). Confirmez ou corrigez.",
+ d_unsigned:"Demande envoyée en signature électronique il y a {n} jours, toujours non signée.",
+ d_callback:"Le client demande à être rappelé au sujet d'une modification de police.",
+ d_claim:"L'assureur a répondu sur le sinistre. Informez le client.",
+ d_campaign:"Le client a répondu à l'avis sur les règles de retraite et veut un bilan.",
+ d_review:"Document associé avec une confiance moyenne. Confirmez le client proposé ou choisissez-en un autre.",
+ d_unassigned:"Aucun client n'a pu être associé (fax). Trouvez le titulaire ou demandez plus de données.",
+ d_submit:"La demande signée est prête à être transmise à l'assureur.",
+ d_endorse:"Modification en cours de contrat : ajouter un conducteur. Traitez-la avec l'assureur.",
+ d_claimgap:"Il manque {n} pièces sur 6 au sinistre. Relancez le client.",
+ d_commission:"Une ligne du relevé de l'assureur ne correspond pas à la commission attendue.",
+ d_sendfail:"Un message de campagne à ce client a échoué (numéro absent de WhatsApp). Choisissez un autre canal.",
+ d_approval:"Dossier KYC signalé : grosse prime unique. Approuvez ou demandez l'origine des fonds.",
+ d_complaint:"Réclamation ouverte depuis {n} jours, délai de réponse dépassé.",
+ d_compliance:"La formation continue de la licence d'agent est due dans {n} jours.",
+ d_misfile:"Une pièce a été signalée comme classée chez le mauvais client. Vérifiez le journal de confidentialité.",
+ d_campaign2:"Une campagne d'offre de produit attend votre accord. Audience : {n} clients.",
+ d_leak:"{n} polices ont dépassé leur date de renouvellement sans suite."
+}
+};
+/* sample multilingual client messages: original + translation per UI language */
+var MSGS=[
+ {from:"ru",orig:"Здравствуйте! Когда заканчивается моя страховка на машину? Хочу продлить.",
+  tr:{en:"Hello! When does my car insurance end? I want to renew.",he:"שלום! מתי מסתיים הביטוח של הרכב שלי? אני רוצה לחדש.",ar:"مرحبًا! متى ينتهي تأمين سيارتي؟ أريد التجديد.",fr:"Bonjour ! Quand mon assurance auto se termine-t-elle ? Je veux la renouveler."}},
+ {from:"ar",orig:"هل يمكنني تغيير موعد دفع القسط إلى بداية الشهر؟",
+  tr:{en:"Can I move the premium payment date to the start of the month?",he:"האם אפשר להעביר את מועד תשלום הפרמיה לתחילת החודש?",ru:"Можно ли перенести дату оплаты взноса на начало месяца?",fr:"Puis-je déplacer la date de paiement de la prime au début du mois ?"}},
+ {from:"fr",orig:"Bonjour, j'ai changé de travail. Que dois-je faire pour ma retraite ?",
+  tr:{en:"Hello, I changed jobs. What should I do about my pension?",he:"שלום, החלפתי עבודה. מה עליי לעשות בנוגע לפנסיה?",ar:"مرحبًا، غيّرت عملي. ماذا أفعل بشأن تقاعدي؟",ru:"Здравствуйте, я сменил работу. Что мне делать с пенсией?"}},
+ {from:"he",orig:"היי, רציתי לשאול אם אפשר להוסיף נהג צעיר לפוליסה.",
+  tr:{en:"Hi, I wanted to ask whether I can add a young driver to the policy.",ar:"مرحبًا، أردت أن أسأل إن كان بالإمكان إضافة سائق شاب إلى البوليصة.",ru:"Привет, хотел спросить, можно ли добавить в полис молодого водителя.",fr:"Salut, je voulais savoir si je peux ajouter un jeune conducteur à la police."}}
+];
+var NAMES=["יוסי כהן","Dana Levi","فاطمة حداد","Omar Khoury","Ирина Волкова","Sergey Petrov","Marie Dubois","אבי מזרחי","Nadia Mansour","Леонид Кац","Rachel Peretz","أحمد صالح","Sophie Benhamou","Борис Рабин","מרים אזולאי","Tamer Nasser","Elena Shapiro","David Biton","Yael Friedman","Karim Haddad"];
+
+/* ---------- data ---------- */
+var ROLES=["agent","back","mgr"];
+var TYPES={
+ renewal:{r:"agent",w:6,ch:"wa",urg:function(n){return n<10?2:n<20?1:0}},
+ reply:{r:"agent",w:6,ch:"wa",urg:function(n,m){return m>1440?2:m>240?1:0}},
+ filed:{r:"agent",w:6,ch:"em",urg:function(){return 0},intake:1},
+ unsigned:{r:"agent",w:3,ch:"em",urg:function(n){return n>4?1:0}},
+ callback:{r:"agent",w:3,ch:"ph",urg:function(n,m){return m>600?2:1}},
+ claim:{r:"agent",w:2,ch:"em",urg:function(){return 1}},
+ campaign:{r:"agent",w:2,ch:"wa",urg:function(){return 1}},
+ review:{r:"back",w:8,ch:"fx",urg:function(n,m){return m>480?2:1},intake:1},
+ unassigned:{r:"back",w:4,ch:"fx",urg:function(n,m){return m>300?2:1},intake:1},
+ submit:{r:"back",w:6,ch:"sy",urg:function(){return 0}},
+ endorse:{r:"back",w:4,ch:"em",urg:function(){return 0}},
+ claimgap:{r:"back",w:4,ch:"em",urg:function(n){return 1}},
+ commission:{r:"back",w:3,ch:"sy",urg:function(){return 0}},
+ sendfail:{r:"back",w:2,ch:"wa",urg:function(){return 0}},
+ approval:{r:"mgr",w:4,ch:"sy",urg:function(){return 2}},
+ complaint:{r:"mgr",w:3,ch:"em",urg:function(n){return n>5?2:1}},
+ compliance:{r:"mgr",w:3,ch:"sy",urg:function(n){return n<7?2:1}},
+ misfile:{r:"mgr",w:2,ch:"sy",urg:function(){return 2}},
+ campaign2:{r:"mgr",w:2,ch:"sy",urg:function(){return 1}},
+ leak:{r:"mgr",w:2,ch:"sy",urg:function(){return 1}}
+};
+var COUNT={agent:46,back:62,mgr:18};
+var LENS=8;
+
+function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;var t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function idNum(r){var d=[];for(var i=0;i<8;i++)d.push(Math.floor(r()*10));var s=0;for(i=0;i<8;i++){var x=d[i]*(i%2?2:1);s+=x>9?x-9:x}d.push((10-s%10)%10);return d.join("")}
+function gen(role,seed){
+  var r=rng(seed),keys=Object.keys(TYPES).filter(function(k){return TYPES[k].r===role}),pool=[];
+  keys.forEach(function(k){for(var i=0;i<TYPES[k].w;i++)pool.push(k)});
+  var out=[];
+  for(var i=0;i<COUNT[role];i++){
+    var ty=pool[Math.floor(r()*pool.length)],T=TYPES[ty];
+    var mins=Math.floor(5+r()*r()*3000),n=ty==="renewal"?Math.floor(2+r()*50):ty==="compliance"?Math.floor(2+r()*40):ty==="leak"||ty==="campaign2"?Math.floor(3+r()*60):ty==="claimgap"?2+Math.floor(r()*3):Math.floor(1+r()*9);
+    out.push({id:role+i,type:ty,role:role,client:NAMES[Math.floor(r()*NAMES.length)],idn:idNum(r),mins:mins,n:n,
+      ch:T.ch,conf:T.intake?(ty==="filed"?0.96+r()*0.04:ty==="review"?0.6+r()*0.25:0.1+r()*0.3):null,
+      msg:ty==="reply"||ty==="campaign"||ty==="callback"?MSGS[Math.floor(r()*MSGS.length)]:null,
+      alt:NAMES[Math.floor(r()*NAMES.length)],urg:T.urg(n,mins)});
+  }
+  out.sort(function(a,b){return b.urg-a.urg||a.mins-b.mins});
+  return out;
+}
+
+/* ---------- state ---------- */
+var S={lang:"en",theme:null,role:"agent",tab:"inbox",filter:"all",sel:null,lens:0,
+  items:{agent:gen("agent",11),back:gen("back",22),mgr:gen("mgr",33)},done:{agent:3,back:7,mgr:1},tour:null,
+  audit:[],tampered:-1,verdict:null};
+function store(k,v){try{localStorage.setItem("ansurance."+k,v)}catch(e){}}
+function load(k){try{return localStorage.getItem("ansurance."+k)}catch(e){return null}}
+
+/* ---------- helpers ---------- */
+function t(k,v){var s=(I[S.lang]&&I[S.lang][k])||I.en[k]||k;if(v)for(var x in v)s=s.split("{"+x+"}").join(v[x]);return s}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function $(id){return document.getElementById(id)}
+function age(m){return m<60?t("ago_m",{n:m}):m<1440?t("ago_h",{n:Math.round(m/60)}):t("ago_d",{n:Math.round(m/1440)})}
+function uc(u){return u===2?"r":u===1?"a":""}
+function toast(s){var e=$("toast");e.textContent=s;e.classList.add("on");clearTimeout(toast.h);toast.h=setTimeout(function(){e.classList.remove("on")},2200)}
+function fnv(s){var h=2166136261;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return(h>>>0).toString(16).padStart(8,"0")}
+function logAudit(who,text){
+  var prev=S.audit.length?S.audit[S.audit.length-1].hash:"genesis",when=new Date().toISOString().slice(11,19);
+  S.audit.push({who:who,text:text,when:when,orig:text,hash:fnv(prev+who+text+when)});
+}
+function visible(){var a=S.items[S.role];return S.filter==="all"?a:a.filter(function(i){return i.type===S.filter})}
+function roleName(r){return t("role_"+r)}
+
+/* ---------- render ---------- */
+function applyChrome(){
+  var h=document.documentElement;h.lang=S.lang;h.dir=RTL[S.lang]?"rtl":"ltr";
+  if(S.theme)h.setAttribute("data-theme",S.theme);else h.removeAttribute("data-theme");
+  var dark=S.theme?S.theme==="dark":(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches);
+  $("themeBtn").textContent=dark?"☀ "+t("theme_l"):"☾ "+t("theme_d");
+  $("tourBtn").textContent="▶ "+t("tour");
+  $("langSel").value=S.lang;
+  document.title="ansurance - "+t("tab_inbox");
+  var rs=$("roleSel");rs.innerHTML="";
+  ROLES.forEach(function(r){var b=document.createElement("button");b.textContent=roleName(r);b.setAttribute("aria-pressed",String(r===S.role));b.onclick=function(){S.role=r;S.filter="all";S.sel=null;S.lens=0;store("role",r);render()};rs.appendChild(b)});
+  var tb=$("tabs");tb.innerHTML="";
+  [["inbox",t("tab_inbox")],["trust",t("tab_trust")]].forEach(function(x){var b=document.createElement("button");b.setAttribute("role","tab");b.setAttribute("aria-selected",String(S.tab===x[0]));b.textContent=x[1];b.onclick=function(){S.tab=x[0];render()};tb.appendChild(b)});
+  $("foot").textContent=t("foot");
+}
+function render(){applyChrome();S.tab==="inbox"?renderInbox():renderTrust()}
+
+function renderInbox(){
+  var all=S.items[S.role],vis=visible(),urgent=all.filter(function(i){return i.urg===2}).length;
+  S.lens=Math.max(0,Math.min(S.lens,Math.max(0,vis.length-LENS)));
+  var counts={};all.forEach(function(i){counts[i.type]=(counts[i.type]||0)+1});
+  var chips='<button class="chip" data-f="all" aria-pressed="'+(S.filter==="all")+'">'+t("all")+'<b>'+all.length+'</b></button>';
+  Object.keys(TYPES).filter(function(k){return TYPES[k].r===S.role&&counts[k]}).forEach(function(k){
+    chips+='<button class="chip" data-f="'+k+'" aria-pressed="'+(S.filter===k)+'">'+t("ty_"+k)+'<b>'+counts[k]+'</b></button>'});
+  var h='<p class="note">'+esc(t("foot"))+'</p><div class="toolbar" id="chips">'+chips+'</div>';
+  h+='<div class="summary">'+t("sum",{n:all.length,a:'\u0001',d:S.done[S.role]}).replace("\u0001",'<span class="u">'+urgent+'</span>')+'</div>';
+  h+='<div class="grid"><div class="card"><div class="strip" id="strip" tabindex="0" aria-label="Lens">';
+  vis.forEach(function(i){h+='<div class="bar '+uc(i.urg)+'"></div>'});
+  h+='<div class="lens" id="lens"></div></div><div class="lensinfo"><span id="win"></span><span>'+esc(t("lenshint"))+'</span></div><div class="list" id="list" tabindex="0">';
+  if(!vis.length)h+='<div class="empty ok">✓ '+esc(t("empty"))+'</div>';
+  h+='</div></div><div class="card detail" id="detail"></div></div>';
+  $("main").innerHTML=h;
+  $("chips").onclick=function(e){var b=e.target.closest("button");if(!b)return;S.filter=b.dataset.f;S.sel=null;S.lens=0;renderInbox()};
+  drawList();drawDetail();bindLens();
+}
+function drawList(){
+  var vis=visible(),list=$("list");if(!list)return;
+  var keep=list.querySelector(".empty");list.innerHTML="";if(keep)list.appendChild(keep);
+  vis.forEach(function(it,idx){
+    var inLens=idx>=S.lens&&idx<S.lens+LENS,b=document.createElement("button");
+    if(inLens){
+      b.className="row "+uc(it.urg);b.setAttribute("aria-current",String(S.sel===it.id));
+      b.innerHTML='<div class="t"><span class="badge '+uc(it.urg)+'">'+esc(t("ty_"+it.type))+'</span><span class="cl">'+esc(it.client)+'</span><span class="age">'+esc(age(it.mins))+'</span></div><div class="d">'+esc(t("d_"+it.type,{n:it.n}))+'</div>';
+      b.onclick=function(){S.sel=it.id;drawList();drawDetail()};
+    }else{
+      b.className="sq "+uc(it.urg);b.title=it.client+" - "+t("ty_"+it.type);b.setAttribute("aria-label",b.title);
+      b.onclick=function(){S.lens=Math.max(0,Math.min(vis.length-LENS,idx-Math.floor(LENS/2)));drawList();syncLens()};
+    }
+    list.appendChild(b);
+  });
+  syncLens();
+}
+function syncLens(){
+  var vis=visible(),n=vis.length,lens=$("lens");if(!lens)return;
+  var w=n?Math.min(1,LENS/n):1,l=n?S.lens/n:0;
+  lens.style.insetInlineStart=(l*100)+"%";lens.style.width=(w*100)+"%";
+  $("win").textContent=n?t("win",{a:S.lens+1,b:Math.min(n,S.lens+LENS),n:n}):"";
+  lens.parentNode.style.display=n?"flex":"none";
+}
+function bindLens(){
+  var strip=$("strip"),list=$("list");if(!strip)return;
+  var drag=false;
+  function pos(e){
+    var n=visible().length,r=strip.getBoundingClientRect(),x=e.clientX-r.left,f=RTL[S.lang]?1-x/r.width:x/r.width;
+    S.lens=Math.max(0,Math.min(n-LENS,Math.round(f*n-LENS/2)));drawList();
+  }
+  strip.onpointerdown=function(e){drag=true;strip.setPointerCapture(e.pointerId);pos(e)};
+  strip.onpointermove=function(e){if(drag)pos(e)};
+  strip.onpointerup=function(){drag=false};
+  function move(d){var n=visible().length;S.lens=Math.max(0,Math.min(Math.max(0,n-LENS),S.lens+d));drawList()}
+  function key(e){
+    if(e.key==="ArrowDown"||e.key==="ArrowRight"){move(1);e.preventDefault()}
+    else if(e.key==="ArrowUp"||e.key==="ArrowLeft"){move(-1);e.preventDefault()}
+    else if(e.key==="PageDown"){move(LENS);e.preventDefault()}
+    else if(e.key==="PageUp"){move(-LENS);e.preventDefault()}
+  }
+  strip.onkeydown=key;list.onkeydown=key;
+  list.onwheel=function(e){if(visible().length>LENS){e.preventDefault();move(e.deltaY>0?1:-1)}};
+}
+function findSel(){var a=S.items[S.role];for(var i=0;i<a.length;i++)if(a[i].id===S.sel)return a[i];return null}
+function drawDetail(){
+  var d=$("detail"),it=findSel();if(!d)return;
+  if(!it){d.innerHTML='<div class="empty">'+esc(t("pick"))+'</div>';return}
+  var T=TYPES[it.type],h='<span class="badge '+uc(it.urg)+'">'+esc(t("ty_"+it.type))+'</span><h2>'+esc(it.client)+'</h2><div>'+esc(t("d_"+it.type,{n:it.n}))+'</div>';
+  h+='<dl class="kv"><dt>'+t("idn")+'</dt><dd dir="ltr">'+it.idn+'</dd><dt>'+t("channel")+'</dt><dd>'+esc(t("ch_"+it.ch))+'</dd><dt>'+t("age")+'</dt><dd>'+esc(age(it.mins))+'</dd><dt>'+t("urg")+'</dt><dd>'+esc(t("u"+it.urg))+'</dd></dl>';
+  if(T.intake){
+    var pct=Math.round(it.conf*100);
+    h+='<div class="doc" aria-hidden="true"><i></i><i></i><i></i><i></i></div><div>'+esc(t("match"))+': <b>'+pct+'%</b></div><div class="conf"><div style="width:'+pct+'%;background:'+(pct>=95?"var(--green)":pct>=50?"var(--amber)":"var(--red)")+'"></div></div>';
+    if(it.type==="review")h+='<p class="note" style="margin-top:8px">'+esc(it.client)+' / '+esc(it.alt)+'</p>';
+  }
+  if(it.msg){
+    var m=it.msg,tr=m.tr[S.lang];
+    h+='<div class="msg"><small>'+esc(t("orig"))+' ('+m.from+')</small><span dir="auto">'+esc(m.orig)+'</span></div>';
+    if(m.from!==S.lang&&tr)h+='<div class="msg"><small>'+esc(t("trans"))+'</small><span>'+esc(tr)+'</span></div>';
+  }
+  var act={reply:"a_reply",callback:"a_call",campaign:"a_reply",renewal:"a_call",filed:"a_review",review:"a_review",unassigned:"a_assign",submit:"a_send",approval:"a_approve",campaign2:"a_approve",complaint:"a_open",compliance:"a_open",misfile:"a_open",leak:"a_open",unsigned:"a_confirm"}[it.type]||"a_open";
+  var others=ROLES.filter(function(r){return r!==S.role});
+  h+='<div class="actions"><button class="btn primary" id="go">'+esc(t(act))+'</button>';
+  others.forEach(function(r){h+='<button class="btn" data-r="'+r+'">'+esc(t("reassign",{r:roleName(r)}))+'</button>'});
+  h+='</div><div class="actions"><select id="why" aria-label="'+esc(t("reason"))+'"><option value="">'+esc(t("reason"))+'…</option><option>'+esc(t("r1"))+'</option><option>'+esc(t("r2"))+'</option><option>'+esc(t("r3"))+'</option></select><button class="btn" id="dis" disabled>'+esc(t("dismiss"))+'</button></div>';
+  d.innerHTML=h;
+  $("go").onclick=function(){removeSel(it);S.done[S.role]++;logAudit(roleName(S.role),t("done",{a:t("ty_"+it.type)})+" / "+it.client);toast("✓ "+t("done",{a:t("ty_"+it.type)}))};
+  d.querySelectorAll("[data-r]").forEach(function(b){b.onclick=function(){var r=b.dataset.r;removeSel(it);it.role=r;S.items[r].unshift(it);logAudit(roleName(S.role),t("reassigned",{r:roleName(r)})+" / "+it.client);toast(t("reassigned",{r:roleName(r)}))}});
+  $("why").onchange=function(){$("dis").disabled=!$("why").value};
+  $("dis").onclick=function(){removeSel(it);logAudit(roleName(S.role),t("dismissed")+" ("+$("why").value+") / "+it.client);toast(t("dismissed"))};
+}
+function removeSel(it){
+  var a=S.items[S.role],i=a.indexOf(it);if(i>=0)a.splice(i,1);S.sel=null;renderInbox();
+}
+
+function renderTrust(){
+  var rows="";S.audit.forEach(function(e,i){rows+='<tr class="'+(S.verdict&&S.verdict.bad===i?"bad":"")+'"><td>'+(i+1)+'</td><td>'+esc(e.who)+'</td><td>'+esc(e.text)+'</td><td>'+esc(e.when)+'</td><td><code>'+e.hash+'</code></td></tr>'});
+  var v=S.verdict?'<p><b>'+esc(S.verdict.bad>=0?t("bad",{n:S.verdict.bad+1}):t("ok",{n:S.audit.length}))+'</b></p>':"";
+  $("main").innerHTML='<p class="note">'+esc(t("trusthint"))+'</p><div class="card audit"><div class="actions" style="margin:0 0 10px"><button class="btn primary" id="ver">'+esc(t("verify"))+'</button><button class="btn" id="tam">'+esc(t("tamper"))+'</button><button class="btn" id="res">'+esc(t("restore"))+'</button></div>'+v+'<table><thead><tr><th>#</th><th>'+t("who")+'</th><th>'+t("what")+'</th><th>'+t("when")+'</th><th>'+t("hash")+'</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+  $("ver").onclick=function(){
+    var prev="genesis",bad=-1;
+    S.audit.forEach(function(e,i){if(bad>=0)return;var h=fnv(prev+e.who+e.text+e.when);if(h!==e.hash)bad=i;prev=e.hash});
+    S.verdict={bad:bad};renderTrust();
+  };
+  $("tam").onclick=function(){if(S.audit.length>1){S.audit[1].text+=" (edited)";S.verdict=null;renderTrust()}};
+  $("res").onclick=function(){S.audit.forEach(function(e){e.text=e.orig});S.verdict=null;renderTrust()};
+}
+
+/* ---------- Show me tour ---------- */
+function stopTour(){
+  if(!S.tour)return;clearInterval(S.tour.h);["tourRing","tourTip"].forEach(function(i){var e=$(i);if(e)e.remove()});S.tour=null;
+}
+function startTour(){
+  stopTour();S.tab="inbox";render();
+  var steps=[["roleSel","t1"],["langSel","t2"],["themeBtn","t3"],["chips","t4"],["strip","t5"],["list","t6"]],i=0;
+  var ring=document.createElement("div");ring.className="tour-ring";ring.id="tourRing";
+  var tip=document.createElement("div");tip.className="tour-tip";tip.id="tourTip";
+  document.body.appendChild(ring);document.body.appendChild(tip);
+  function show(){
+    var s=steps[i],el=$(s[0]);if(!el){next();return}
+    el.scrollIntoView({block:"center",behavior:"smooth"});
+    setTimeout(function(){
+      if(!S.tour)return;var r=el.getBoundingClientRect();
+      ring.style.cssText="left:"+(r.left-6)+"px;top:"+(r.top-6)+"px;width:"+(r.width+12)+"px;height:"+(r.height+12)+"px";
+      tip.innerHTML=esc(t(s[1]))+'<small>'+(i+1)+'/'+steps.length+' · '+esc(t("t_stop"))+'</small>';
+      var top=r.bottom+14;if(top+110>innerHeight)top=Math.max(8,r.top-110);
+      var left=Math.max(8,Math.min(innerWidth-310,r.left));
+      tip.style.top=top+"px";tip.style.left=left+"px";
+    },380);
+  }
+  function next(){i++;if(i>=steps.length){stopTour();return}show()}
+  S.tour={h:setInterval(next,4200)};show();
+}
+
+/* ---------- boot ---------- */
+(function(){
+  var l=load("lang");if(l&&I[l])S.lang=l;else{var n=(navigator.language||"en").slice(0,2);if(I[n])S.lang=n}
+  var th=load("theme");if(th==="light"||th==="dark")S.theme=th;
+  var r=load("role");if(r&&ROLES.indexOf(r)>=0)S.role=r;
+  logAudit("System","Nightly backup stored encrypted");
+  logAudit("Manager","Login with two-factor authentication");
+  logAudit("Back-office","Fax intake: 14 documents filed, 2 sent to review");
+  $("langSel").onchange=function(){S.lang=this.value;store("lang",S.lang);render()};
+  $("themeBtn").onclick=function(){
+    var dark=S.theme?S.theme==="dark":(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches);
+    S.theme=dark?"light":"dark";store("theme",S.theme);render();
+  };
+  $("tourBtn").onclick=startTour;
+  document.addEventListener("keydown",function(e){if(e.key==="Escape")stopTour()});
+  document.addEventListener("pointerdown",function(e){if(S.tour&&!e.target.closest("#tourTip"))stopTour()},true);
+  render();
+})();
+</script>
+</body>
+</html>
