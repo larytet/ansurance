@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" dir="ltr">
+<html lang="he" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -407,7 +407,7 @@ function gen(role,seed){
 }
 
 /* ---------- state ---------- */
-var S={lang:"en",theme:null,role:"agent",tab:"inbox",filter:"all",sel:null,lens:0,
+var S={lang:"he",theme:null,role:"agent",tab:"inbox",filter:"all",sel:null,lens:0,
   items:{agent:gen("agent",11),back:gen("back",22),mgr:gen("mgr",33)},done:{agent:3,back:7,mgr:1},tour:null,
   audit:[],tampered:-1,verdict:null};
 function store(k,v){try{localStorage.setItem("ansurance."+k,v)}catch(e){}}
@@ -579,7 +579,7 @@ function startTour(){
 
 /* ---------- boot ---------- */
 (function(){
-  var l=load("lang");if(l&&I[l])S.lang=l;else{var n=(navigator.language||"en").slice(0,2);if(I[n])S.lang=n}
+  var l=load("lang");if(l&&I[l])S.lang=l;
   var th=load("theme");if(th==="light"||th==="dark")S.theme=th;
   var r=load("role");if(r&&ROLES.indexOf(r)>=0)S.role=r;
   logAudit("System","Nightly backup stored encrypted");
