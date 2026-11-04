@@ -358,7 +358,18 @@ var MSGS=[
   tr:{en:"Hello, I changed jobs. What should I do about my pension?",he:"שלום, החלפתי עבודה. מה עליי לעשות בנוגע לפנסיה?",ar:"مرحبًا، غيّرت عملي. ماذا أفعل بشأن تقاعدي؟",ru:"Здравствуйте, я сменил работу. Что мне делать с пенсией?"}},
  {from:"he",orig:"היי, רציתי לשאול אם אפשר להוסיף נהג צעיר לפוליסה.",
   tr:{en:"Hi, I wanted to ask whether I can add a young driver to the policy.",ar:"مرحبًا، أردت أن أسأل إن كان بالإمكان إضافة سائق شاب إلى البوليصة.",ru:"Привет, хотел спросить, можно ли добавить в полис молодого водителя.",fr:"Salut, je voulais savoir si je peux ajouter un jeune conducteur à la police."}}
+,
+ {from:"ru",orig:"Добрый день, прошу прислать копию полиса на почту.",
+  tr:{en:"Good afternoon, please email me a copy of my policy.",he:"יום טוב, אשמח לקבל עותק של הפוליסה במייל.",ar:"مساء الخير، أرجو إرسال نسخة من البوليصة على بريدي الإلكتروني.",fr:"Bonjour, merci de m'envoyer une copie de ma police par e-mail."}},
+ {from:"ar",orig:"لقد تعرضت لحادث بسيط، كيف أقدّم مطالبة؟",
+  tr:{en:"I had a minor accident. How do I file a claim?",he:"הייתי בתאונה קלה. איך מגישים תביעה?",ru:"Я попал в небольшую аварию. Как подать заявление о выплате?",fr:"J'ai eu un petit accident. Comment déclarer un sinistre ?"}},
+ {from:"fr",orig:"Pouvez-vous me rappeler demain matin au sujet de mon assurance habitation ?",
+  tr:{en:"Can you call me back tomorrow morning about my home insurance?",he:"אפשר שתחזרו אליי מחר בבוקר לגבי ביטוח הדירה?",ar:"هل يمكنكم الاتصال بي غدًا صباحًا بخصوص تأمين منزلي؟",ru:"Не могли бы вы перезвонить мне завтра утром по поводу страхования квартиры?"}},
+ {from:"he",orig:"שלום, קיבלתי הודעה על שינוי בכללי הפנסיה. אפשר לקבוע פגישה?",
+  tr:{en:"Hello, I got a notice about the pension rule change. Can we set up a meeting?",ar:"مرحبًا، وصلني إشعار بتغيير قواعد التقاعد. هل يمكن تحديد موعد؟",ru:"Здравствуйте, я получил уведомление об изменении правил пенсии. Можно назначить встречу?",fr:"Bonjour, j'ai reçu un avis sur le changement des règles de retraite. Peut-on fixer un rendez-vous ?"}}
 ];
+/* each client has one preferred language: the language of their messages */
+var CLANG={"יוסי כהן":"he","Dana Levi":"he","فاطمة حداد":"ar","Omar Khoury":"ar","Ирина Волкова":"ru","Sergey Petrov":"ru","Marie Dubois":"fr","אבי מזרחי":"he","Nadia Mansour":"ar","Леонид Кац":"ru","Rachel Peretz":"he","أحمد صالح":"ar","Sophie Benhamou":"fr","Борис Рабин":"ru","מרים אזולאי":"he","Tamer Nasser":"ar","Elena Shapiro":"ru","David Biton":"he","Yael Friedman":"he","Karim Haddad":"ar"};
 var NAMES=["יוסי כהן","Dana Levi","فاطمة حداد","Omar Khoury","Ирина Волкова","Sergey Petrov","Marie Dubois","אבי מזרחי","Nadia Mansour","Леонид Кац","Rachel Peretz","أحمد صالح","Sophie Benhamou","Борис Рабин","מרים אזולאי","Tamer Nasser","Elena Shapiro","David Biton","Yael Friedman","Karim Haddad"];
 
 /* transliterations: native name -> Hebrew and Latin forms */
@@ -405,6 +416,7 @@ var TYPES={
  leak:{r:"mgr",w:2,ch:"sy",urg:function(){return 1}}
 };
 var COUNT={agent:46,back:62,mgr:18};
+var IDS={};
 var LENS=8;
 
 function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;var t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
@@ -416,9 +428,12 @@ function gen(role,seed){
   for(var i=0;i<COUNT[role];i++){
     var ty=pool[Math.floor(r()*pool.length)],T=TYPES[ty];
     var mins=Math.floor(5+r()*r()*3000),n=ty==="renewal"?Math.floor(2+r()*50):ty==="compliance"?Math.floor(2+r()*40):ty==="leak"||ty==="campaign2"?Math.floor(3+r()*60):ty==="claimgap"?2+Math.floor(r()*3):Math.floor(1+r()*9);
-    out.push({id:role+i,type:ty,role:role,client:NAMES[Math.floor(r()*NAMES.length)],idn:idNum(r),mins:mins,n:n,
+    var cl=NAMES[Math.floor(r()*NAMES.length)];
+    if(!IDS[cl])IDS[cl]=idNum(rng(fnv(cl).split("").reduce(function(a,c){return a*31+c.charCodeAt(0)|0},7)));
+    var mine=MSGS.filter(function(m){return m.from===CLANG[cl]});
+    out.push({id:role+i,type:ty,role:role,client:cl,idn:IDS[cl],mins:mins,n:n,
       ch:T.ch,conf:T.intake?(ty==="filed"?0.96+r()*0.04:ty==="review"?0.6+r()*0.25:0.1+r()*0.3):null,
-      msg:ty==="reply"||ty==="campaign"||ty==="callback"?MSGS[Math.floor(r()*MSGS.length)]:null,
+      msg:ty==="reply"||ty==="campaign"||ty==="callback"?mine[Math.floor(r()*mine.length)]:null,
       alt:NAMES[Math.floor(r()*NAMES.length)],urg:T.urg(n,mins)});
   }
   out.sort(function(a,b){return b.urg-a.urg||a.mins-b.mins});
