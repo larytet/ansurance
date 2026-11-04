@@ -117,6 +117,12 @@ nav.tabs{overflow-x:auto;white-space:nowrap}
 .sub .txt{font-size:17px}.sub small{color:var(--muted);display:block}.flag{color:var(--amber);font-weight:600}
 input,label{font:inherit}
 input{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px 10px}
+
+.pk-strip{margin-top:6px}.strip .bar.s{background:var(--accent)}
+.prow{display:flex;gap:10px;align-items:center;padding:6px 8px;border:1px solid var(--line);border-radius:8px;margin-bottom:4px;background:var(--panel);cursor:pointer}
+.prow:hover{border-color:var(--accent)}.prow .pn{flex:1}.prow .pid{color:var(--muted);font-size:12px}
+.scroll{max-height:320px;overflow:auto;border:1px solid var(--line);border-radius:8px}
+.scroll .tbl th{position:sticky;top:0;background:var(--panel)}
 </style>
 </head>
 <body>
@@ -409,6 +415,24 @@ function nm(n){
   return x?n+" ("+x+")":n;
 }
 
+
+/* extra sample clients: the agency has hundreds, so every client list must scale */
+(function(){
+  var have={};NAMES.forEach(function(n){have[n]=1});
+  function add(nat,he,en,lang){if(have[nat])return;have[nat]=1;NAMES.push(nat);CLANG[nat]=lang;var o={};if(he)o.he=he;if(en)o.en=en;TR[nat]=o}
+  var HF=[["נועה","Noa"],["איתי","Itai"],["שירה","Shira"],["עידו","Ido"],["תמר","Tamar"],["רועי","Roi"],["מיכל","Michal"],["גיל","Gil"],["ליאור","Lior"],["אורי","Uri"],["הילה","Hila"],["אלון","Alon"]];
+  var HS=[["שמעוני","Shimoni"],["גולן","Golan"],["אברהם","Avraham"],["דהן","Dahan"],["חיים","Haim"],["סבן","Saban"],["לוי","Levi"],["מלכה","Malka"],["אשכנזי","Ashkenazi"],["בן דוד","Ben David"]];
+  for(var i=0;i<12;i++){var f=HF[i],l=HS[(i*3+1)%HS.length];add(f[0]+" "+l[0],null,f[1]+" "+l[1],"he")}
+  var AF=[["محمد","Mohammed","מוחמד"],["ليلى","Layla","לילא"],["خالد","Khaled","ח'אלד"],["سامي","Sami","סאמי"],["هدى","Huda","הדא"],["يوسف","Yousef","יוסף"],["رنا","Rana","רנא"],["وليد","Walid","וליד"],["مريم","Maryam","מריאם"],["عمر","Omar","עומר"]];
+  var AS=[["عيسى","Issa","עיסא"],["منصور","Mansour","מנסור"],["دراوشة","Darawsheh","דראושה"],["زعبي","Zoabi","זועבי"],["خوري","Khoury","חורי"],["شحادة","Shehadeh","שחאדה"]];
+  for(i=0;i<10;i++){var a=AF[i],b=AS[(i*5+2)%AS.length];add(a[0]+" "+b[0],a[2]+" "+b[2],a[1]+" "+b[1],"ar")}
+  var RU=[["Алексей Иванов","Alexey Ivanov","אלכסיי איבנוב"],["Наталья Смирнова","Natalia Smirnova","נטליה סמירנובה"],["Игорь Кузнецов","Igor Kuznetsov","איגור קוזנצוב"],["Ольга Попова","Olga Popova","אולגה פופובה"],["Андрей Соколов","Andrey Sokolov","אנדריי סוקולוב"],["Татьяна Морозова","Tatiana Morozova","טטיאנה מורוזובה"],["Дмитрий Волков","Dmitry Volkov","דמיטרי וולקוב"],["Анна Лебедева","Anna Lebedeva","אנה לבדבה"]];
+  RU.forEach(function(r){add(r[0],r[2],r[1],"ru")});
+  var FF=[["Julien","ז'וליאן"],["Camille","קמיל"],["Nicolas","ניקולא"],["Léa","לאה"],["Thomas","תומא"],["Claire","קלייר"]];
+  var FS=[["Martin","מרטן"],["Bernard","ברנאר"],["Cohen","כהן"],["Lefèvre","לפבר"],["Azoulay","אזולאי"],["Dupont","דופון"]];
+  for(i=0;i<6;i++){var p=FF[i],q=FS[(i+2)%FS.length];add(p[0]+" "+q[0],p[1]+" "+q[1],null,"fr")}
+})();
+
 /* ---------- data ---------- */
 var ROLES=["agent","back","mgr"];
 var TYPES={
@@ -459,7 +483,7 @@ function gen(role,seed){
 }
 
 /* ---------- state ---------- */
-var S={lang:"he",theme:null,role:"agent",tab:"inbox",filter:"all",sel:null,lens:0,
+var S={q:"",lang:"he",theme:null,role:"agent",tab:"inbox",filter:"all",sel:null,lens:0,
   items:{agent:gen("agent",11),back:gen("back",22),mgr:gen("mgr",33)},done:{agent:3,back:7,mgr:1},tour:null,
   audit:[],tampered:-1,verdict:null};
 function store(k,v){try{localStorage.setItem("ansurance."+k,v)}catch(e){}}
@@ -477,7 +501,7 @@ function logAudit(who,text){
   var prev=S.audit.length?S.audit[S.audit.length-1].hash:"genesis",when=new Date().toISOString().slice(11,19);
   S.audit.push({who:who,text:text,when:when,orig:text,hash:fnv(prev+who+text+when)});
 }
-function visible(){var a=S.items[S.role];return S.filter==="all"?a:a.filter(function(i){return i.type===S.filter})}
+function visible(){var a=S.items[S.role];a=S.filter==="all"?a:a.filter(function(i){return i.type===S.filter});return S.q?a.filter(function(i){return matchClient(i.client,S.q)}):a}
 function roleName(r){return t("role_"+r)}
 
 /* ---------- render ---------- */
@@ -492,12 +516,12 @@ function applyChrome(){
   var rs=$("roleSel");rs.innerHTML="";
   ROLES.forEach(function(r){var b=document.createElement("button");b.textContent=roleName(r);b.setAttribute("aria-pressed",String(r===S.role));b.onclick=function(){S.role=r;S.filter="all";S.sel=null;S.lens=0;store("role",r);render()};rs.appendChild(b)});
   var tb=$("tabs");tb.innerHTML="";
-  ["inbox","integ","intake","wa","call","pension","trust"].map(function(id){return [id,t("tab_"+id)]}).forEach(function(x){var b=document.createElement("button");b.setAttribute("role","tab");b.setAttribute("aria-selected",String(S.tab===x[0]));b.textContent=x[1];b.onclick=function(){S.tab=x[0];render()};tb.appendChild(b)});
+  ["inbox","integ","excel","intake","wa","call","pension","trust"].map(function(id){return [id,t("tab_"+id)]}).forEach(function(x){var b=document.createElement("button");b.setAttribute("role","tab");b.setAttribute("aria-selected",String(S.tab===x[0]));b.textContent=x[1];b.onclick=function(){S.tab=x[0];render()};tb.appendChild(b)});
   $("foot").textContent=t("foot");
 }
 function render(){
   stopCall();TOKEN++;applyChrome();
-  var V={inbox:renderInbox,integ:renderInteg,intake:renderIntake,wa:renderWa,call:renderCall,pension:renderPension,trust:renderTrust};
+  var V={inbox:renderInbox,integ:renderInteg,excel:renderExcel,intake:renderIntake,wa:renderWa,call:renderCall,pension:renderPension,trust:renderTrust};
   (V[S.tab]||renderInbox)();
 }
 
@@ -508,14 +532,15 @@ function renderInbox(){
   var chips='<button class="chip" data-f="all" aria-pressed="'+(S.filter==="all")+'">'+t("all")+'<b>'+all.length+'</b></button>';
   Object.keys(TYPES).filter(function(k){return TYPES[k].r===S.role&&counts[k]}).forEach(function(k){
     chips+='<button class="chip" data-f="'+k+'" aria-pressed="'+(S.filter===k)+'">'+t("ty_"+k)+'<b>'+counts[k]+'</b></button>'});
-  var h='<p class="note">'+esc(t("foot"))+'</p><div class="toolbar" id="chips">'+chips+'</div>';
+  var h='<p class="note">'+esc(t("foot"))+'</p><div class="toolbar"><input id="q" type="search" value="'+esc(S.q)+'" placeholder="'+esc(t("q_ph"))+'" aria-label="'+esc(t("q_ph"))+'" style="min-width:260px"></div><div class="toolbar" id="chips">'+chips+'</div>';
   h+='<div class="summary">'+t("sum",{n:all.length,a:'\u0001',d:S.done[S.role]}).replace("\u0001",'<span class="u">'+urgent+'</span>')+'</div>';
   h+='<div class="grid"><div class="card"><div class="strip" id="strip" tabindex="0" aria-label="Lens">';
   vis.forEach(function(i){h+='<div class="bar '+uc(i.urg)+'"></div>'});
   h+='<div class="lens" id="lens"></div></div><div class="lensinfo"><span id="win"></span><span>'+esc(t("lenshint"))+'</span></div><div class="list" id="list" tabindex="0">';
-  if(!vis.length)h+='<div class="empty ok">✓ '+esc(t("empty"))+'</div>';
+  if(!vis.length)h+=S.q?'<div class="empty">'+esc(t("pk_none"))+'</div>':'<div class="empty ok">✓ '+esc(t("empty"))+'</div>';
   h+='</div></div><div class="card detail" id="detail"></div></div>';
   $("main").innerHTML=h;
+  $("q").oninput=function(){var p=this.selectionStart;S.q=this.value;S.lens=0;S.sel=null;renderInbox();var n=$("q");n.focus();try{n.setSelectionRange(p,p)}catch(e){}};
   $("chips").onclick=function(e){var b=e.target.closest("button");if(!b)return;S.filter=b.dataset.f;S.sel=null;S.lens=0;renderInbox()};
   drawList();drawDetail();bindLens();
 }
@@ -610,6 +635,27 @@ function renderTrust(){
 /* ---------- integration demos (all simulated, nothing leaves the page) ---------- */
 Object.assign(I.en,{
  sim:"Simulated: no real connection. Data is fictional.",
+ tab_excel:"Excel (join)",
+ xj_intro:"Type a name or a few digits of the ID. The demo looks in three spreadsheets, joins what it finds and builds one report. The join logic really runs; the files are generated.",
+ xj_files:"Source files",xj_rows:"{n} rows",
+ xj_f1:"Agency CRM export: full ID number and name in the client's own script.",
+ xj_f2:"Insurer commission statement: only the last 4 digits of the ID, and the name in Latin letters, sometimes spelled differently.",
+ xj_f3:"Pension clearing house export: full ID number, no name column.",
+ xj_search:"Name or a few ID digits",xj_run:"Search and join",xj_ex:"Examples",xj_hint:"For example Haddad, or 4 digits of an ID",
+ xj_found:"Found in each file",xj_direct:"{n} direct matches",xj_c_note:"no name column: reached through the full ID from clients.xlsx",
+ xj_join:"Joined report",xj_pol:"Policy",xj_comm:"Commission",xj_bal:"Pension balance",xj_jq:"Join quality (statement)",xj_filesc:"Files",xj_nobal:"not in file",
+ xj_q_exact:"last 4 digits + same name",xj_q_similar:"last 4 digits + similar name, check spelling",xj_q_last4:"last 4 digits only, name differs",xj_q_none:"not in the statement",
+ xj_sum:"{n} clients found. Commission total {c}, pension balance total {b}. {k} need a check, {x} missing from the statement, {y} without pension data.",
+ xj_none:"No client found in clients.xlsx.",xj_exp:"Export joined report (CSV)",
+ au_xj:"Excel join: query {q}, {n} clients",au_xjx:"Joined report exported to CSV ({n} clients)",
+ q_ph:"Quick search: client name or ID number",pk_search:"Quick search: name or ID number",pk_all:"Select all matching ({n})",pk_clear:"Clear selection",pk_count:"{s} selected of {n} clients ({m} match)",pk_none:"No client matches",pk_lens:"Drag the lens, scroll or use arrow keys. Blue bars are selected clients.",
+ pe_sel_sum:"{n} selected: {s} with signed authorization, {u} without",pe_signall:"Send authorization to unsigned ({n})",pe_reqall:"Send request ({r} ready, {b} blocked)",pe_blockedn:"{b} blocked: no signed authorization",pe_status:"Status",pe_open:"Open",pe_nosel:"Select clients on the left.",pe_ffall:"Fast-forward 3 days ({n} pending)",
+ pe_st_unsigned:"No authorization",pe_st_signed:"Authorization signed",pe_st_sent:"Request sent, answer in about 3 business days",pe_st_ready:"Results ready",
+ au_pes:"Authorization sent for e-signature to {n} clients",au_pen:"Clearing house request sent for {n} clients",
+ ig_xl:"Excel / CSV",ig_xl_d:"Insurer commission statements in, client lists out. See also the Excel (join) tab",ig_r_xl:"Statement imported: {m} lines matched, {d} need a look",
+ xl_h:"Excel: commission statements in, client list out",xl_note:"The statement import is simulated. The CSV export is real: it downloads a file that opens in Excel.",xl_run:"Import commission statement (xlsx)",xl_exp:"Export clients to Excel (CSV)",xl_hint:"Press import to match a sample insurer statement against the expected commissions.",
+ xl_pol:"Policy",xl_exp_c:"Expected",xl_stm:"Statement",xl_st:"Status",xl_s_ok:"Matched",xl_s_diff:"Difference",xl_s_miss:"Missing in statement",xl_sum:"Expected {a}, statement {b}, difference {d}",
+ au_xl:"Excel statement imported: {n} lines",au_xlx:"Client list exported to CSV ({n} clients)",
  tab_integ:"Integrations",tab_intake:"Intake (fax, email)",tab_wa:"WhatsApp",tab_call:"Live call",tab_pension:"Pension (Mislaka)",
  t7:"Tabs: the Inbox plus simulated integrations (intake, WhatsApp, live call, pension, sync).",
  au_sync:"Sync: {n}",au_intake:"Intake processed: {a}",au_wa:"WhatsApp reply sent to {c}",au_wab:"Campaign blocked by the consent gate for {c}",au_wao:"Campaign offer sent to {c} (opt-in on record)",au_pe:"Clearing house request sent for {c}",au_pe2:"Review task created for {c}",
@@ -659,6 +705,27 @@ Object.assign(I.en,{
 });
 Object.assign(I.he,{
  sim:"הדמיה: אין חיבור אמיתי. הנתונים בדויים.",
+ tab_excel:"אקסל (איחוד)",
+ xj_intro:"הקלידו שם או כמה ספרות מתעודת הזהות. הדמו מחפש בשלושה גיליונות, מאחד את הנמצא ומפיק דוח אחד. לוגיקת האיחוד באמת רצה; הקבצים נוצרו להדגמה.",
+ xj_files:"קובצי מקור",xj_rows:"{n} שורות",
+ xj_f1:"ייצוא מה־CRM של הסוכנות: מספר זהות מלא ושם בכתב של הלקוח.",
+ xj_f2:"דוח עמלות מחברת ביטוח: רק 4 הספרות האחרונות של הזהות, והשם באותיות לועזיות, לפעמים באיות שונה.",
+ xj_f3:"ייצוא מהמסלקה הפנסיונית: מספר זהות מלא, בלי עמודת שם.",
+ xj_search:"שם או כמה ספרות מהזהות",xj_run:"חיפוש ואיחוד",xj_ex:"דוגמאות",xj_hint:"למשל Haddad, או 4 ספרות של זהות",
+ xj_found:"נמצא בכל קובץ",xj_direct:"{n} התאמות ישירות",xj_c_note:"אין עמודת שם: מגיעים אליו דרך מספר הזהות המלא מ־clients.xlsx",
+ xj_join:"דוח מאוחד",xj_pol:"פוליסה",xj_comm:"עמלה",xj_bal:"יתרה בפנסיה",xj_jq:"איכות ההתאמה (דוח עמלות)",xj_filesc:"קבצים",xj_nobal:"לא בקובץ",
+ xj_q_exact:"4 ספרות אחרונות + אותו שם",xj_q_similar:"4 ספרות אחרונות + שם דומה, לבדוק איות",xj_q_last4:"4 ספרות אחרונות בלבד, השם שונה",xj_q_none:"לא בדוח העמלות",
+ xj_sum:"נמצאו {n} לקוחות. סך עמלות {c}, סך יתרות פנסיה {b}. {k} דורשים בדיקה, {x} חסרים בדוח העמלות, {y} בלי נתוני פנסיה.",
+ xj_none:"לא נמצא לקוח ב־clients.xlsx.",xj_exp:"ייצוא הדוח המאוחד (CSV)",
+ au_xj:"איחוד אקסל: חיפוש {q}, {n} לקוחות",au_xjx:"הדוח המאוחד יוצא ל־CSV ({n} לקוחות)",
+ q_ph:"חיפוש מהיר: שם לקוח או מספר זהות",pk_search:"חיפוש מהיר: שם או מספר זהות",pk_all:"בחירת כל המתאימים ({n})",pk_clear:"ניקוי הבחירה",pk_count:"{s} נבחרו מתוך {n} לקוחות ({m} מתאימים)",pk_none:"אין לקוח מתאים",pk_lens:"גררו את העדשה, גללו או השתמשו בחצים. פסים כחולים הם לקוחות שנבחרו.",
+ pe_sel_sum:"{n} נבחרו: {s} עם הרשאה חתומה, {u} בלי",pe_signall:"שליחת הרשאה לחתימה למי שלא חתם ({n})",pe_reqall:"שליחת בקשה ({r} מוכנים, {b} חסומים)",pe_blockedn:"{b} חסומים: אין הרשאה חתומה",pe_status:"סטטוס",pe_open:"פתיחה",pe_nosel:"בחרו לקוחות בצד.",pe_ffall:"דילוג של 3 ימים ({n} ממתינים)",
+ pe_st_unsigned:"אין הרשאה",pe_st_signed:"הרשאה חתומה",pe_st_sent:"הבקשה נשלחה, תשובה בעוד כ־3 ימי עסקים",pe_st_ready:"התוצאות מוכנות",
+ au_pes:"נשלחה הרשאה לחתימה דיגיטלית ל־{n} לקוחות",au_pen:"נשלחה בקשה למסלקה עבור {n} לקוחות",
+ ig_xl:"Excel / CSV",ig_xl_d:"דוחות עמלות מחברות הביטוח פנימה, רשימות לקוחות החוצה. ראו גם את לשונית אקסל (איחוד)",ig_r_xl:"הדוח יובא: {m} שורות תואמות, {d} דורשות בדיקה",
+ xl_h:"Excel: דוחות עמלות פנימה, רשימת לקוחות החוצה",xl_note:"ייבוא הדוח הוא הדמיה. ייצוא ה־CSV אמיתי: יורד קובץ שנפתח באקסל.",xl_run:"ייבוא דוח עמלות (xlsx)",xl_exp:"ייצוא לקוחות לאקסל (CSV)",xl_hint:"לחצו על ייבוא כדי להתאים דוח לדוגמה של חברת ביטוח לעמלות הצפויות.",
+ xl_pol:"פוליסה",xl_exp_c:"צפוי",xl_stm:"בדוח",xl_st:"סטטוס",xl_s_ok:"תואם",xl_s_diff:"פער",xl_s_miss:"חסר בדוח",xl_sum:"צפוי {a}, בדוח {b}, פער {d}",
+ au_xl:"דוח אקסל יובא: {n} שורות",au_xlx:"רשימת לקוחות יוצאה ל־CSV ({n} לקוחות)",
  tab_integ:"אינטגרציות",tab_intake:"קליטה (פקס, מייל)",tab_wa:"וואטסאפ",tab_call:"שיחה חיה",tab_pension:"פנסיה (מסלקה)",
  t7:"לשוניות: תיבת המשימות ועוד אינטגרציות מדומות (קליטה, וואטסאפ, שיחה חיה, פנסיה, סנכרון).",
  au_sync:"סנכרון: {n}",au_intake:"קליטה עובדה: {a}",au_wa:"נשלחה תשובה בוואטסאפ אל {c}",au_wab:"קמפיין נחסם בשער ההסכמה עבור {c}",au_wao:"הצעת קמפיין נשלחה אל {c} (הסכמה מתועדת)",au_pe:"נשלחה בקשה למסלקה עבור {c}",au_pe2:"נוצרה משימת סקירה עבור {c}",
@@ -706,9 +773,9 @@ Object.assign(I.he,{
  pe_flags:"ממצאים",pe_f_dup:"כיסוי חיים כפול בשתי פוליסות",pe_f_fee:"דמי ניהול גבוהים ב{p}",pe_f_gap:"לא נמצא כיסוי אובדן כושר עבודה",pe_none:"לא נמצאו ממצאים",
  pe_prep:"הכנת סקירה לסוכן",pe_done:"נוצרה משימת סקירה (הדמיה)",pe_note:"דמי הניהול וההשוואות להמחשה בלבד."
 });
-Object.assign(I.ar,{sim:"محاكاة: لا يوجد اتصال حقيقي. البيانات وهمية.",tab_integ:"التكاملات",tab_intake:"الاستقبال (فاكس، بريد)",tab_wa:"واتساب",tab_call:"مكالمة حية",tab_pension:"التقاعد (المسلكة)"});
-Object.assign(I.ru,{sim:"Симуляция: реального подключения нет. Данные вымышленные.",tab_integ:"Интеграции",tab_intake:"Приём (факс, почта)",tab_wa:"WhatsApp",tab_call:"Живой звонок",tab_pension:"Пенсия (клиринг)"});
-Object.assign(I.fr,{sim:"Simulation : aucune connexion réelle. Données fictives.",tab_integ:"Intégrations",tab_intake:"Réception (fax, e-mail)",tab_wa:"WhatsApp",tab_call:"Appel en direct",tab_pension:"Retraite (compensation)"});
+Object.assign(I.ar,{tab_excel:"إكسل (دمج)",sim:"محاكاة: لا يوجد اتصال حقيقي. البيانات وهمية.",tab_integ:"التكاملات",tab_intake:"الاستقبال (فاكس، بريد)",tab_wa:"واتساب",tab_call:"مكالمة حية",tab_pension:"التقاعد (المسلكة)"});
+Object.assign(I.ru,{tab_excel:"Excel (объединение)",sim:"Симуляция: реального подключения нет. Данные вымышленные.",tab_integ:"Интеграции",tab_intake:"Приём (факс, почта)",tab_wa:"WhatsApp",tab_call:"Живой звонок",tab_pension:"Пенсия (клиринг)"});
+Object.assign(I.fr,{tab_excel:"Excel (jointure)",sim:"Simulation : aucune connexion réelle. Données fictives.",tab_integ:"Intégrations",tab_intake:"Réception (fax, e-mail)",tab_wa:"WhatsApp",tab_call:"Appel en direct",tab_pension:"Retraite (compensation)"});
 /* quick replies and offer text in the other languages (call script and replies carry the translation point) */
 var WAQ={
  q1:{en:I.en.wa_q1,he:I.he.wa_q1,ar:"نعم، سأنقل الدفع إلى أول الشهر ابتداءً من الشهر القادم وسأؤكد هنا.",ru:"Да, перенесу платёж на 1-е число со следующего месяца и подтвержу здесь.",fr:"Oui, je déplace le paiement au 1er du mois dès le mois prochain et je confirme ici."},
@@ -724,7 +791,7 @@ var CALL=[
  {who:"client",from:"ru",flag:0,he:"תודה, אני מחכה.",en:"Thank you, I'll wait.",ru:"Спасибо, жду.",ar:"شكرًا، سأنتظر.",fr:"Merci, j'attends."}
 ];
 var TOKEN=0,CALLH=null;
-S.sync={};S.syncRes={};S.co=null;S.coSys="old";S.intake={sel:0,steps:[],busy:false};S.wa={msgs:[],optin:false,blocked:false};S.call={i:0,run:false};S.pe={client:"Dana Levi",signed:false,sent:false,ready:false,date:""};
+S.sync={};S.syncRes={};S.xl=null;S.co=null;S.coSys="old";S.intake={sel:0,steps:[],busy:false};S.wa={msgs:[],optin:false,blocked:false};S.call={i:0,run:false};
 function sim(){return '<p class="note"><span class="sim">'+esc(t("sim"))+'</span></p>'}
 function clientId(cl){if(!IDS[cl])IDS[cl]=idNum(rng(fnv(cl).split("").reduce(function(a,c){return a*31+c.charCodeAt(0)|0},7)));return IDS[cl]}
 function idValid(s){if(!/^\d{9}$/.test(s))return false;var sum=0;for(var i=0;i<9;i++){var x=+s[i]*(i%2?2:1);sum+=x>9?x-9:x}return sum%10===0}
@@ -734,7 +801,7 @@ function nowStr(){return new Date().toTimeString().slice(0,8)}
 function stopCall(){if(CALLH){clearInterval(CALLH);CALLH=null}S.call.run=false}
 
 /* --- Integrations overview + coexistence --- */
-var CARDS=["wa","mail","fax","tel","mis","sys","sf","inv"];
+var CARDS=["wa","mail","fax","tel","mis","sys","sf","xl","inv"];
 function renderInteg(){
   var h=sim()+'<p class="note">'+esc(t("ig_intro"))+'</p><div class="cards">';
   CARDS.forEach(function(c){
@@ -754,14 +821,45 @@ function renderInteg(){
     M.forEach(function(r){h+='<tr><td>'+esc(t("map_"+r[0]))+'</td><td dir="ltr">'+esc(r[1])+'</td></tr>'});
     h+='</tbody></table><p class="note" style="margin-top:8px">'+esc(t("ig_sf_note"))+'</p>';
   }
-  h+='</div>';
+  h+='</div>'+excelPanel();
   $("main").innerHTML=h;
   document.querySelectorAll("[data-c]").forEach(function(b){b.onclick=function(){syncCard(b.dataset.c)}});
   $("coSys").onchange=function(){S.coSys=this.value;renderInteg()};
+  $("xlRun").onclick=function(){syncCard("xl")};
+  $("xlExp").onclick=exportCsv;
   $("coRun").onclick=function(){syncCard(S.coSys==="sf"?"sf":"sys")};
+}
+
+function genXl(){
+  var rows=[];
+  for(var i=0;i<8;i++){
+    var c=NAMES[(i*7+2)%NAMES.length],exp=80+parseInt(fnv(c),16)%320,st=exp,k="ok";
+    if(i===2){st=exp-12;k="diff"}else if(i===5){st=exp+30;k="diff"}else if(i===6){st=null;k="miss"}
+    rows.push({pol:polNo(c),c:c,exp:exp,st:st,k:k});
+  }
+  return {rows:rows};
+}
+function excelPanel(){
+  var h='<div class="card" style="padding:16px;margin-top:16px"><h2 style="margin:0 0 6px;font-size:17px">'+esc(t("xl_h"))+'</h2><p class="note">'+esc(t("xl_note"))+'</p><div class="actions" style="margin:0 0 8px"><button class="btn primary" id="xlRun">'+esc(t("xl_run"))+'</button><button class="btn" id="xlExp">'+esc(t("xl_exp"))+'</button></div>';
+  if(!S.xl)h+='<p class="note">'+esc(t("xl_hint"))+'</p>';
+  else{
+    var ea=0,sa=0;S.xl.rows.forEach(function(r){ea+=r.exp;sa+=r.st||0});
+    h+='<p class="summary">'+esc(t("xl_sum",{a:"₪"+ea,b:"₪"+sa,d:"₪"+(sa-ea)}))+'</p><table class="tbl"><thead><tr><th>'+esc(t("xl_pol"))+'</th><th>'+esc(t("client"))+'</th><th>'+esc(t("xl_exp_c"))+'</th><th>'+esc(t("xl_stm"))+'</th><th>'+esc(t("xl_st"))+'</th></tr></thead><tbody>';
+    S.xl.rows.forEach(function(r){h+='<tr><td dir="ltr">'+r.pol+'</td><td dir="auto">'+esc(nm(r.c))+'</td><td dir="ltr">₪'+r.exp+'</td><td dir="ltr">'+(r.st===null?"-":"₪"+r.st)+'</td><td><span class="badge '+(r.k==="ok"?"":r.k==="diff"?"a":"r")+'">'+esc(t("xl_s_"+r.k))+'</span></td></tr>'});
+    h+='</tbody></table>';
+  }
+  return h+'</div>';
+}
+function exportCsv(){
+  var q=function(x){return '"'+String(x).replace(/"/g,'""')+'"'};
+  var rows=["client,id_number,language,policy_number"].concat(NAMES.map(function(n){return [q(n),clientId(n),CLANG[n],polNo(n)].join(",")}));
+  var b=new Blob(["\uFEFF"+rows.join("\r\n")],{type:"text/csv;charset=utf-8"}),a=document.createElement("a");
+  a.href=URL.createObjectURL(b);a.download="ansurance-clients.csv";document.body.appendChild(a);a.click();a.remove();
+  logAudit(roleName(S.role),t("au_xlx",{n:NAMES.length}));toast("✓ "+t("au_xlx",{n:NAMES.length}));
 }
 function syncCard(c){
   S.sync[c]=nowStr();S.syncRes[c]=t("ig_r_"+c);
+  if(c==="xl"){S.xl=genXl();S.syncRes.xl=t("ig_r_xl",{m:S.xl.rows.filter(function(r){return r.k==="ok"}).length,d:S.xl.rows.filter(function(r){return r.k!=="ok"}).length});logAudit(roleName(S.role),t("au_xl",{n:S.xl.rows.length}));toast("✓ "+S.syncRes.xl);renderInteg();return}
   if(c==="sys"||c==="sf"){S.coSys=c==="sf"?"sf":"old";
     var w=["old","old","new","new","man"];
     S.co=[0,1,2,3,4].map(function(i){return {c:NAMES[(i*3+1)%NAMES.length],k:i+1,w:w[i]}});
@@ -861,41 +959,176 @@ function renderCall(){
   $("caRe").onclick=function(){stopCall();S.call.i=0;renderCall()};
 }
 
-/* --- Pension: Mislaka / Har HaBituach --- */
-var PCLIENTS=["Dana Levi","Omar Khoury","Ирина Волкова","אבי מזרחי","Marie Dubois"];
+/* --- reusable client picker: quick search + lens + multi-select. Works for hundreds of clients --- */
+var PK_WIN=8;
+function matchClient(n,q){
+  q=(q||"").trim().toLowerCase();if(!q)return true;var tr=TR[n]||{};
+  return [n,tr.he||"",tr.en||"",clientId(n)].some(function(x){return String(x).toLowerCase().indexOf(q)>=0});
+}
+function makePicker(box,cfg){
+  var P={q:"",lens:0},win=cfg.win||PK_WIN;
+  box.innerHTML='<input class="pk-q" type="search" aria-label="'+esc(t("pk_search"))+'" placeholder="'+esc(t("pk_search"))+'" style="width:100%"><div class="actions"><button class="btn" data-k="all"></button><button class="btn" data-k="clr">'+esc(t("pk_clear"))+'</button></div><div class="note pk-count"></div><div class="strip pk-strip" tabindex="0" aria-label="Lens"></div><div class="lensinfo"><span class="pk-win"></span><span>'+esc(t("pk_lens"))+'</span></div><div class="list pk-list" tabindex="0"></div>';
+  var q=box.querySelector(".pk-q"),strip=box.querySelector(".pk-strip"),list=box.querySelector(".pk-list"),bAll=box.querySelector("[data-k=all]"),bClr=box.querySelector("[data-k=clr]");
+  function flt(){return cfg.all.filter(function(n){return matchClient(n,P.q)})}
+  function draw(){
+    var f=flt(),n=f.length;P.lens=Math.max(0,Math.min(P.lens,Math.max(0,n-win)));
+    var sh="";f.forEach(function(c){sh+='<div class="bar'+(cfg.sel[c]?" s":"")+'"></div>'});
+    sh+='<div class="lens" style="inset-inline-start:'+(n?P.lens/n*100:0)+'%;width:'+(n?Math.min(1,win/n)*100:100)+'%"></div>';
+    strip.innerHTML=sh;strip.style.display=n?"flex":"none";
+    var lh=n?"":'<div class="empty">'+esc(t("pk_none"))+'</div>';
+    f.slice(P.lens,P.lens+win).forEach(function(c,i){lh+='<label class="prow"><input type="checkbox" data-i="'+(P.lens+i)+'"'+(cfg.sel[c]?" checked":"")+'><span class="pn" dir="auto">'+esc(nm(c))+'</span><span class="pid" dir="ltr">'+clientId(c)+'</span></label>'});
+    list.innerHTML=lh;
+    box.querySelector(".pk-win").textContent=n?t("win",{a:P.lens+1,b:Math.min(n,P.lens+win),n:n}):"";
+    var s=cfg.all.filter(function(c){return cfg.sel[c]}).length;
+    box.querySelector(".pk-count").textContent=t("pk_count",{s:s,n:cfg.all.length,m:n});
+    bAll.textContent=t("pk_all",{n:n});
+  }
+  q.oninput=function(){P.q=this.value;P.lens=0;draw()};
+  list.onchange=function(e){var c=flt()[+e.target.dataset.i];if(!c)return;if(e.target.checked)cfg.sel[c]=true;else delete cfg.sel[c];draw();cfg.onChange()};
+  bAll.onclick=function(){flt().forEach(function(c){cfg.sel[c]=true});draw();cfg.onChange()};
+  bClr.onclick=function(){Object.keys(cfg.sel).forEach(function(k){delete cfg.sel[k]});draw();cfg.onChange()};
+  var drag=false;
+  function pos(e){var n=flt().length,r=strip.getBoundingClientRect(),x=e.clientX-r.left,f=RTL[S.lang]?1-x/r.width:x/r.width;P.lens=Math.max(0,Math.min(n-win,Math.round(f*n-win/2)));draw()}
+  strip.onpointerdown=function(e){drag=true;strip.setPointerCapture(e.pointerId);pos(e)};
+  strip.onpointermove=function(e){if(drag)pos(e)};strip.onpointerup=function(){drag=false};
+  function move(d){var n=flt().length;P.lens=Math.max(0,Math.min(Math.max(0,n-win),P.lens+d));draw()}
+  function key(e){
+    if(e.key==="ArrowDown"||e.key==="ArrowRight"){move(1);e.preventDefault()}
+    else if(e.key==="ArrowUp"||e.key==="ArrowLeft"){move(-1);e.preventDefault()}
+    else if(e.key==="PageDown"){move(win);e.preventDefault()}
+    else if(e.key==="PageUp"){move(-win);e.preventDefault()}
+  }
+  strip.onkeydown=key;list.onkeydown=key;
+  list.onwheel=function(e){if(flt().length>win){e.preventDefault();move(e.deltaY>0?1:-1)}};
+  draw();return {draw:draw};
+}
+
+/* --- Pension: Mislaka / Har HaBituach (many clients at once) --- */
+S.pe={sel:{},st:{},open:null};
+function peSt(n){if(!S.pe.st[n])S.pe.st[n]={signed:parseInt(fnv(n),16)%10<6,sent:false,ready:false,date:""};return S.pe.st[n]}
 function pData(name){
   var r=rng(parseInt(fnv(name),16)),prods=["p1","p3"];
   if(r()<0.6)prods.push("p2");prods.push("p4");if(r()<0.5)prods.push("p4");if(r()<0.5)prods.push("p5");if(r()<0.6)prods.push("p6");
   return prods.map(function(p){return {p:p,ins:"ABCDE"[Math.floor(r()*5)],prem:Math.round(150+r()*900),fee:(p==="p4"||p==="p5")?null:+(0.1+r()*1.1).toFixed(2)}});
 }
 function renderPension(){
-  var P=S.pe,h=sim()+'<p class="note">'+esc(t("pe_intro"))+'</p><div class="card" style="padding:14px"><label>'+esc(t("pe_client"))+' <select id="peC">';
-  PCLIENTS.forEach(function(c){h+='<option value="'+esc(c)+'"'+(c===P.client?" selected":"")+'>'+esc(nm(c))+'</option>'});
-  h+='</select></label><div class="step" style="margin-top:12px">'+(P.signed?'<span class="tick">✓</span> '+esc(t("pe_auth"))+' ('+esc(t("pe_signed"))+')':'<button class="btn" id="peSign">'+esc(t("pe_signreq"))+'</button>')+'</div>';
-  h+='<div class="actions"><button class="btn primary" id="peReq">'+esc(t("pe_req"))+'</button></div>';
-  if(!P.signed&&!P.sent)h+='<p class="note">'+esc(t("pe_blocked"))+'</p>';
-  if(P.sent&&!P.ready)h+='<p class="note">'+esc(t("pe_pending"))+'</p><button class="btn" id="peFf">'+esc(t("pe_ff"))+'</button>';
-  if(P.ready){
-    var rows=pData(P.client),life=rows.filter(function(r){return r.p==="p4"}).length,flags=[];
+  $("main").innerHTML=sim()+'<p class="note">'+esc(t("pe_intro"))+'</p><div class="grid"><div class="card" style="padding:14px" id="peLeft"></div><div class="card" style="padding:14px" id="peRight"></div></div>';
+  makePicker($("peLeft"),{all:NAMES,sel:S.pe.sel,onChange:drawPe});
+  drawPe();
+}
+function drawPe(){
+  var box=$("peRight");if(!box)return;
+  var sel=NAMES.filter(function(n){return S.pe.sel[n]});
+  if(!sel.length){box.innerHTML='<div class="empty">'+esc(t("pe_nosel"))+'</div>';return}
+  var uns=sel.filter(function(n){return !peSt(n).signed}),
+      ready=sel.filter(function(n){var s=peSt(n);return s.signed&&!s.sent}),
+      pending=sel.filter(function(n){var s=peSt(n);return s.sent&&!s.ready});
+  var h='<div class="summary">'+esc(t("pe_sel_sum",{n:sel.length,s:sel.length-uns.length,u:uns.length}))+'</div><div class="actions" style="margin:0 0 10px">'+
+   '<button class="btn" id="peSignAll"'+(uns.length?"":" disabled")+'>'+esc(t("pe_signall",{n:uns.length}))+'</button>'+
+   '<button class="btn primary" id="peReqAll">'+esc(t("pe_reqall",{r:ready.length,b:uns.length}))+'</button>'+
+   '<button class="btn" id="peFfAll"'+(pending.length?"":" disabled")+'>'+esc(t("pe_ffall",{n:pending.length}))+'</button></div>'+
+   '<div class="scroll"><table class="tbl"><thead><tr><th>'+esc(t("client"))+'</th><th>'+esc(t("pe_status"))+'</th><th></th></tr></thead><tbody>';
+  sel.forEach(function(n,i){
+    var s=peSt(n),k=s.ready?"ready":s.sent?"sent":s.signed?"signed":"unsigned";
+    h+='<tr><td dir="auto">'+esc(nm(n))+'</td><td><span class="badge '+(k==="unsigned"?"r":k==="ready"?"":"a")+'">'+esc(t("pe_st_"+k))+'</span></td><td>'+(s.ready?'<button class="btn" data-o="'+i+'">'+esc(t("pe_open"))+'</button>':"")+'</td></tr>';
+  });
+  h+='</tbody></table></div>';
+  var op=S.pe.open;
+  if(op&&S.pe.sel[op]&&peSt(op).ready){
+    var rows=pData(op),life=rows.filter(function(r){return r.p==="p4"}).length,flags=[];
     if(life>1)flags.push(t("pe_f_dup"));
     var hi=rows.filter(function(r){return r.fee!==null&&r.fee>0.6})[0];if(hi)flags.push(t("pe_f_fee",{p:t("pe_"+hi.p)}));
     if(!rows.some(function(r){return r.p==="p5"}))flags.push(t("pe_f_gap"));
-    h+='<h3 style="margin:14px 0 6px">'+esc(t("pe_res",{d:P.date}))+'</h3><table class="tbl"><thead><tr><th>'+esc(t("pe_ins"))+'</th><th>'+esc(t("pe_prod"))+'</th><th>'+esc(t("pe_prem"))+'</th><th>'+esc(t("pe_fee"))+'</th></tr></thead><tbody>';
+    h+='<h3 style="margin:14px 0 6px" dir="auto">'+esc(nm(op))+' - '+esc(t("pe_res",{d:peSt(op).date}))+'</h3><table class="tbl"><thead><tr><th>'+esc(t("pe_ins"))+'</th><th>'+esc(t("pe_prod"))+'</th><th>'+esc(t("pe_prem"))+'</th><th>'+esc(t("pe_fee"))+'</th></tr></thead><tbody>';
     rows.forEach(function(r){h+='<tr><td>'+r.ins+'</td><td>'+esc(t("pe_"+r.p))+'</td><td dir="ltr">₪'+r.prem+'</td><td dir="ltr">'+(r.fee===null?"-":r.fee+"%")+'</td></tr>'});
     h+='</tbody></table><h3 style="margin:14px 0 6px">'+esc(t("pe_flags"))+'</h3>';
     if(flags.length)flags.forEach(function(f){h+='<div class="alert">'+esc(f)+'</div>'});else h+='<div class="note">'+esc(t("pe_none"))+'</div>';
     h+='<div class="actions"><button class="btn primary" id="pePrep">'+esc(t("pe_prep"))+'</button></div><p class="note">'+esc(t("pe_note"))+'</p>';
   }
+  box.innerHTML=h;
+  $("peSignAll").onclick=function(){uns.forEach(function(n){peSt(n).signed=true});logAudit(roleName(S.role),t("au_pes",{n:uns.length}));drawPe()};
+  $("peReqAll").onclick=function(){
+    ready.forEach(function(n){peSt(n).sent=true});
+    if(uns.length)toast(t("pe_blockedn",{b:uns.length}));
+    if(ready.length)logAudit(roleName(S.role),t("au_pen",{n:ready.length}));
+    drawPe();
+  };
+  $("peFfAll").onclick=function(){var d=new Date().toISOString().slice(0,10);pending.forEach(function(n){var s=peSt(n);s.ready=true;s.date=d});drawPe()};
+  box.querySelectorAll("[data-o]").forEach(function(b){b.onclick=function(){S.pe.open=sel[+b.dataset.o];drawPe()}});
+  if($("pePrep"))$("pePrep").onclick=function(){logAudit(roleName(S.role),t("au_pe2",{c:nm(S.pe.open)}));toast("✓ "+t("pe_done"))};
+}
+
+/* --- Excel join demo: look up across spreadsheets, join, report (the join logic really runs; the files are generated) --- */
+var XF=null;
+function latin(n){return script(n)==="en"?n:((TR[n]&&TR[n].en)||n)}
+function norm(s){return String(s).normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z֐-׿؀-ۿЀ-ӿ]/g,"")}
+function lev(a,b){var m=a.length,n=b.length,d=[],i,j;for(i=0;i<=m;i++)d[i]=[i];for(j=1;j<=n;j++)d[0][j]=j;for(i=1;i<=m;i++)for(j=1;j<=n;j++)d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));return d[m][n]}
+function xlFiles(){
+  if(XF)return XF;
+  var A=[],B=[],C=[];
+  NAMES.forEach(function(n){
+    var id=clientId(n),h=function(k){return parseInt(fnv(n+k),16)};
+    A.push({name:n,id:id,phone:"05"+(10000000+h("p")%90000000)});
+    if(h("B")%10<7){var l=latin(n);if(h("v")%6===0){var tk=l.split(" ");tk[0]=tk[0].slice(0,-1);l=tk.join(" ")}B.push({cust:l,last4:id.slice(-4),pol:polNo(n),comm:80+h("c")%320})}
+    if(h("C")%10<6)C.push({id:id,fund:"Pension fund",bal:20000+h("b")%380000});
+  });
+  XF={A:A,B:B,C:C};return XF;
+}
+S.xj={q:"",res:null};
+function xjRun(q){
+  var F=xlFiles(),qq=q.trim(),dig=/^\d{2,9}$/.test(qq),nq=norm(qq),res={q:qq,rows:[],direct:{}};
+  var A=qq?F.A.filter(function(r){return matchClient(r.name,qq)}):[];
+  res.direct.A=A.length;
+  res.direct.B=qq?F.B.filter(function(r){return dig?r.last4.indexOf(qq)>=0:(nq&&norm(r.cust).indexOf(nq)>=0)}).length:0;
+  res.direct.C=qq?F.C.filter(function(r){return dig&&r.id.indexOf(qq)>=0}).length:0;
+  A.forEach(function(a){
+    var ln=norm(latin(a.name)),cand=F.B.filter(function(b){return b.last4===a.id.slice(-4)}),best=null,bd=99;
+    cand.forEach(function(b){var d=lev(norm(b.cust),ln);if(d<bd){bd=d;best=b}});
+    var jq=!best?"none":bd===0?"exact":bd<=2?"similar":"last4",c=F.C.filter(function(r){return r.id===a.id})[0];
+    res.rows.push({name:a.name,id:a.id,pol:best?best.pol:null,comm:best?best.comm:null,bal:c?c.bal:null,jq:jq,files:"A"+(best?"+B":"")+(c?"+C":"")});
+  });
+  return res;
+}
+function xjExamples(F){
+  var e2=null,e3=null;
+  F.A.forEach(function(a){
+    var b=F.B.filter(function(x){return x.last4===a.id.slice(-4)})[0],c=F.C.some(function(x){return x.id===a.id});
+    if(b&&!e2&&lev(norm(b.cust),norm(latin(a.name)))===1)e2=a.id.slice(-4);
+    if(b&&c&&!e3&&norm(b.cust)===norm(latin(a.name)))e3=latin(a.name).split(" ").pop();
+  });
+  return [e3,e2,"Haddad","\u05d9\u05d5\u05e1\u05d9"].filter(Boolean);
+}
+function renderExcel(){
+  var F=xlFiles(),res=S.xj.res;
+  var prev=function(rows,cols){return '<table class="tbl"><thead><tr>'+cols.map(function(c){return '<th>'+esc(c[0])+'</th>'}).join("")+'</tr></thead><tbody>'+rows.slice(0,4).map(function(r){return '<tr>'+cols.map(function(c){return '<td dir="auto">'+esc(c[1](r))+'</td>'}).join("")+'</tr>'}).join("")+'</tbody></table>'};
+  var h=sim()+'<p class="note">'+esc(t("xj_intro"))+'</p><h3 style="margin:8px 0">'+esc(t("xj_files"))+'</h3><div class="cards">'+
+   '<details class="card" style="padding:10px"><summary><b>clients.xlsx</b> · '+esc(t("xj_rows",{n:F.A.length}))+'</summary><p class="note">'+esc(t("xj_f1"))+'</p>'+prev(F.A,[["Name",function(r){return r.name}],["ID",function(r){return r.id}],["Phone",function(r){return r.phone}]])+'</details>'+
+   '<details class="card" style="padding:10px"><summary><b>commissions_insurer_A.xlsx</b> · '+esc(t("xj_rows",{n:F.B.length}))+'</summary><p class="note">'+esc(t("xj_f2"))+'</p>'+prev(F.B,[["Customer",function(r){return r.cust}],["ID",function(r){return "••••"+r.last4}],["Policy",function(r){return r.pol}],["Commission",function(r){return "₪"+r.comm}]])+'</details>'+
+   '<details class="card" style="padding:10px"><summary><b>pension_balances.xlsx</b> · '+esc(t("xj_rows",{n:F.C.length}))+'</summary><p class="note">'+esc(t("xj_f3"))+'</p>'+prev(F.C,[["ID",function(r){return r.id}],["Fund",function(r){return r.fund}],["Balance",function(r){return "₪"+r.bal}]])+'</details></div>';
+  h+='<div class="card" style="padding:14px;margin-top:16px"><label>'+esc(t("xj_search"))+'<br><input id="xjq" type="search" value="'+esc(S.xj.q)+'" placeholder="'+esc(t("xj_hint"))+'" style="min-width:300px;margin-top:4px"></label> <button class="btn primary" id="xjGo">'+esc(t("xj_run"))+'</button><div class="actions" style="margin:8px 0 0"><span class="note" style="margin:0">'+esc(t("xj_ex"))+':</span>'+xjExamples(F).map(function(x){return '<button class="chip" data-x="'+esc(x)+'">'+esc(x)+'</button>'}).join("")+'</div>';
+  if(res){
+    if(!res.rows.length)h+='<p class="note" style="margin-top:12px">'+esc(t("xj_none"))+'</p>';
+    else{
+      var cs=0,bs=0,chk=0,nb=0,nc=0;res.rows.forEach(function(r){cs+=r.comm||0;bs+=r.bal||0;if(r.jq==="similar"||r.jq==="last4")chk++;if(r.jq==="none")nb++;if(r.bal===null)nc++});
+      h+='<h3 style="margin:14px 0 6px">'+esc(t("xj_found"))+'</h3><ul class="note"><li>clients.xlsx: '+esc(t("xj_direct",{n:res.direct.A}))+'</li><li>commissions_insurer_A.xlsx: '+esc(t("xj_direct",{n:res.direct.B}))+'</li><li>pension_balances.xlsx: '+esc(t("xj_direct",{n:res.direct.C}))+' - '+esc(t("xj_c_note"))+'</li></ul>';
+      h+='<h3 style="margin:14px 0 6px">'+esc(t("xj_join"))+'</h3><p class="summary">'+esc(t("xj_sum",{n:res.rows.length,c:"₪"+cs,b:"₪"+bs,k:chk,x:nb,y:nc}))+'</p><div class="scroll"><table class="tbl"><thead><tr><th>'+esc(t("client"))+'</th><th>'+esc(t("idn"))+'</th><th>'+esc(t("xj_pol"))+'</th><th>'+esc(t("xj_comm"))+'</th><th>'+esc(t("xj_bal"))+'</th><th>'+esc(t("xj_jq"))+'</th><th>'+esc(t("xj_filesc"))+'</th></tr></thead><tbody>';
+      res.rows.forEach(function(r){h+='<tr><td dir="auto">'+esc(nm(r.name))+'</td><td dir="ltr">'+r.id+'</td><td dir="ltr">'+esc(r.pol||"-")+'</td><td dir="ltr">'+(r.comm===null?"-":"₪"+r.comm)+'</td><td dir="ltr">'+(r.bal===null?esc(t("xj_nobal")):"₪"+r.bal)+'</td><td><span class="badge '+(r.jq==="exact"?"":r.jq==="none"?"r":"a")+'">'+esc(t("xj_q_"+r.jq))+'</span></td><td dir="ltr">'+r.files+'</td></tr>'});
+      h+='</tbody></table></div><div class="actions"><button class="btn primary" id="xjExp">'+esc(t("xj_exp"))+'</button></div>';
+    }
+  }
   h+='</div>';
   $("main").innerHTML=h;
-  $("peC").onchange=function(){S.pe={client:this.value,signed:false,sent:false,ready:false,date:""};renderPension()};
-  if($("peSign"))$("peSign").onclick=function(){S.pe.signed=true;renderPension()};
-  $("peReq").onclick=function(){
-    if(!S.pe.signed){toast(t("pe_blocked"));return}
-    S.pe.sent=true;logAudit(roleName(S.role),t("au_pe",{c:nm(S.pe.client)}));renderPension();
+  var run=function(v){S.xj.q=v;S.xj.res=xjRun(v);logAudit(roleName(S.role),t("au_xj",{q:v,n:S.xj.res.rows.length}));renderExcel()};
+  $("xjGo").onclick=function(){run($("xjq").value)};
+  $("xjq").onkeydown=function(e){if(e.key==="Enter")run(this.value)};
+  document.querySelectorAll("[data-x]").forEach(function(b){b.onclick=function(){run(b.dataset.x)}});
+  if($("xjExp"))$("xjExp").onclick=function(){
+    var q=function(x){return '"'+String(x).replace(/"/g,'""')+'"'};
+    var rows=["client,id_number,policy,commission,pension_balance,join_quality,files"].concat(S.xj.res.rows.map(function(r){return [q(r.name),r.id,r.pol||"",r.comm===null?"":r.comm,r.bal===null?"":r.bal,r.jq,r.files].join(",")}));
+    var b=new Blob(["﻿"+rows.join("\r\n")],{type:"text/csv;charset=utf-8"}),a=document.createElement("a");
+    a.href=URL.createObjectURL(b);a.download="joined-report.csv";document.body.appendChild(a);a.click();a.remove();
+    logAudit(roleName(S.role),t("au_xjx",{n:S.xj.res.rows.length}));toast("✓ "+t("au_xjx",{n:S.xj.res.rows.length}));
   };
-  if($("peFf"))$("peFf").onclick=function(){S.pe.ready=true;S.pe.date=new Date().toISOString().slice(0,10);renderPension()};
-  if($("pePrep"))$("pePrep").onclick=function(){logAudit(roleName(S.role),t("au_pe2",{c:nm(S.pe.client)}));toast("✓ "+t("pe_done"))};
 }
 
 /* ---------- Show me tour ---------- */

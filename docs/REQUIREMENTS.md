@@ -273,6 +273,8 @@ Borrowed from the praxis-demo project (larytet/praxis-demo, GitHub Pages demo):
 6. **Inbox-first home**: the first screen is always the user's Inbox with counts and urgency.
 7. **Trust page**: shows the audit log, with the verify-chain button.
 8. Plain language, one primary action per item, nothing touchable that does nothing: every element drills in or opens detail.
+9. **Client picker, never a plain drop-down**: wherever a client (or several) is chosen, the control is a quick-search box (name in any script, transliteration, or any digits of the ID number) plus the Lens over the result list and multi-select with select-all-matching. It must stay usable with hundreds of clients. The Inbox has the same quick search.
+10. **Excel as an integration**: import insurer commission statements (F7), export client lists and reports to Excel, and join several spreadsheets on a partial key. Example from the mock: an agency export with the full ID, an insurer statement with only the last 4 digits and the name in Latin letters, and a clearing house export with the full ID and no name are joined on ID, and on last 4 digits plus fuzzy name where the ID is partial. The report shows how each row was joined and flags rows where the name is spelled differently.
 
 ## 9. Integrations
 
