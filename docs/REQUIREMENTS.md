@@ -45,7 +45,7 @@ Each flow lists trigger, steps, actors, outputs and regulatory hooks.
   1. Agent creates the lead; duplicate check on ID number (9 digits, Luhn check digit validated) and phone.
   2. Collect ID card plus the paper addendum (Sefach), proof of address if needed. Client may send photos over WhatsApp or email; they route through the intake pipeline (F6).
   3. KYC form completed: identity, beneficiary, controlling shareholder for corporate clients, source of funds for large or unusual products.
-  4. Client signs a mandate/representation letter and a consent for data lookup (section F5).
+  4. Client signs a mandate/representation letter and a consent for data lookup (section F5). Marketing consent (per channel, yes or no) is asked separately and stored in the consent registry, because F10 depends on it.
   5. Manager approval is required only for flagged cases (high risk, politically exposed, large single premium).
 - Outputs: client record, KYC file, signed consents, audit trail.
 - Regulatory hooks: the Prohibition on Money Laundering order for insurers and agents (identification, reporting and record keeping; the 2001 order is cited in the sources but its text was not retrieved) **[verify]**; Privacy Protection Law Amendment 13 (in force 14 Aug 2025): purpose-limited collection and notice at collection.
@@ -130,6 +130,36 @@ This is the signature feature. See section 4 for detail.
 
 See section 5.
 
+### F10. Notify client (targeted outreach and upsell channel)
+
+- Trigger: a new financial product from an insurer or fund, a regulatory change, a market event, a policy anniversary, or an agent idea ("everyone who has X and not Y").
+- Purpose: one controlled channel for telling clients something that matters to them, and only the clients it matters to. Doubles as the upsell channel, but every campaign needs a stated client benefit, so it stays advice and not spam.
+- Steps:
+  1. Campaign created by an agent or the manager from a template (type: regulatory update, product offer, protection gap, renewal nudge, life event).
+  2. Audience builder: rule-based segment over client and portfolio data, with a live count and a sample list. Examples below. A client appears only if the rule matches and the consent check passes.
+  3. Consent gate (automatic, not skippable): see below. Excluded clients are listed with the reason (no consent, opted out, do-not-call, sensitive case).
+  4. Content: message written once in one language, translated per client preferred language (section 5), with human review of each translation before first send. Channel per client: WhatsApp (approved template), email, SMS; voice follow-up as an agent task.
+  5. Manager approval for product-offer campaigns and anything that mentions regulation (accuracy check); agents may send regulatory-update notices from approved templates without approval.
+  6. Send in batches with throttling; replies land in the agent-of-record Inbox as "client replied to campaign"; interested clients become tasks or leads (F2, F5).
+  7. Results: delivered, read, replied, converted, unsubscribed, complaints; fed back to the segment so a client is not contacted twice in a short period (frequency cap, default one marketing contact per client per 30 days).
+- Segment examples built from recent Israeli developments (verify each before use, see sources in section 11):
+  - Early pension withdrawal rules (Capital Market Authority, reported July 2026, effective about three months later): notify clients aged 50+ holding pension or provident products and clients who recently asked about withdrawals. Content: new verification steps, risk of fraud and impersonation, tax cost of early withdrawal, "call us before you decide". This is a protective notice. An insurance agency was reported fined NIS 10.5 million in August 2026 for illegally encouraging early withdrawals, so this campaign must never push withdrawal and must be reviewed by the manager.
+  - Managers' insurance restriction (in force since September 2023): employees below twice the average wage cannot newly join managers' insurance. Segment: clients who changed jobs in the last 12 months with salary under the threshold. Content: what vehicle to use instead (pension or provident fund) and a savings review.
+  - Investment provident fund ceiling (about ILS 83,641 per year in 2026): segment: clients with an investment provident fund and recorded deposits near the ceiling, or no such fund and spare savings capacity. Product offer, needs-analysis first.
+  - Savings for Every Child (National Insurance Institute deposits ILS 58 a month per child to age 18; parents can redirect payments to an investment house): segment: clients with children under 18 and no child-savings product. Content: options and comparison.
+  - Pension tax exemption ceiling on monthly pension rising to ILS 5,422 in 2026: segment: retirees and clients within 5 years of retirement. Low urgency, informational.
+  - Group health insurance framework approvals (draft circular reported by Bizportal): segment: business clients with group health policies. Informational, send only after the circular is final.
+  - Protection gaps (agency-defined, no regulator news needed): clients with a mortgage and no life cover, car policy renewing within 60 days with a claim-free record (price review), self-employed clients with no disability cover, clients whose long-term care cover is only the health-fund default.
+- Consent and law (Communications Law section 30A, the "spam law", in force since 2008 and amended in 2016; Privacy Protection Law Amendment 13):
+  - Advertising by email, SMS, automated dialing or fax requires explicit advance written consent. WhatsApp is treated as covered in practice.
+  - An existing-customer exception exists (contact details given when buying or negotiating a purchase, similar products, opt-out offered at collection) but its three conditions must be confirmed by counsel and encoded exactly **[verify]**. Until then, the system defaults to requiring recorded opt-in for any product offer.
+  - Pure service or regulatory notices (for example a change that affects the client's existing policy) are not advertising and need no marketing consent, but must contain no sales content. The campaign type decides which rule applies, and the content check flags sales wording in a "service" campaign.
+  - Advertising emails carry the advertisement label in the subject ("פרסומת"), sender identity and contact details, and a one-click unsubscribe that is honored immediately across all channels.
+  - Exposure is up to ILS 1,000 per message without proof of damage, and officers can be personally liable, so the consent gate is a hard stop, not a warning. All consent records (when, how, wording, channel, source) are stored and exportable.
+  - Check the national do-not-call register before voice campaigns **[verify]**.
+- Outputs: campaign record, audience snapshot (who was selected and why), consent evidence per recipient, send log, replies, conversions.
+- Acceptance: no message leaves without a passing consent check recorded on the recipient; every campaign keeps an immutable audience snapshot; an unsubscribe in any channel suppresses all marketing channels within one minute; the manager sees campaigns pending approval in the Inbox.
+
 ## 4. Automatic intake pipeline (fax, email, WhatsApp)
 
 ### 4.1 Channels
@@ -205,9 +235,9 @@ Every role has an Inbox as the home screen. An Inbox item is anything that needs
 
 | Role | Typical items | Urgent rules |
 |---|---|---|
-| Agent | Renewals due, client replies, auto-filed documents for my clients, unsigned applications, callbacks, claim updates, birthday and policy-anniversary nudges | Renewal under 10 days, client waiting over 1 business day |
-| Back-office | Review queue (medium-confidence documents), Unassigned queue, applications to submit, endorsements, claim document gaps, commission mismatches | Item older than same-day SLA |
-| Manager | Approvals (KYC flags, payouts), complaints over SLA, compliance expiries, misfile reports, team workload, retention leaks | Any regulatory deadline within 7 days |
+| Agent | Renewals due, client replies, auto-filed documents for my clients, unsigned applications, callbacks, claim updates, birthday and policy-anniversary nudges, campaign replies | Renewal under 10 days, client waiting over 1 business day |
+| Back-office | Review queue (medium-confidence documents), Unassigned queue, applications to submit, endorsements, claim document gaps, commission mismatches, campaign send failures | Item older than same-day SLA |
+| Manager | Approvals (KYC flags, payouts), complaints over SLA, compliance expiries, misfile reports, team workload, retention leaks, campaigns awaiting approval | Any regulatory deadline within 7 days |
 
 Behaviour:
 
@@ -262,17 +292,44 @@ Pick what Israeli agencies and their clients already use, not new tools to learn
 | 3 | **Zapier or Make** | Lets the agency connect anything else without code | Webhooks out, triggers in |
 | 3 | **Insurer agent portals** | Policy data, quotes, commission statements | v1: deep links and file download; later: API where offered |
 
+See 9.1 for a worked example with an existing Israeli agency system.
+
 Integration rules: each integration is behind an adapter interface with a fake implementation for tests; every external call is logged; credentials live in a secret store; no integration may bypass the audit log.
+
+### 9.1 Worked example: integrating with an existing Israeli agency system
+
+Many Israeli agencies already run an agency management system and will not switch overnight. The Israeli systems found in research that connect to the pension clearing house and Har HaBituach:
+
+| System | What it is (per vendor pages) |
+|---|---|
+| Surense | CRM for insurance and financial agents; clearing house files flow into the client record; mobile work, client digital service, API integrations |
+| Jamm | Digital platform: lead management, CRM, process automation, Har HaBituach and clearing house connection |
+| Atid (cloud agency software) | Cloud office management; clearing house requests for pre-advice and production download; automatic interfaces to WhatsApp, SMS, call recordings and Har HaBituach |
+| Aloni | Ingests material from all insurers and funds, including clearing house data; Har HaBituach connection and product simulators |
+| BAFI | Office management, car insurance simulator, online clearing house (vendor page is old, check it is current) |
+| Sapiens IDITSuite | Insurer-grade core suite with open APIs (API Conductor), also used by brokers; more relevant to insurers than to a five-agent agency |
+
+Example scenario (coexistence, ansurance as the front layer, a system such as Surense or Atid kept as the system of record for the first phase):
+
+1. Day 0: import. A one-time export of clients and policies (CSV or API) is loaded into ansurance. Each record keeps the source system ID in a `external_ids` field (`{"system": "surense", "id": "..."}`). Matching key is the 9-digit ID number.
+2. Daily: sync adapter. A scheduled adapter pulls changes since the last run (new or changed policies, premiums, renewal dates) from the existing system through its API or a scheduled file drop. Conflicts follow a stated rule: the existing system wins for policy data, ansurance wins for documents, messages, consents, campaigns and Inbox tasks.
+3. Clearing house data. For phase 1 the agency keeps using the clearing house screen of the existing system. ansurance receives the resulting files, attaches them to the portfolio (F5) and flags changes. In a later phase ansurance requests directly (through Mislaka-API or its own connection) and the old system becomes read-only.
+4. Documents and messages. The existing system's WhatsApp, SMS and call recordings are ingested through its interface or export, so F6 and F9 see one timeline. If the old system also sends WhatsApp, only one of the two may send marketing messages (the one holding the consent records), to avoid double contact and inconsistent opt-outs.
+5. Write-back (optional, only if the vendor offers it): ansurance creates tasks or notes in the old system when an item is completed, for example "client replied to campaign". Otherwise ansurance stays one-way.
+6. Cut-over test. Run both in parallel for one renewal cycle; compare renewal lists, commission expectations and portfolio totals; sign off by the manager.
+7. Exit path. Every adapter and the data model support full export, so ansurance can replace the old system later, or be replaced, without data loss.
+
+Adapter contract (the same for any vendor): `list_clients(since)`, `list_policies(since)`, `get_document(id)`, `push_task(client, text)` (optional), plus a health check. A fake adapter with synthetic data is used in tests. Vendor API access, rate limits, authentication and licensing terms must be agreed with the vendor before the build; none of these were verified in research **[verify]**.
 
 ## 10. Phasing
 
 | Phase | Content |
 |---|---|
-| 0 (2-3 weeks) | Clients, policies, documents, roles, Inbox (all three), audit log, theme/language/role switchers |
+| 0 (2-3 weeks) | Clients, policies, documents, roles, Inbox (all three), audit log, theme/language/role switchers, consent registry (opt-in, opt-out, source), import from the existing agency system (9.1) |
 | 1 | F6 intake: email and WhatsApp first, then fax; ID-number attribution; Review and Unassigned queues |
 | 2 | F1, F2, F3, F4 flows with e-signature |
 | 3 | F9 live translation on calls, translation inline on WhatsApp and email |
-| 4 | F5 clearing house and Har HaBituach, F7 commissions, F8 compliance dashboard |
+| 4 | F5 clearing house and Har HaBituach, F7 commissions, F8 compliance dashboard, F10 notify client (consent registry must exist from phase 0) |
 | 5 | Lens, Show me scripts, polish, Arabic RTL review |
 
 ## 11. Research notes and sources
@@ -310,4 +367,19 @@ Sources:
 - [AssemblyAI: real-time speech recognition APIs 2026](https://www.assemblyai.com/blog/best-api-models-for-real-time-speech-recognition-and-transcription)
 - [Lynxbe: WhatsApp for business in Israel](https://www.lynxbe.co.il/en/lynxbe-platform-whatsapp)
 - [Green Invoice (morning)](https://apps.shopify.com/green-invoice?locale=cs)
+- [Surense: CRM for insurance agents](https://www.surense.co.il/crm-for-insurance-agents/)
+- [Jamm](https://jamm.co.il/)
+- [Atid Software Engineering](https://www.atidsm.co.il/homesite/)
+- [Aloni Software](https://www.aloni.org.il/)
+- [Start Point: CRM for insurance agents, 2026 comparison](https://start-point.co.il/crm-for-insurance-agents/)
+- [Sapiens IDITSuite](https://sapiens.com/property-and-casualty/iditsuite/)
+- [Israeli Anti-SPAM Legislation Amended for the First Time (Lexology)](https://www.lexology.com/library/detail.aspx?g=dfa80306-8bc5-4ac3-b01e-193ccd49dbb8)
+- [WhatsApp marketing rules in Israel 2026](https://quickwa.com/blog/whatsapp-marketing-rules-israel)
+- [gov.il: FAQ about spam mail](https://www.gov.il/en/departments/faq/17052018_7)
+- [Capital Market Authority tightens rules on early pension withdrawals](https://news.itsbaba.com/story/42050/israeli-regulator-mandates-warning-calls-to-curb-early-pensi-42721)
+- [Lexology: restrictions on managers' insurance plans](https://www.lexology.com/library/detail.aspx?g=b4c8d3c5-1c9c-49eb-9273-c64707671cfb)
+- [Globes: changes that will affect personal finances in 2026](https://en.globes.co.il/en/article-changes-that-will-affect-personal-finances-in-2026-1001530085)
+- [Ynet: what awaits Israelis on January 1](https://www.ynetnews.com/business/article/rkpl6m11n11l)
+- [Bizportal: group health insurance rule change (draft circular)](https://www.bizportal.co.il/Insurance/news/article/20046700)
+- [Taub Center: long-term care insurance in Israel](https://www.taubcenter.org.il/wp-content/uploads/2024/03/LTC-ENG-2024.pdf)
 - [praxis-demo (UX reference)](https://github.com/larytet/praxis-demo)
