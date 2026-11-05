@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="he" dir="rtl">
+<html lang="he" dir="rtl" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -130,6 +130,25 @@ body.compact .row{padding:4px 10px;margin-bottom:3px}body.compact .row .d{font-s
 body.compact .prow{padding:3px 8px;margin-bottom:2px}body.compact .tbl th,body.compact .tbl td{padding:3px 8px}
 body.compact .card.detail,body.compact .icard{padding:10px}
 .pl{background:var(--accent-soft);color:var(--accent);border-radius:6px;padding:0 6px;font-size:11px;font-weight:600}
+
+.fld{display:flex;flex-direction:column;gap:2px;font-size:13px;color:var(--muted)}.fld input,.fld select{color:var(--ink)}
+.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px}
+.paper{background:#fff;color:#111;border:1px solid var(--line);border-radius:6px;padding:16px;line-height:1.9;font-size:14px;margin:8px 0;box-shadow:var(--shadow)}
+.fv{background:#dcf2e6;color:#111;border-radius:3px;padding:0 3px}.fm{background:#fbe3e5;color:#b3202e;border-radius:3px;padding:0 3px;font-weight:600}
+.idcard{display:flex;gap:12px;align-items:center;border:2px solid var(--line);border-radius:10px;padding:10px;background:linear-gradient(135deg,var(--accent-soft),var(--panel));margin:8px 0}.idcard .ph{width:56px;height:70px;border-radius:6px;background:var(--line)}
+.labels{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin:10px 0}.lab{border:1px dashed #777;padding:8px;font-size:12px;border-radius:4px;background:#fff;color:#111}.lab .lf{font-size:10px;color:#555;border-bottom:1px solid #ddd;padding-bottom:3px;margin-bottom:5px}.lab .lt{font-size:14px;line-height:1.4}.lbar{height:18px;margin-top:6px;background:repeating-linear-gradient(90deg,#111 0 2px,#fff 2px 4px,#111 4px 5px,#fff 5px 8px)}
+#printArea{display:none}
+@media print{body>*:not(#printArea){display:none!important}#printArea{display:block!important}}
+.chk{display:flex;gap:6px;align-items:center;margin:4px 0}
+.phone{width:340px;max-width:100%;height:640px;border:10px solid #222;border-radius:34px;background:var(--panel);display:flex;flex-direction:column;overflow:hidden;margin:0 auto;box-shadow:var(--shadow)}
+.ptop{padding:10px 14px;border-bottom:1px solid var(--line);display:flex;gap:8px;align-items:center;background:var(--panel)}.pback{border:0;background:none;font-size:22px}
+.pbody{flex:1;overflow:auto;padding:12px}.pc{text-align:center}.plogo{font-weight:800;font-size:26px;color:var(--accent)}
+.phead{margin-bottom:8px}.pbd{background:var(--amber-soft);border-radius:8px;padding:6px 8px;margin-top:6px}
+.pcard{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px}.pcard .big{font-size:24px;font-weight:700}.pcard .d{color:var(--muted);font-size:12px}
+.pbars{display:flex;gap:6px;height:60px;align-items:flex-end;margin-top:8px}.pbars i{flex:1;background:linear-gradient(var(--accent),var(--accent-soft));border-radius:4px 4px 0 0}
+.ptiles{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}.ptiles div{border:1px solid var(--line);border-radius:10px;padding:8px}.ptiles span{display:block;font-size:11px;color:var(--muted)}
+.pnav{display:flex;border-top:1px solid var(--line)}.pnav button{flex:1;border:0;background:none;padding:6px 2px;font-size:11px}.pnav button span{display:block;font-size:18px}.pnav button[aria-pressed="true"]{color:var(--accent);font-weight:700}
+.sheet{border:1px solid var(--accent);border-radius:12px;padding:12px;background:var(--panel)}
 </style>
 </head>
 <body>
@@ -446,7 +465,7 @@ function nm(n){
 })();
 
 /* ---------- data ---------- */
-var ROLES=["agent","back","mgr"];
+var ROLES=["agent","back","mkt","mgr"];
 var TYPES={
  renewal:{r:"agent",w:6,ch:"wa",urg:function(n){return n<10?2:n<20?1:0}},
  reply:{r:"agent",w:6,ch:"wa",urg:function(n,m){return m>1440?2:m>240?1:0}},
@@ -526,14 +545,15 @@ function applyChrome(){
   $("langSel").value=S.lang;
   document.title="ansurance - "+t("tab_inbox");
   var rs=$("roleSel");rs.innerHTML="";
-  ROLES.forEach(function(r){var b=document.createElement("button");b.textContent=roleName(r);b.setAttribute("aria-pressed",String(r===S.role));b.onclick=function(){S.role=r;S.filter="all";S.sel=null;S.lens=0;store("role",r);render()};rs.appendChild(b)});
+  ROLES.forEach(function(r){var b=document.createElement("button");b.textContent=roleName(r);b.setAttribute("aria-pressed",String(r===S.role));b.onclick=function(){S.role=r;S.tab=HOME[r];S.filter="all";S.sel=null;S.lens=0;store("role",r);render()};rs.appendChild(b)});
   var tb=$("tabs");tb.innerHTML="";
-  ["inbox","integ","excel","intake","wa","call","pension","clients","settings","trust"].map(function(id){return [id,t("tab_"+id)]}).forEach(function(x){var b=document.createElement("button");b.setAttribute("role","tab");b.setAttribute("aria-selected",String(S.tab===x[0]));b.textContent=x[1];b.onclick=function(){S.tab=x[0];render()};tb.appendChild(b)});
+  tabsOf(S.role).map(function(id){return [id,t("tab_"+id)]}).forEach(function(x){var b=document.createElement("button");b.setAttribute("role","tab");b.setAttribute("aria-selected",String(S.tab===x[0]));b.textContent=x[1];b.onclick=function(){S.tab=x[0];render()};tb.appendChild(b)});
   $("foot").textContent=t("foot");
 }
 function render(){
   stopCall();TOKEN++;applyChrome();
-  var V={inbox:renderInbox,integ:renderInteg,excel:renderExcel,intake:renderIntake,wa:renderWa,call:renderCall,pension:renderPension,clients:renderClients,settings:renderSettings,trust:renderTrust};
+  if(tabsOf(S.role).indexOf(S.tab)<0)S.tab=HOME[S.role];
+  var V={desk:renderDesk,file:renderFile,mkt:renderMkt,overview:renderOverview,today:renderToday,app:renderApp,inbox:renderInbox,integ:renderInteg,excel:renderExcel,intake:renderIntake,wa:renderWa,call:renderCall,pension:renderPension,clients:renderClients,settings:renderSettings,trust:renderTrust};
   (V[S.tab]||renderInbox)();
 }
 
@@ -618,10 +638,11 @@ function drawDetail(){
   }
   var act={reply:"a_reply",callback:"a_call",campaign:"a_reply",renewal:"a_call",filed:"a_review",review:"a_review",unassigned:"a_assign",submit:"a_send",approval:"a_approve",campaign2:"a_approve",complaint:"a_open",compliance:"a_open",misfile:"a_open",leak:"a_open",unsigned:"a_confirm"}[it.type]||"a_open";
   var others=ROLES.filter(function(r){return r!==S.role});
-  h+='<div class="actions"><button class="btn primary" id="go">'+esc(t(act))+'</button>';
+  h+='<div class="actions"><button class="btn primary" id="go">'+esc(t(act))+'</button>'+(JUMP[it.type]?'<button class="btn" id="jump">'+esc(t("a_openarea"))+'</button>':"");
   others.forEach(function(r){h+='<button class="btn" data-r="'+r+'">'+esc(t("reassign",{r:roleName(r)}))+'</button>'});
   h+='</div><div class="actions"><select id="why" aria-label="'+esc(t("reason"))+'"><option value="">'+esc(t("reason"))+'…</option><option>'+esc(t("r1"))+'</option><option>'+esc(t("r2"))+'</option><option>'+esc(t("r3"))+'</option></select><button class="btn" id="dis" disabled>'+esc(t("dismiss"))+'</button></div>';
   d.innerHTML=h;
+  if($("jump"))$("jump").onclick=function(){var j=JUMP[it.type];S.tab=j[0];if(j[0]==="desk")S.desk.sec=j[1];else S.mk.sec=j[1];render()};
   $("go").onclick=function(){removeSel(it);S.done[S.role]++;logAudit(roleName(S.role),t("done",{a:t("ty_"+it.type)})+" / "+nm(it.client));toast("✓ "+t("done",{a:t("ty_"+it.type)}))};
   d.querySelectorAll("[data-r]").forEach(function(b){b.onclick=function(){var r=b.dataset.r;removeSel(it);it.role=r;S.items[r].unshift(it);logAudit(roleName(S.role),t("reassigned",{r:roleName(r)})+" / "+nm(it.client));toast(t("reassigned",{r:roleName(r)}))}});
   $("why").onchange=function(){$("dis").disabled=!$("why").value};
@@ -1250,7 +1271,7 @@ function renderSettings(){
     applyPrefs();render();
   }});
   $("tzIn").onchange=function(){var v=this.value.trim();if(!tzOk(v)){toast(t("set_tz_bad"));return}P.tz=v;P.tzMode="explicit";savePrefs();render()};
-  $("setReset").onclick=function(){S.prefs={layout:"wide",density:"comfortable",tzMode:"browser",tz:"Asia/Jerusalem"};S.theme=null;store("theme","system");savePrefs();applyPrefs();render()};
+  $("setReset").onclick=function(){S.prefs={layout:"wide",density:"comfortable",tzMode:"browser",tz:"Asia/Jerusalem"};S.theme="light";store("theme","light");savePrefs();applyPrefs();render()};
 }
 
 /* ---------- Show me tour ---------- */
@@ -1279,11 +1300,898 @@ function startTour(){
   S.tour={h:setInterval(next,4200)};show();
 }
 
+/* ================= EXTENSION 1: roles, helpers, back-office desk ================= */
+function reg(o){Object.keys(o).forEach(function(k){I.en[k]=o[k][0];I.he[k]=o[k][1]})}
+I.ar.role_mkt="التسويق";I.ru.role_mkt="Маркетинг";I.fr.role_mkt="Marketing";
+I.ar.tab_desk="مكتب الخلفية";I.ru.tab_desk="Бэк-офис";I.fr.tab_desk="Back-office";
+I.ar.tab_today="اليوم";I.ru.tab_today="Сегодня";I.fr.tab_today="Aujourd'hui";
+I.ar.tab_file="ملف العميل";I.ru.tab_file="Досье клиента";I.fr.tab_file="Dossier client";
+I.ar.tab_mkt="التسويق";I.ru.tab_mkt="Маркетинг";I.fr.tab_mkt="Marketing";
+I.ar.tab_overview="نظرة عامة";I.ru.tab_overview="Обзор";I.fr.tab_overview="Vue d'ensemble";
+I.ar.tab_app="تطبيق العميل";I.ru.tab_app="Приложение клиента";I.fr.tab_app="Appli client";
+
+var AGENT={name:"אבי רוזן",lic:"12345-67"};
+var AGENCY={name:"סוכנות ביטוח לדוגמה בע\"מ",addr:"הנגב 7, תל אביב",zip:"6706007"};
+var HOME={agent:"today",back:"desk",mkt:"mkt",mgr:"overview"};
+var TABS_BY={
+  agent:["today","inbox","file","wa","call","pension","app","clients","settings"],
+  back:["desk","inbox","file","intake","pension","wa","excel","integ","clients","settings"],
+  mkt:["mkt","inbox","wa","excel","clients","settings"],
+  mgr:["overview","inbox","desk","mkt","file","app","integ","trust","clients","settings"]
+};
+S.prof={};S.cons={};S.desk={sec:"id"};S.tpl={client:NAMES[0],key:"poa_pol",vals:{}};
+S.out={q:[],sel:{},labels:false};S.req={items:[],sel:null,f:"all"};S.tax={sec:"certs",certs:[],coord:[],resid:[],agency:[],sel:null};
+S.idc={cases:[],sel:null};
+
+/* ---------- small helpers ---------- */
+function Hn(n){return parseInt(fnv(String(n)),16)}
+var DAYMS=86400000;
+function dstr(off){return new Date(Date.now()+off*DAYMS).toISOString().slice(0,10)}
+function money(n){return "₪"+Math.round(n).toLocaleString("en-US")}
+function b(id,label,cls,dis,extra){return '<button class="btn'+(cls?" "+cls:"")+'" id="'+id+'"'+(dis?" disabled":"")+(extra||"")+'>'+esc(label)+'</button>'}
+function ab(a,label,cls,dis,v){return '<button class="btn'+(cls?" "+cls:"")+'" data-a="'+a+'"'+(v!==undefined?' data-v="'+esc(v)+'"':"")+(dis?" disabled":"")+'>'+esc(label)+'</button>'}
+function chipRow(a,opts,cur){return '<div class="toolbar">'+opts.map(function(o){return '<button class="chip" data-a="'+a+'" data-v="'+o[0]+'" aria-pressed="'+(o[0]===cur)+'">'+esc(o[1])+(o[2]!==undefined?'<b>'+o[2]+'</b>':"")+'</button>'}).join("")+'</div>'}
+function bind(root,map){root.querySelectorAll("[data-a]").forEach(function(el){el.onclick=function(e){var f=map[el.dataset.a];if(f)f(el.dataset.v,el,e)}})}
+function nmSel(id,cur,all){return '<select id="'+id+'" dir="auto">'+(all||NAMES).map(function(n){return '<option value="'+esc(n)+'"'+(n===cur?" selected":"")+'>'+esc(nm(n))+'</option>'}).join("")+'</select>'}
+function who(){return roleName(S.role)}
+function mask(id){return "******"+String(id).slice(-3)}
+function idValid(s){if(!/^\d{9}$/.test(s))return false;var sum=0;for(var i=0;i<9;i++){var x=+s[i]*(i%2?2:1);sum+=x>9?x-9:x}return sum%10===0}
+function ptag(s){return '<span class="pl">'+esc(s)+'</span>'}
+function tagv(){return ' '+ptag(t("verify_tag"))}
+function field(label,html){return '<label class="fld"><span>'+esc(label)+'</span>'+html+'</label>'}
+var STREETS=[["הרצל","Herzl"],["ויצמן","Weizmann"],["ז'בוטינסקי","Jabotinsky"],["הנביאים","HaNevi'im"],["בן יהודה","Ben Yehuda"],["אלנבי","Allenby"],["רוטשילד","Rothschild"],["הגפן","HaGefen"]];
+var CITIES=[["תל אביב","Tel Aviv","6100000"],["חיפה","Haifa","3303100"],["ירושלים","Jerusalem","9100000"],["באר שבע","Beer Sheva","8400000"],["נתניה","Netanya","4200000"],["נצרת","Nazareth","1600000"]];
+var INSURERS=["הראל","מנורה מבטחים","הפניקס","מגדל","כלל","איילון","הכשרה","ביטוח ישיר"];
+var INS_EN={"הראל":"Harel","מנורה מבטחים":"Menora Mivtachim","הפניקס":"Phoenix","מגדל":"Migdal","כלל":"Clal","איילון":"Ayalon","הכשרה":"Hachshara","ביטוח ישיר":"Direct Insurance"};
+function insn(n){return S.lang==="he"?n:(INS_EN[n]||n)}
+function prof(n){
+  var o=S.prof[n];if(o)return o;
+  var h=Hn(n),st=STREETS[h%STREETS.length],c=CITIES[(h>>>3)%CITIES.length];
+  o=S.prof[n]={addr:st[0]+" "+(1+h%60),city:c[0],zip:String(+c[2]+((h>>>5)%900)+100),phone:"05"+(h%5)+"-"+String(1000000+(h>>>2)%8999999),
+    email:"c"+(h%90000)+"@example.com",birth:(1950+h%50)+"-"+String(1+h%12).padStart(2,"0")+"-"+String(1+(h>>>4)%28).padStart(2,"0"),
+    mstat:["married","single","divorced"][h%3],cls:["A","B","C"][(h>>>2)%3],src:["referral","web","campaign","walk-in"][(h>>>3)%4],status:"active",tax:"il",emp:["שכיר","עצמאי","שכיר ועצמאי"][h%3]};
+  return o;
+}
+function cname(n){return nm(n)}
+function consent(n){if(S.cons[n])return S.cons[n];var k=Hn(n)%10;return k<7?"in":k<9?"none":"out"}
+function sim2(){return sim()}
+
+/* ---------- inbox: new types for the four roles ---------- */
+Object.assign(TYPES,{
+ idmiss:{r:"back",w:5,ch:"wa",urg:function(n){return n>5?2:1}},
+ insreq:{r:"back",w:6,ch:"em",urg:function(n){return n>5?2:1}},
+ taxcert:{r:"back",w:3,ch:"sy",urg:function(){return 1}},
+ dispatch:{r:"back",w:3,ch:"sy",urg:function(){return 0}},
+ mk_draft:{r:"mkt",w:3,ch:"sy",urg:function(){return 1}},
+ mk_optout:{r:"mkt",w:4,ch:"wa",urg:function(){return 2}},
+ mk_bounce:{r:"mkt",w:3,ch:"wa",urg:function(){return 0}},
+ mk_result:{r:"mkt",w:2,ch:"sy",urg:function(){return 0}},
+ mk_lead:{r:"mkt",w:4,ch:"wa",urg:function(){return 1}},
+ insescal:{r:"mgr",w:4,ch:"em",urg:function(){return 2}},
+ taxdue:{r:"mgr",w:2,ch:"sy",urg:function(n){return n<7?2:1}}
+});
+COUNT.mkt=22;
+S.items.mkt=gen("mkt",44);S.done.mkt=2;
+/* some new back-office and manager items were added by gen(); refresh them so counts stay stable */
+S.items.back=gen("back",22);S.items.mgr=gen("mgr",33);
+var JUMP={idmiss:["desk","id"],insreq:["desk","req"],taxcert:["desk","tax"],dispatch:["desk","out"],insescal:["desk","req"],taxdue:["desk","tax"],
+  mk_draft:["mkt","camp"],mk_optout:["mkt","cons"],mk_bounce:["mkt","cons"],mk_result:["mkt","camp"],mk_lead:["mkt","camp"]};
+function mkItem(role,type,client,n){
+  var T=TYPES[type],mins=Math.floor(3+Math.random()*60);
+  clientId(client);
+  var mine=MSGS.filter(function(m){return m.from===CLANG[client]});
+  return {id:role+"x"+Date.now()+Math.floor(Math.random()*1e4),type:type,role:role,client:client,idn:IDS[client],mins:mins,n:n||3,ch:T.ch,conf:null,
+    msg:type==="campaign"||type==="reply"?mine[0]||null:null,alt:client,urg:T.urg(n||3,mins)};
+}
+
+reg({
+ role_mkt:["Marketing","שיווק"],
+ tab_desk:["Back-office desk","שולחן גב משרד"],tab_today:["Today","היום"],tab_file:["Client file","תיק לקוח"],tab_mkt:["Marketing","שיווק"],tab_overview:["Overview","סקירה"],tab_app:["Client app preview","תצוגת אפליקציית לקוח"],
+ verify_tag:["verify","לאימות"],yes:["Yes","כן"],no:["No","לא"],save:["Save","שמירה"],cancel:["Cancel","ביטול"],close:["Close","סגירה"],open_:["Open","פתיחה"],
+ ty_idmiss:["ID missing","חסרה ת.ז."],ty_insreq:["Insurer request","פנייה מחברת ביטוח"],ty_taxcert:["Tax certificate","אישור מס"],ty_dispatch:["Letters to send","מכתבים לשליחה"],
+ ty_mk_draft:["Campaign draft","טיוטת קמפיין"],ty_mk_optout:["Opt-out to process","הסרה מדיוור"],ty_mk_bounce:["Bounced messages","הודעות שנכשלו"],ty_mk_result:["Campaign results","תוצאות קמפיין"],ty_mk_lead:["Campaign lead","ליד מקמפיין"],
+ ty_insescal:["Insurer request escalated","פנייה מחברת ביטוח הועברה"],ty_taxdue:["Tax deadline","מועד מס"],
+ d_idmiss:["New client: ID document missing or unreadable. Request it and register the client.","לקוח חדש: חסרה תעודת זהות או שאינה קריאה. בקשו אותה ורשמו את הלקוח."],
+ d_insreq:["Another insurance company asked about this client. A reply is due in {n} days.","חברת ביטוח אחרת פנתה בעניין הלקוח. יש להשיב תוך {n} ימים."],
+ d_taxcert:["Annual tax certificate for deposits not received yet. Request it from the insurer.","אישור שנתי לצורכי מס על הפקדות טרם התקבל. בקשו מחברת הביטוח."],
+ d_dispatch:["{n} letters and labels are waiting to be printed and posted.","{n} מכתבים ומדבקות ממתינים להדפסה ולשליחה בדואר."],
+ d_mk_draft:["Campaign draft needs a consent check before it goes to approval.","טיוטת קמפיין דורשת בדיקת הסכמות לפני אישור."],
+ d_mk_optout:["{n} clients answered STOP or asked to be removed. Update the consent registry now.","{n} לקוחות כתבו STOP או ביקשו הסרה. עדכנו את מרשם ההסכמות עכשיו."],
+ d_mk_bounce:["{n} messages failed (number not on WhatsApp, bad email). Fix the contact or change channel.","{n} הודעות נכשלו (מספר לא בוואטסאפ, מייל שגוי). תקנו או החליפו ערוץ."],
+ d_mk_result:["Campaign finished. Review replies and opt-outs.","הקמפיין הסתיים. עברו על תגובות והסרות."],
+ d_mk_lead:["A client replied to a campaign and wants an agent. Hand the lead over.","לקוח הגיב לקמפיין ורוצה סוכן. העבירו את הליד."],
+ d_insescal:["The clerk escalated an insurer request that needs your approval.","הפקיד העביר פנייה מחברת ביטוח שדורשת את אישורך."],
+ d_taxdue:["An agency tax deadline is in {n} days (invoices, VAT or withholding certificates).","מועד מס של הסוכנות בעוד {n} ימים (חשבוניות, מע\"מ או אישורי ניכוי)."],
+ a_openarea:["Open in work area","פתיחה באזור העבודה"],
+ fv_missing:["missing","חסר"]
+});
+
+/* ======================= BACK-OFFICE DESK ======================= */
+reg({
+ dk_intro:["The back-office day in one place: get the ID, register the client, fill the forms, post or email them, answer other insurers, and keep the tax files in order.","יום העבודה של הגב משרד במקום אחד: להשיג ת.ז., לרשום לקוח, למלא טפסים, לשלוח בדואר או במייל, להשיב לחברות ביטוח אחרות ולסדר את תיקי המס."],
+ dk_id:["1 Get ID and register","1 ת.ז. ורישום"],dk_tpl:["2 Fill templates","2 מילוי טפסים"],dk_out:["3 Post, email, labels","3 דואר, מייל ומדבקות"],dk_req:["4 Insurer requests","4 פניות מחברות ביטוח"],dk_tax:["5 Tax","5 מס"],
+ id_new:["New clients","לקוחות חדשים"],id_st_miss:["ID missing","חסרה ת.ז."],id_st_req:["ID requested","נשלחה בקשה"],id_st_recv:["To check","לבדיקה"],id_st_done:["Registered","נרשם"],
+ id_src:["Received by","התקבל דרך"],id_pick:["Pick a client on the left.","בחרו לקוח מהרשימה."],
+ id_request:["Ask the client for the ID","בקשת ת.ז. מהלקוח"],id_msg_hdr:["Message in the client's language ({l})","הודעה בשפת הלקוח ({l})"],id_sim_recv:["Simulate: client sent the ID photo","הדמיה: הלקוח שלח צילום ת.ז."],
+ id_card:["ID document (as read by OCR)","תעודת זהות (כפי שנקראה ב־OCR)"],id_ocr:["Reading confidence","ביטחון קריאה"],
+ f_name:["Full name","שם מלא"],f_id:["ID number","מספר זהות"],f_birth:["Birth date","תאריך לידה"],f_exp:["ID valid until","תוקף ת.ז."],f_addr:["Street and number","רחוב ומספר"],f_city:["City","יישוב"],f_zip:["Postal code (7 digits)","מיקוד (7 ספרות)"],f_phone:["Mobile phone","טלפון נייד"],f_tax:["Tax residency declaration","הצהרת תושבות לצורכי מס"],
+ tx_il:["Israel only","ישראל בלבד"],tx_us:["US citizen or resident","אזרח או תושב ארה\"ב"],tx_other:["Resident of another country","תושב מדינה אחרת"],tx_none:["Not asked yet","טרם נשאל"],
+ ck_hdr:["Checks before registering","בדיקות לפני רישום"],
+ ck_len:["ID has 9 digits","בת.ז. 9 ספרות"],ck_luhn:["Check digit is valid (likely OCR error if not)","ספרת ביקורת תקינה (אחרת כנראה שגיאת OCR)"],ck_exp:["ID document not expired","תעודת הזהות בתוקף"],ck_dup:["Not already in the database","הלקוח עדיין לא קיים במאגר"],ck_addr:["Address complete (7-digit postal code)","כתובת מלאה (מיקוד 7 ספרות)"],ck_phone:["Mobile number looks valid","מספר נייד תקין"],ck_tax:["Tax residency declared","הוצהרה תושבות מס"],
+ ck_dup_bad:["Same ID already belongs to {c}. Merge instead of creating a duplicate.","אותה ת.ז. כבר שייכת ל{c}. מזגו במקום ליצור כפילות."],
+ ck_fatca:["US or foreign tax residency: a tax self-declaration form is added to the tasks.","תושבות מס בארה\"ב או במדינה אחרת: טופס הצהרת מס יתווסף למשימות."],
+ id_register:["Register in the database","רישום במאגר"],id_merge:["Merge with the existing client","מיזוג עם הלקוח הקיים"],id_registered:["Client registered. Next: the welcome letter, the powers of attorney and the consent form.","הלקוח נרשם. הבא: מכתב קבלת פנים, ייפויי כוח וטופס הסכמה."],
+ id_next:["Next: fill templates","הבא: מילוי טפסים"],id_audit_reg:["Registered new client {c} (ID {i})","נרשם לקוח חדש {c} (ת.ז. {i})"],id_audit_merge:["Merged duplicate into {c}","מוזגה כפילות ללקוח {c}"],id_audit_req:["Requested ID document from {c} ({l})","נשלחה בקשת ת.ז. אל {c} ({l})"],
+ id_consent:["Marketing consent: not asked. Opt-in stays off until the client agrees (consent registry).","הסכמה לדיוור: לא נשאלה. ההסכמה נשארת כבויה עד שהלקוח מאשר (מרשם הסכמות)."],
+ tp_client:["Client","לקוח"],tp_tpl:["Template","תבנית"],tp_auto:["Filled from the client record","מולא מתיק הלקוח"],tp_need:["Fill in","להשלמה"],tp_prev:["Preview (documents to Israeli institutions are in Hebrew)","תצוגה מקדימה (מסמכים למוסדות בישראל בעברית)"],
+ tp_save:["Save to client file","שמירה בתיק הלקוח"],tp_sign:["Send for e-signature","שליחה לחתימה דיגיטלית"],tp_queue:["Add to dispatch","הוספה לשליחה"],tp_missing:["{n} fields still empty","{n} שדות עדיין ריקים"],tp_ready:["All fields filled","כל השדות מלאים"],
+ tp_audit_save:["Saved {d} in the file of {c}","נשמר {d} בתיק של {c}"],tp_audit_sign:["Sent {d} to {c} for e-signature","נשלח {d} ל{c} לחתימה"],tp_audit_q:["Added {d} for {c} to dispatch ({ch})","נוסף {d} עבור {c} לשליחה ({ch})"],
+ tp_poa_pol:["Power of attorney: policy information from insurers","ייפוי כוח: מידע על פוליסות מחברות ביטוח"],tp_poa_hb:["Power of attorney: Har HaBituach (appendix E)","ייפוי כוח: הר הביטוח (נספח ה)"],tp_poa_ml:["Power of attorney: pension clearing house (appendix A)","ייפוי כוח: מסלקה פנסיונית (נספח א)"],
+ tp_appt:["Agent appointment letter to an insurer","כתב מינוי סוכן לחברת ביטוח"],tp_addr:["Address change notice to an insurer","הודעה על שינוי כתובת לחברת ביטוח"],tp_cancel:["Request to cancel a policy","בקשה לביטול פוליסה"],tp_kyc:["KYC and tax residency self-declaration","הצהרת הכר את הלקוח ותושבות מס"],tp_taxreq:["Request for the annual tax certificate","בקשה לאישור שנתי לצורכי מס"],tp_reply:["Reply to another insurance company","מענה לפנייה מחברת ביטוח אחרת"],
+ nf_insurer:["Insurer","חברת ביטוח"],nf_policy:["Policy number","מספר פוליסה"],nf_newaddr:["New address","כתובת חדשה"],nf_eff:["Effective date","תאריך תחילה"],nf_year:["Tax year","שנת מס"],nf_ref:["Their reference number","מספר הפנייה שלהם"],nf_answer:["Answer in short","תשובה בקצרה"],
+ ot_hdr:["Outgoing mail","דואר יוצא"],ot_doc:["Document","מסמך"],ot_ch:["Channel","ערוץ"],ot_st:["Status","סטטוס"],ot_note:["Note","הערה"],ot_post:["Post","דואר"],ot_email:["Email","מייל"],
+ ot_st_queued:["Queued","בתור"],ot_st_sent:["Sent","נשלח"],ot_st_posted:["Posted","נשלח בדואר"],ot_st_blocked:["Blocked","חסום"],
+ ot_send:["Send selected emails ({n})","שליחת המיילים שנבחרו ({n})"],ot_labels:["Print labels ({n})","הדפסת מדבקות ({n})"],ot_letters:["Print letters ({n})","הדפסת מכתבים ({n})"],ot_posted:["Mark as posted with registered mail no. ({n})","סימון כנשלח בדואר רשום ({n})"],ot_selall:["Select all queued","בחירת כל מה שבתור"],
+ ot_nomail:["No email address on file","אין כתובת מייל בתיק"],ot_noaddr:["Postal address incomplete","כתובת למשלוח חסרה"],ot_nocons:["Marketing item and no opt-in: blocked","פריט שיווקי ללא הסכמה: חסום"],
+ ot_sentn:["{n} emails sent (simulated)","נשלחו {n} מיילים (הדמיה)"],ot_printn:["{n} items sent to the printer (simulated)","{n} פריטים נשלחו להדפסה (הדמיה)"],ot_postedn:["{n} items marked as posted","{n} פריטים סומנו כנשלחו בדואר"],
+ ot_sheet:["Label sheet (preview)","גיליון מדבקות (תצוגה מקדימה)"],ot_printnow:["Print now","הדפסה"],ot_reg:["Registered mail","דואר רשום"],ot_from:["From","מאת"],ot_to:["To","אל"],
+ ot_audit_send:["Sent {n} emails","נשלחו {n} מיילים"],ot_audit_lab:["Printed {n} address labels","הודפסו {n} מדבקות כתובת"],ot_audit_post:["Posted {n} items (registered mail)","נשלחו {n} פריטים בדואר רשום"],
+ rq_hdr:["Requests from other insurance companies: none may stay unanswered","פניות מחברות ביטוח אחרות: אף פנייה לא נשארת ללא מענה"],
+ rq_all:["All","הכל"],rq_open:["Open","פתוחות"],rq_overdue:["Overdue","באיחור"],rq_soon:["Due in 2 days","בעוד יומיים"],rq_done:["Answered","נענו"],
+ rq_from:["From","מאת"],rq_type:["Type","סוג"],rq_due:["Reply due","מועד מענה"],rq_days:["{n} days","{n} ימים"],rq_late:["{n} days late","באיחור של {n} ימים"],rq_today:["today","היום"],rq_ref:["Reference","אסמכתא"],
+ rq_t_info:["Policy information request","בקשת מידע על פוליסה"],rq_t_agent:["Agent-of-record change","בקשת החלפת סוכן"],rq_t_port:["Policy transfer between insurers","בקשת ניוד בין חברות"],rq_t_claim:["Claim information","בקשת מידע בתביעה"],rq_t_tax:["Tax or withholding certificate","אישור מס / ניכוי"],rq_t_comm:["Commission query","בירור עמלה"],
+ rq_s1:["Verify the client and the authority (power of attorney, agent of record)","אימות הלקוח וההרשאה (ייפוי כוח, סוכן מטפל)"],rq_s2:["Gather the data and documents asked for","איסוף הנתונים והמסמכים המבוקשים"],rq_s3:["Draft the reply from the template","ניסוח המענה מתבנית"],rq_s4:["Manager approval (client or policy changes hands)","אישור מנהל (הלקוח או הפוליסה עוברים)"],rq_s5:["Send the reply and log the reference","שליחת המענה ורישום אסמכתא"],
+ rq_escalate:["Escalate to manager","העברה למנהל"],rq_send:["Send the reply","שליחת המענה"],rq_sent:["Reply sent and logged","המענה נשלח ונרשם"],rq_prev:["Reply preview","תצוגת המענה"],
+ rq_sla:["The mock uses 7 days as the reply time. The real time limits come from CMISA circulars and the insurers' own agreements","במוק זמן המענה הוא 7 ימים. הזמנים בפועל נקבעים בחוזרי רשות שוק ההון ובהסכמים עם החברות"],
+ rq_pick:["Pick a request.","בחרו פנייה."],rq_audit_sent:["Answered {i} request {r} about {c}","נענתה פנייה של {i} {r} בעניין {c}"],rq_audit_esc:["Escalated {i} request {r} to the manager","פנייה של {i} {r} הועברה למנהל"],
+ tx_hdr:["Tax work","עבודות מס"],tx_certs:["Annual deposit certificates","אישורים שנתיים להפקדות"],tx_coord:["Tax coordination and refunds","תיאום מס והחזרים"],tx_resid:["Tax residency declarations","הצהרות תושבות מס"],tx_agency:["The agency's own taxes","מסי הסוכנות"],
+ tx_note:["Tax rules, forms and dates below are working assumptions for the mock. Confirm every one with the agency's accountant","כללי המס, הטפסים והמועדים כאן הם הנחות עבודה למוק. כל אחד מהם יאושר מול רואה החשבון של הסוכנות"],
+ tx_year:["Tax year {y}","שנת מס {y}"],tx_c_need:["To request","לבקש"],tx_c_req:["Requested","התבקש"],tx_c_got:["Received","התקבל"],tx_c_sent:["Sent to client","נשלח ללקוח"],
+ tx_req1:["Request","בקשה"],tx_got1:["Mark received","סימון כהתקבל"],tx_send1:["Send to client","שליחה ללקוח"],tx_reqall:["Request all missing ({n})","בקשת כל החסרים ({n})"],tx_sendall:["Send all received to clients ({n})","שליחת כל שהתקבל ללקוחות ({n})"],
+ tx_prod:["Product","מוצר"],tx_deposits:["Deposits {y}","הפקדות {y}"],tx_reqn:["{n} requests added to dispatch","נוספו {n} בקשות לשליחה"],tx_sentn:["{n} certificates sent to clients","נשלחו {n} אישורים ללקוחות"],
+ tx_k_coord:["Tax coordination for a pension payment","תיאום מס לקצבה"],tx_k_sev:["Severance and withdrawal: tax-exempt amounts","פיצויים ומשיכה: סכומים פטורים"],tx_k_ref:["Tax refund file support","סיוע בתיק החזר מס"],
+ tx_st1:["Collect ID and the payer's letter","איסוף ת.ז. ומכתב המשלם"],tx_st2:["Get the clearing house or insurer balance statement","קבלת אישור יתרה ממסלקה או מחברה"],tx_st3:["Prepare the documents for the client or accountant","הכנת המסמכים ללקוח או לרו\"ח"],tx_st4:["Client or accountant files with the Tax Authority","הלקוח או רו\"ח מגישים לרשות המסים"],tx_st5:["Certificate received and filed","האישור התקבל ותויק"],
+ tx_scope:["The agent supplies the documents. Tax advice and filing stay with the client or their accountant","הסוכן מספק מסמכים. ייעוץ מס והגשה נשארים אצל הלקוח או רו\"ח"],
+ tx_r_form:["Send declaration form","שליחת טופס הצהרה"],tx_r_got:["Mark received","סימון כהתקבל"],tx_r_note:["Clients with US or foreign tax residency need a self-declaration on file before products are issued.","ללקוחות עם תושבות מס בארה\"ב או בחו\"ל נדרשת הצהרה בתיק לפני הפקת מוצרים."],
+ tx_a_inv:["Monthly commission invoice to {i}","חשבונית עמלות חודשית ל{i}"],tx_a_whc:["Withholding-at-source certificate from {i} (annual)","אישור ניכוי מס במקור מ{i} (שנתי)"],tx_a_vat:["Periodic VAT report","דוח מע\"מ תקופתי"],tx_a_acc:["Annual package to the accountant","חבילה שנתית לרואה החשבון"],tx_a_alloc:["Invoice allocation numbers are required above a threshold","נדרש מספר הקצאה לחשבוניות מעל סף מסוים"],
+ tx_done1:["Mark done","סימון כבוצע"],tx_due:["Due","מועד"],tx_in:["in {n} days","בעוד {n} ימים"],tx_late:["{n} days late","באיחור {n} ימים"],
+ tx_audit:["Tax: {a}","מס: {a}"]
+});
+
+/* ----- sample data for the desk ----- */
+function newIdn(seed,bad){var s=idNum(rng(seed));if(bad)s=s.slice(0,8)+String((+s[8]+3)%10);return s}
+function seedDesk(){
+  S.idc.cases=[
+   {id:"c1",name:"נועם ברק",lang:"he",src:"wa",st:"recv",idn:newIdn(101),birth:"1988-03-05",exp:"2032-04-12",addr:"הרצל 14",city:"חיפה",zip:"3303105",phone:"050-1234567",tax:"",conf:.97},
+   {id:"c2",name:"Алина Морозова",lang:"ru",src:"em",st:"recv",idn:newIdn(102),birth:"1991-07-21",exp:"2030-09-01",addr:"יפו 22",city:"ירושלים",zip:"9434105",phone:"052-7654321",tax:"us",conf:.93},
+   {id:"c3",name:"سلمى عبد الله",lang:"ar",src:"fx",st:"recv",idn:newIdn(103,1),birth:"1979-11-30",exp:"2029-01-15",addr:"",city:"נצרת",zip:"16100",phone:"054-5550101",tax:"",conf:.62},
+   {id:"c4",name:"Dana Levy",lang:"he",src:"wa",st:"recv",idn:clientId("Dana Levi"),birth:"1985-02-02",exp:"2031-06-06",addr:"אלנבי 5",city:"תל אביב",zip:"6513601",phone:"050-9988776",tax:"il",conf:.9},
+   {id:"c5",name:"אורן גבאי",lang:"he",src:"em",st:"recv",idn:newIdn(105),birth:"1974-09-09",exp:"2023-02-10",addr:"בן יהודה 3",city:"נתניה",zip:"4210201",phone:"053-1112223",tax:"il",conf:.95},
+   {id:"c6",name:"Tamara Vaisman",lang:"ru",src:"ph",st:"miss",idn:"",birth:"",exp:"",addr:"",city:"",zip:"",phone:"058-4445556",tax:"",conf:0}
+  ];
+  S.idc.sel="c1";
+  S.req.items=[
+   ["הראל","info","Dana Levi","em",6,5],["מנורה מבטחים","agent","Omar Khoury","fx",5,2],["הפניקס","port","Sergey Petrov","em",8,-2],["מגדל","claim","Marie Dubois","em",3,4],
+   ["כלל","tax","אבי מזרחי","em",2,5],["איילון","comm","Rachel Peretz","em",4,3],["הראל","port","Ирина Волкова","fx",9,-3],["הכשרה","info","فاطمة حداد","em",1,6],["הפניקס","agent","Nadia Mansour","em",7,0]
+  ].map(function(a,i){return {id:"q"+i,ins:a[0],type:a[1],client:a[2],ch:a[3],recv:a[4],due:a[5],st:"new",steps:[0,0,0,0,0],ref:"REQ-"+(4000+i*37)}});
+  S.req.sel="q2";
+  var docs=["מכתב קבלת פנים","הצעת ביטוח","טופס ביטול","אישור שנתי","מכתב חידוש","פוליסה (עותק)","ייפוי כוח","מכתב מידע על שינוי תקנון"];
+  S.out.q=[
+   ["Dana Levi",0,"post"],["Marie Dubois",1,"email"],["אבי מזרחי",2,"post"],["Rachel Peretz",3,"post"],["Omar Khoury",4,"email"],["Nadia Mansour",5,"post"],["Sergey Petrov",6,"post"],["Ирина Волкова",7,"post"],["فاطمة حداد",4,"email"]
+  ].map(function(a,i){return {id:"o"+i,client:a[0],doc:docs[a[1]],ch:a[2],kind:i===7?"marketing":"service",st:"queued",reg:i%2===0,track:""}});
+  var pr=["pension","provident","life","study","health"];
+  S.tax.certs=NAMES.slice(0,12).map(function(n,i){return {id:"t"+i,client:n,ins:INSURERS[i%INSURERS.length],prod:pr[i%pr.length],amt:12000+(Hn(n)%90)*1000,st:["need","need","req","got","need","sent","req","need","got","need","need","req"][i]}});
+  S.tax.coord=[
+   {id:"k1",client:"Леонид Кац",kind:"coord",steps:[1,1,0,0,0]},{id:"k2",client:"Rachel Peretz",kind:"sev",steps:[1,0,0,0,0]},{id:"k3",client:"David Biton",kind:"ref",steps:[1,1,1,0,0]},{id:"k4",client:"Sophie Benhamou",kind:"ref",steps:[0,0,0,0,0]}
+  ];
+  S.tax.resid=NAMES.slice(14,22).map(function(n,i){return {id:"r"+i,client:n,decl:["us","other","us","il","il","il","other","il"][i],st:i<3?"missing":i<5?"sent":"got"}});
+  S.tax.agency=[
+   {id:"a1",k:"inv",ins:"הראל",due:3,st:"todo"},{id:"a2",k:"inv",ins:"מנורה מבטחים",due:3,st:"todo"},{id:"a3",k:"inv",ins:"הפניקס",due:3,st:"done"},
+   {id:"a4",k:"whc",ins:"מגדל",due:40,st:"todo"},{id:"a5",k:"vat",due:10,st:"todo"},{id:"a6",k:"acc",due:90,st:"todo"}
+  ];
+}
+seedDesk();
+
+function tabsOf(r){return TABS_BY[r]||TABS_BY.agent}
+
+function renderDesk(){
+  var sec=S.desk.sec;
+  var openReq=S.req.items.filter(function(r){return r.st!=="done"}).length;
+  var secs=[["id",t("dk_id"),S.idc.cases.filter(function(c){return c.st!=="done"}).length],["tpl",t("dk_tpl")],["out",t("dk_out"),S.out.q.filter(function(o){return o.st==="queued"}).length],["req",t("dk_req"),openReq],["tax",t("dk_tax")]];
+  var h=sim2()+'<p class="note">'+esc(t("dk_intro"))+'</p>'+chipRow("dsec",secs,sec)+'<div id="deskBody"></div>';
+  $("main").innerHTML=h;
+  bind($("main"),{dsec:function(v){S.desk.sec=v;renderDesk()}});
+  ({id:drawIdSec,tpl:drawTpl,out:drawOut,req:drawReq,tax:drawTax})[sec]();
+}
+
+/* ---------- 1 ID and registration ---------- */
+var IDMSG={
+ he:"שלום, כדי לפתוח תיק ולהפיק עבורך את המסמכים נא לשלוח כאן צילום של תעודת הזהות (שני הצדדים) כולל הספח.",
+ en:"Hello, to open your file please send a photo of your ID card here (both sides), including the address page.",
+ ar:"مرحبًا، لفتح ملفك يُرجى إرسال صورة عن بطاقة الهوية هنا (الوجهين) مع صفحة العنوان.",
+ ru:"Здравствуйте! Чтобы открыть ваше досье, пришлите фото удостоверения личности (обе стороны) вместе с приложением с адресом.",
+ fr:"Bonjour, pour ouvrir votre dossier, merci d'envoyer ici une photo de votre carte d'identité (recto verso) avec la page d'adresse."
+};
+function idChecks(c){
+  var dup=NAMES.filter(function(n){return clientId(n)===c.idn&&n!==c.name})[0];
+  var ok=function(k,v,block,extra){return {k:k,ok:!!v,block:block!==false,extra:extra}};
+  return [
+   ok("len",/^\d{9}$/.test(c.idn)),ok("luhn",idValid(c.idn)),ok("exp",c.exp&&c.exp>=dstr(0)),
+   ok("dup",!dup,true,dup?t("ck_dup_bad",{c:nm(dup)}):""),
+   ok("addr",c.addr&&c.city&&/^\d{7}$/.test(c.zip)),ok("phone",/^0\d{1,2}-?\d{7}$/.test(c.phone),false),ok("tax",!!c.tax),
+  ];
+}
+function drawIdSec(){
+  var box=$("deskBody"),cs=S.idc.cases,c=cs.filter(function(x){return x.id===S.idc.sel})[0]||cs[0];
+  var list='<div class="card" style="padding:12px"><b>'+esc(t("id_new"))+'</b><div style="margin-top:8px">';
+  cs.forEach(function(x){list+='<div class="prow" data-a="idpick" data-v="'+x.id+'" style="'+(x.id===c.id?"border-color:var(--accent);background:var(--accent-soft)":"")+'"><span class="pn" dir="auto">'+esc(nm(x.name))+'</span><span class="pid">'+esc(t("ch_"+x.src))+'</span><span class="badge '+(x.st==="miss"?"r":x.st==="done"?"":"a")+'">'+esc(t("id_st_"+x.st))+'</span></div>'});
+  list+='</div></div>';
+  box.innerHTML='<div class="grid"><div>'+list+'</div><div class="card" style="padding:14px" id="idDetail"></div></div>';
+  bind(box,{idpick:function(v){S.idc.sel=v;drawIdSec()}});
+  drawIdDetail(c);
+}
+function drawIdDetail(c){
+  var d=$("idDetail"),h='<h2 style="margin:0 0 6px;font-size:18px" dir="auto">'+esc(nm(c.name))+'</h2><div class="note">'+esc(t("id_src"))+': '+esc(t("ch_"+c.src))+' · '+esc(LNAME[c.lang])+'</div>';
+  if(c.st==="miss"||c.st==="req"){
+    h+='<div class="alert">'+esc(t("id_st_"+c.st))+'</div>';
+    h+='<div class="msg"><small>'+esc(t("id_msg_hdr",{l:LNAME[c.lang]}))+'</small><span dir="auto">'+esc(IDMSG[c.lang]||IDMSG.en)+'</span></div>';
+    h+='<div class="actions">'+(c.st==="miss"?b("idReq",t("id_request"),"primary"):b("idRecv",t("id_sim_recv"),"primary"))+'</div>';
+    d.innerHTML=h;
+    if($("idReq"))$("idReq").onclick=function(){c.st="req";logAudit(who(),t("id_audit_req",{c:c.name,l:LNAME[c.lang]}));toast("✓ "+t("id_audit_req",{c:nm(c.name),l:LNAME[c.lang]}));drawIdSec()};
+    if($("idRecv"))$("idRecv").onclick=function(){c.st="recv";c.idn=newIdn(Hn(c.name));c.birth="1990-05-17";c.exp="2031-03-01";c.addr="רוטשילד 9";c.city="תל אביב";c.zip="6688102";c.conf=.91;drawIdSec()};
+    return;
+  }
+  if(c.st==="done"){
+    d.innerHTML=h+'<div class="alert" style="background:var(--green-soft);border-color:var(--green)">✓ '+esc(t("id_registered"))+'</div><div class="actions">'+b("idNext",t("id_next"),"primary")+'</div>';
+    $("idNext").onclick=function(){S.tpl.client=c.name;S.desk.sec="tpl";renderDesk()};return;
+  }
+  h+='<div class="idcard" aria-hidden="true"><div class="ph"></div><div><b dir="auto">'+esc(c.name)+'</b><br><span dir="ltr">'+esc(c.idn||"-")+'</span><br><small>'+esc(c.birth)+' · '+esc(c.exp)+'</small></div></div>';
+  h+='<div class="note">'+esc(t("id_ocr"))+': '+Math.round(c.conf*100)+'%</div><div class="conf" style="margin-bottom:10px"><div style="width:'+Math.round(c.conf*100)+'%;background:'+(c.conf>.9?"var(--green)":"var(--amber)")+'"></div></div>';
+  h+='<div class="form">'+
+   field(t("f_name"),'<input data-f="name" value="'+esc(c.name)+'" dir="auto">')+field(t("f_id"),'<input data-f="idn" value="'+esc(c.idn)+'" dir="ltr" inputmode="numeric">')+
+   field(t("f_birth"),'<input data-f="birth" type="date" value="'+esc(c.birth)+'">')+field(t("f_exp"),'<input data-f="exp" type="date" value="'+esc(c.exp)+'">')+
+   field(t("f_addr"),'<input data-f="addr" value="'+esc(c.addr)+'" dir="auto">')+field(t("f_city"),'<input data-f="city" value="'+esc(c.city)+'" dir="auto">')+
+   field(t("f_zip"),'<input data-f="zip" value="'+esc(c.zip)+'" dir="ltr" inputmode="numeric">')+field(t("f_phone"),'<input data-f="phone" value="'+esc(c.phone)+'" dir="ltr">')+
+   field(t("f_tax"),'<select data-f="tax">'+[["","tx_none"],["il","tx_il"],["us","tx_us"],["other","tx_other"]].map(function(o){return '<option value="'+o[0]+'"'+(c.tax===o[0]?" selected":"")+'>'+esc(t(o[1]))+'</option>'}).join("")+'</select>')+'</div>';
+  h+='<h3 style="margin:12px 0 4px;font-size:15px">'+esc(t("ck_hdr"))+'</h3><div id="idChecks"></div><div class="note">'+esc(t("id_consent"))+'</div><div class="actions" id="idActs"></div>';
+  d.innerHTML=h;
+  var upd=function(){
+    var cks=idChecks(c),hh="",block=false,dup=false;
+    cks.forEach(function(k){hh+='<div class="step"><span class="'+(k.ok?"tick":"flag")+'">'+(k.ok?"✓":"✗")+'</span> '+esc(t("ck_"+k.k))+(k.ok||!k.extra?"":' <span class="flag">- '+esc(k.extra)+'</span>')+'</div>';if(!k.ok&&k.block)block=true;if(k.k==="dup"&&!k.ok)dup=true});
+    if(c.tax==="us"||c.tax==="other")hh+='<div class="step"><span class="flag">!</span> '+esc(t("ck_fatca"))+'</div>';
+    $("idChecks").innerHTML=hh;
+    $("idActs").innerHTML=dup?b("idMerge",t("id_merge"),"primary"):b("idReg",t("id_register"),"primary",block);
+    if($("idReg"))$("idReg").onclick=function(){registerClient(c)};
+    if($("idMerge"))$("idMerge").onclick=function(){var o=NAMES.filter(function(n){return clientId(n)===c.idn&&n!==c.name})[0];c.st="done";logAudit(who(),t("id_audit_merge",{c:o}));toast("✓ "+t("id_audit_merge",{c:nm(o)}));drawIdSec()};
+  };
+  d.querySelectorAll("[data-f]").forEach(function(el){el.oninput=el.onchange=function(){c[el.dataset.f]=el.value.trim();upd()}});
+  upd();
+}
+function registerClient(c){
+  NAMES.push(c.name);CLANG[c.name]=c.lang;IDS[c.name]=c.idn;
+  S.prof[c.name]={addr:c.addr,city:c.city,zip:c.zip,phone:c.phone,email:"",birth:c.birth,mstat:"single",cls:"C",src:"walk-in",status:"active",tax:c.tax,emp:""};
+  c.st="done";logAudit(who(),t("id_audit_reg",{c:c.name,i:mask(c.idn)}));toast("✓ "+t("id_audit_reg",{c:nm(c.name),i:mask(c.idn)}));
+  if(c.tax==="us"||c.tax==="other")S.tax.resid.unshift({id:"r"+Date.now(),client:c.name,decl:c.tax,st:"missing"});
+  drawIdSec();
+}
+
+/* ---------- 2 templates ---------- */
+var TPL={
+ poa_pol:{need:["insurer"],body:"אני הח\"מ {name}, ת.ז. {id}, מרשה בזאת את {agent}, סוכן/ת ביטוח בעל/ת רישיון מס' {lic}, לקבל מחברת הביטוח {insurer} מידע על כל הפוליסות הרשומות על שמי ולפעול מולה בעניין זה. ייפוי הכוח תקף עד לביטולו בכתב. כתובת: {addr}. טלפון: {phone}.\nתאריך: {date}\nחתימה: ______________"},
+ poa_hb:{need:[],body:"אני הח\"מ {name}, ת.ז. {id}, מרשה בזאת את {agent} (רישיון {lic}) לקבל עבורי מידע ממאגר הר הביטוח של רשות שוק ההון, ביטוח וחיסכון, לצורך ייעוץ וטיפול בתיק הביטוחי שלי.\nתאריך: {date}\nחתימה: ______________"},
+ poa_ml:{need:[],body:"אני הח\"מ {name}, ת.ז. {id}, מרשה בזאת את {agent} (רישיון {lic}) לקבל עבורי מידע וקבצים מהמסלקה הפנסיונית על מוצרי הפנסיה, הגמל וההשתלמות שלי, ולפעול מולה בשמי.\nתאריך: {date}\nחתימה: ______________"},
+ appt:{need:["insurer","policy"],body:"לכבוד {insurer}\nהנדון: כתב מינוי סוכן - פוליסה {policy}\nאני {name}, ת.ז. {id}, ממנה בזאת את {agent}, מס' רישיון {lic}, כסוכן הביטוח המטפל בפוליסה הנ\"ל, החל מיום {date}.\nחתימה: ______________"},
+ addr:{need:["insurer","policy","newaddr"],body:"לכבוד {insurer}\nהנדון: עדכון כתובת - פוליסה {policy}\nאני {name}, ת.ז. {id}, מבקש/ת לעדכן את כתובתי החל מיום {date} ל: {newaddr}. הכתובת הקודמת: {addr}.\nחתימה: ______________"},
+ cancel:{need:["insurer","policy","eff"],body:"לכבוד {insurer}\nהנדון: בקשה לביטול פוליסה {policy}\nאני {name}, ת.ז. {id}, מבקש/ת לבטל את הפוליסה החל מיום {eff}. נא לאשר בכתב את הביטול ואת יתרת הזכות או החובה.\nחתימה: ______________"},
+ kyc:{need:[],body:"הצהרת הכר את הלקוח ותושבות לצורכי מס\nשם: {name}  ת.ז.: {id}  כתובת: {addr}\nאני מצהיר/ה כי אני תושב/ת מס של: {taxres}. אני מתחייב/ת להודיע על כל שינוי.\nתאריך: {date}\nחתימה: ______________"},
+ taxreq:{need:["insurer","year"],body:"לכבוד {insurer}\nהנדון: בקשה לאישור שנתי לצורכי מס לשנת {year}\nבהמשך לייפוי הכוח שבתיק, נבקש לקבל אישור על הפקדות ותשלומים של {name}, ת.ז. {id}, לשנת המס {year}.\nבכבוד, {agent}, רישיון {lic}"},
+ reply:{need:["insurer","ref","answer"],body:"לכבוד {insurer}\nהנדון: מענה לפנייתכם מס' {ref} בעניין {name}, ת.ז. {id}\n{answer}\nבכבוד, {agent}, רישיון {lic}, {agency}"}
+};
+var NF={insurer:"nf_insurer",policy:"nf_policy",newaddr:"nf_newaddr",eff:"nf_eff",year:"nf_year",ref:"nf_ref",answer:"nf_answer"};
+function tplVals(n){
+  var p=prof(n),v=S.tpl.vals;
+  return {name:n,id:clientId(n),addr:p.addr+", "+p.city,phone:p.phone,email:p.email,date:dstr(0),agent:AGENT.name,lic:AGENT.lic,agency:AGENCY.name,taxres:p.tax==="us"?"ארה\"ב וישראל":p.tax==="other"?"מדינה נוספת":"ישראל בלבד",
+    insurer:v.insurer||"",policy:v.policy||"",newaddr:v.newaddr||"",eff:v.eff||"",year:v.year||String(new Date().getFullYear()-1),ref:v.ref||"",answer:v.answer||""};
+}
+function tplRender(key,n,html){
+  var T=TPL[key],V=tplVals(n),miss=0;
+  var s=T.body.replace(/\{(\w+)\}/g,function(m,k){
+    var x=V[k];
+    if(!x){miss++;return html?'<span class="fm">['+esc(t(NF[k]||"fv_missing"))+']</span>':"["+k+"]"}
+    return html?'<span class="fv">'+esc(x)+'</span>':x;
+  });
+  return {text:html?s.split("\n").join("<br>"):s,miss:miss};
+}
+function drawTpl(){
+  var box=$("deskBody"),key=S.tpl.key,T=TPL[key],n=S.tpl.client;
+  var h='<div class="grid"><div class="card" style="padding:14px"><div class="form">'+field(t("tp_client"),nmSel("tpC",n))+
+   field(t("tp_tpl"),'<select id="tpT">'+Object.keys(TPL).map(function(k){return '<option value="'+k+'"'+(k===key?" selected":"")+'>'+esc(t("tp_"+k))+'</option>'}).join("")+'</select>')+'</div>';
+  h+='<div class="note" style="margin-top:10px">'+esc(t("tp_auto"))+': '+esc(["name","id","addr","phone","date","agent","lic"].join(", "))+'</div>';
+  if(T.need.length){h+='<b>'+esc(t("tp_need"))+'</b><div class="form">'+T.need.map(function(k){
+    var cur=S.tpl.vals[k]||"";
+    if(k==="insurer")return field(t(NF[k]),'<select data-v="insurer"><option value=""></option>'+INSURERS.map(function(i){return '<option'+(i===cur?" selected":"")+'>'+i+'</option>'}).join("")+'</select>');
+    return field(t(NF[k]),'<input data-v="'+k+'" value="'+esc(cur)+'" dir="auto">')}).join("")+'</div>'}
+  h+='</div><div class="card" style="padding:14px"><b>'+esc(t("tp_prev"))+'</b><div class="paper" id="tpPaper" dir="rtl"></div><div id="tpStat" class="note"></div><div class="actions" id="tpActs"></div></div></div>';
+  box.innerHTML=h;
+  $("tpC").onchange=function(){S.tpl.client=this.value;drawTpl()};$("tpT").onchange=function(){S.tpl.key=this.value;S.tpl.vals={};drawTpl()};
+  box.querySelectorAll("[data-v]").forEach(function(el){el.oninput=el.onchange=function(){S.tpl.vals[el.dataset.v]=el.value;tpPrev()}});
+  tpPrev();
+}
+function tpPrev(){
+  var r=tplRender(S.tpl.key,S.tpl.client,true);
+  $("tpPaper").innerHTML=r.text;
+  $("tpStat").innerHTML=r.miss?'<span class="flag">'+esc(t("tp_missing",{n:r.miss}))+'</span>':'<span class="tick">✓ '+esc(t("tp_ready"))+'</span>';
+  var dis=r.miss>0,dn=t("tp_"+S.tpl.key);
+  $("tpActs").innerHTML=b("tpSave",t("tp_save"),"",dis)+b("tpSign",t("tp_sign"),"primary",dis)+b("tpQE",t("tp_queue")+" ("+t("ot_email")+")","",dis)+b("tpQP",t("tp_queue")+" ("+t("ot_post")+")","",dis);
+  var c=S.tpl.client;
+  $("tpSave").onclick=function(){logAudit(who(),t("tp_audit_save",{d:dn,c:c}));toast("✓ "+t("tp_audit_save",{d:dn,c:nm(c)}))};
+  $("tpSign").onclick=function(){logAudit(who(),t("tp_audit_sign",{d:dn,c:c}));toast("✓ "+t("tp_audit_sign",{d:dn,c:nm(c)}))};
+  [["tpQE","email"],["tpQP","post"]].forEach(function(x){$(x[0]).onclick=function(){S.out.q.unshift({id:"o"+Date.now(),client:c,doc:dn,ch:x[1],kind:"service",st:"queued",reg:false,track:""});logAudit(who(),t("tp_audit_q",{d:dn,c:c,ch:t("ot_"+x[1])}));toast("✓ "+t("tp_audit_q",{d:dn,c:nm(c),ch:t("ot_"+x[1])}))}});
+}
+
+/* ---------- 3 post, email, labels ---------- */
+function outNote(o){
+  var p=prof(o.client);
+  if(o.kind==="marketing"&&consent(o.client)!=="in")return t("ot_nocons");
+  if(o.ch==="email"&&!p.email)return t("ot_nomail");
+  if(o.ch==="post"&&!(p.addr&&p.city&&p.zip))return t("ot_noaddr");
+  return "";
+}
+function drawOut(){
+  var box=$("deskBody"),q=S.out.q,sel=S.out.sel;
+  var picked=q.filter(function(o){return sel[o.id]&&o.st==="queued"&&!outNote(o)});
+  var pe=picked.filter(function(o){return o.ch==="email"}),pp=picked.filter(function(o){return o.ch==="post"});
+  var h='<p class="note">'+esc(t("ot_hdr"))+'</p><div class="actions" style="margin:0 0 10px">'+b("otSel",t("ot_selall"))+b("otSend",t("ot_send",{n:pe.length}),"primary",!pe.length)+b("otLab",t("ot_labels",{n:pp.length}),"",!pp.length)+b("otLet",t("ot_letters",{n:pp.length}),"",!pp.length)+b("otPost",t("ot_posted",{n:pp.length}),"",!pp.length)+'</div>';
+  h+='<div class="scroll" style="max-height:none"><table class="tbl"><thead><tr><th></th><th>'+esc(t("client"))+'</th><th>'+esc(t("ot_doc"))+'</th><th>'+esc(t("ot_ch"))+'</th><th>'+esc(t("ot_st"))+'</th><th>'+esc(t("ot_note"))+'</th></tr></thead><tbody>';
+  q.forEach(function(o){
+    var nt=o.st==="queued"?outNote(o):"",stt=nt?"blocked":o.st;
+    h+='<tr><td><input type="checkbox" data-c="'+o.id+'"'+(sel[o.id]?" checked":"")+(o.st!=="queued"?" disabled":"")+'></td><td dir="auto">'+esc(nm(o.client))+'</td><td>'+esc(o.doc)+'</td><td><select data-ch="'+o.id+'"'+(o.st!=="queued"?" disabled":"")+'><option value="post"'+(o.ch==="post"?" selected":"")+'>'+esc(t("ot_post"))+'</option><option value="email"'+(o.ch==="email"?" selected":"")+'>'+esc(t("ot_email"))+'</option></select></td><td><span class="badge '+(stt==="blocked"?"r":stt==="queued"?"a":"")+'">'+esc(t("ot_st_"+stt))+'</span></td><td>'+(nt?'<span class="flag">'+esc(nt)+'</span>':o.track?'<code dir="ltr">'+esc(o.track)+'</code>':"")+'</td></tr>';
+  });
+  h+='</tbody></table></div><div id="labelBox"></div>';
+  box.innerHTML=h;
+  box.querySelectorAll("[data-c]").forEach(function(el){el.onchange=function(){sel[el.dataset.c]=el.checked;drawOut()}});
+  box.querySelectorAll("[data-ch]").forEach(function(el){el.onchange=function(){q.filter(function(o){return o.id===el.dataset.ch})[0].ch=el.value;drawOut()}});
+  $("otSel").onclick=function(){q.forEach(function(o){if(o.st==="queued")sel[o.id]=true});drawOut()};
+  $("otSend").onclick=function(){pe.forEach(function(o){o.st="sent";delete sel[o.id]});logAudit(who(),t("ot_audit_send",{n:pe.length}));toast("✓ "+t("ot_sentn",{n:pe.length}));drawOut()};
+  $("otLet").onclick=function(){toast("✓ "+t("ot_printn",{n:pp.length}))};
+  $("otLab").onclick=function(){showLabels(pp)};
+  $("otPost").onclick=function(){pp.forEach(function(o,i){o.st="posted";o.track="RR"+(300000000+Hn(o.id+i)%600000000)+"IL";delete sel[o.id]});logAudit(who(),t("ot_audit_post",{n:pp.length}));toast("✓ "+t("ot_postedn",{n:pp.length}));drawOut()};
+}
+function labelHtml(o){var p=prof(o.client);return '<div class="lab"><div class="lf">'+esc(t("ot_from"))+': '+esc(AGENCY.name)+', '+esc(AGENCY.addr)+' '+esc(AGENCY.zip)+'</div><div class="lt"><b dir="auto">'+esc(o.client)+'</b><br>'+esc(p.addr)+'<br>'+esc(p.city)+' '+esc(p.zip)+'</div>'+(o.reg||true?'<div class="lbar"></div><small>'+esc(t("ot_reg"))+'</small>':"")+'</div>'}
+function showLabels(list){
+  var box=$("labelBox");
+  box.innerHTML='<div class="card" style="padding:14px;margin-top:12px"><b>'+esc(t("ot_sheet"))+'</b><div class="labels" id="labelSheet">'+list.map(labelHtml).join("")+'</div><div class="actions">'+b("labPrint",t("ot_printnow"),"primary")+'</div></div>';
+  logAudit(who(),t("ot_audit_lab",{n:list.length}));
+  $("labPrint").onclick=function(){
+    var pa=document.getElementById("printArea");if(!pa){pa=document.createElement("div");pa.id="printArea";document.body.appendChild(pa)}
+    pa.innerHTML='<div class="labels">'+list.map(labelHtml).join("")+'</div>';window.print();
+  };
+}
+
+/* ---------- 4 insurer requests ---------- */
+var RQ_STEPS=["rq_s1","rq_s2","rq_s3","rq_s4","rq_s5"];
+function rqNeeds4(r){return r.type==="agent"||r.type==="port"}
+function rqLeft(r){return r.due}
+function drawReq(){
+  var box=$("deskBody"),it=S.req.items,f=S.req.f;
+  var open=it.filter(function(r){return r.st!=="done"}),od=open.filter(function(r){return r.due<0}),soon=open.filter(function(r){return r.due>=0&&r.due<=2});
+  var vis=it.filter(function(r){return f==="all"?true:f==="open"?r.st!=="done":f==="od"?r.st!=="done"&&r.due<0:f==="soon"?r.st!=="done"&&r.due>=0&&r.due<=2:r.st==="done"}).sort(function(a,b){return (a.st==="done")-(b.st==="done")||a.due-b.due});
+  var h='<div class="alert" style="background:var(--amber-soft);border-color:var(--amber)"><b>'+esc(t("rq_hdr"))+'</b><div class="note" style="margin:4px 0 0">'+esc(t("rq_sla"))+tagv()+'</div></div>'+
+   chipRow("rqf",[["all",t("rq_all"),it.length],["open",t("rq_open"),open.length],["od",t("rq_overdue"),od.length],["soon",t("rq_soon"),soon.length],["done",t("rq_done"),it.length-open.length]],f)+'<div class="grid"><div class="card" style="padding:10px" id="rqList"></div><div class="card" style="padding:14px" id="rqDet"></div></div>';
+  box.innerHTML=h;
+  var L=$("rqList");
+  vis.forEach(function(r){
+    var late=r.st!=="done"&&r.due<0,when=r.st==="done"?t("rq_done"):r.due<0?t("rq_late",{n:-r.due}):r.due===0?t("rq_today"):t("rq_days",{n:r.due});
+    L.innerHTML+='<button class="row '+(late?"r":r.due<=2&&r.st!=="done"?"a":"")+'" data-a="rqpick" data-v="'+r.id+'" aria-current="'+(S.req.sel===r.id)+'"><div class="t"><span class="badge '+(late?"r":r.st==="done"?"":"a")+'">'+esc(t("rq_t_"+r.type))+'</span><span class="cl" dir="auto">'+esc(insn(r.ins))+' · '+esc(nm(r.client))+'</span><span class="age">'+esc(when)+'</span></div><div class="d">'+esc(r.ref)+' · '+esc(t("ch_"+r.ch))+'</div></button>'});
+  if(!vis.length)L.innerHTML='<div class="empty ok">✓</div>';
+  bind(box,{rqf:function(v){S.req.f=v;drawReq()},rqpick:function(v){S.req.sel=v;drawReq()}});
+  drawReqDet();
+}
+function drawReqDet(){
+  var d=$("rqDet"),r=S.req.items.filter(function(x){return x.id===S.req.sel})[0];
+  if(!r){d.innerHTML='<div class="empty">'+esc(t("rq_pick"))+'</div>';return}
+  var late=r.st!=="done"&&r.due<0;
+  var h='<span class="badge '+(late?"r":"")+'">'+esc(t("rq_t_"+r.type))+'</span><h2 style="margin:6px 0;font-size:18px">'+esc(insn(r.ins))+' · <span dir="auto">'+esc(nm(r.client))+'</span></h2><dl class="kv"><dt>'+esc(t("rq_ref"))+'</dt><dd dir="ltr">'+esc(r.ref)+'</dd><dt>'+esc(t("channel"))+'</dt><dd>'+esc(t("ch_"+r.ch))+'</dd><dt>'+esc(t("rq_due"))+'</dt><dd>'+(r.st==="done"?esc(t("rq_done")):r.due<0?'<b class="flag">'+esc(t("rq_late",{n:-r.due}))+'</b>':esc(r.due===0?t("rq_today"):t("rq_days",{n:r.due})))+'</dd></dl>';
+  var req=RQ_STEPS.filter(function(s,i){return i!==3||rqNeeds4(r)});
+  var ready=true;
+  RQ_STEPS.forEach(function(s,i){
+    if(i===3&&!rqNeeds4(r))return;
+    var prevOk=RQ_STEPS.every(function(_,j){return j>=i||(j===3&&!rqNeeds4(r))||r.steps[j]});
+    if(i===4){h+='<div class="step"><span class="pid">→</span> '+esc(t(s))+'</div>';return}
+    h+='<div class="step"><button class="chip" data-a="rqstep" data-v="'+i+'" aria-pressed="'+!!r.steps[i]+'"'+((r.st==="done"||!prevOk)?" disabled":"")+'>'+(r.steps[i]?"✓":"○")+'</button> '+esc(t(s))+'</div>';
+    if(!r.steps[i]&&i<4)ready=false;
+  });
+  var all4=RQ_STEPS.every(function(_,j){return j===4||(j===3&&!rqNeeds4(r))||r.steps[j]});
+  var prev=TPL.reply.body.replace(/\{insurer\}/g,insn(r.ins)).replace(/\{ref\}/g,r.ref).replace(/\{name\}/g,r.client).replace(/\{id\}/g,clientId(r.client)).replace(/\{answer\}/g,"מצורפים הנתונים והמסמכים המבוקשים. ייפוי הכוח מצוי בתיקנו.").replace(/\{agent\}/g,AGENT.name).replace(/\{lic\}/g,AGENT.lic).replace(/\{agency\}/g,AGENCY.name);
+  h+='<h3 style="margin:10px 0 4px;font-size:15px">'+esc(t("rq_prev"))+'</h3><div class="paper" dir="rtl">'+esc(prev).split("\n").join("<br>")+'</div>';
+  h+='<div class="actions">'+(r.st==="done"?'<span class="tick">✓ '+esc(t("rq_sent"))+'</span>':b("rqSend",t("rq_send"),"primary",!all4)+(rqNeeds4(r)&&S.role!=="mgr"?b("rqEsc",t("rq_escalate")):""))+'</div>';
+  d.innerHTML=h;
+  bind(d,{rqstep:function(v){r.steps[+v]=r.steps[+v]?0:1;drawReq()}});
+  if($("rqSend"))$("rqSend").onclick=function(){r.st="done";logAudit(who(),t("rq_audit_sent",{i:insn(r.ins),r:r.ref,c:r.client}));toast("✓ "+t("rq_sent"));drawReq()};
+  if($("rqEsc"))$("rqEsc").onclick=function(){S.items.mgr.unshift(mkItem("mgr","insescal",r.client,Math.max(0,r.due)));logAudit(who(),t("rq_audit_esc",{i:insn(r.ins),r:r.ref}));toast("✓ "+t("rq_audit_esc",{i:insn(r.ins),r:r.ref}))};
+}
+
+/* ---------- 5 tax ---------- */
+function drawTax(){
+  var box=$("deskBody"),T=S.tax,y=new Date().getFullYear()-1;
+  var secs=[["certs",t("tx_certs")],["coord",t("tx_coord")],["resid",t("tx_resid")],["agency",t("tx_agency")]];
+  var h='<div class="alert" style="background:var(--amber-soft);border-color:var(--amber)">'+esc(t("tx_note"))+'</div>'+chipRow("txsec",secs,T.sec)+'<div id="txBody"></div>';
+  box.innerHTML=h;bind(box,{txsec:function(v){T.sec=v;drawTax()}});
+  var B=$("txBody"),s="";
+  if(T.sec==="certs"){
+    var need=T.certs.filter(function(c){return c.st==="need"}),got=T.certs.filter(function(c){return c.st==="got"});
+    s+='<p class="note">'+esc(t("tx_year",{y:y}))+'</p><div class="actions" style="margin:0 0 10px">'+ab("txreqall",t("tx_reqall",{n:need.length}),"primary",!need.length)+ab("txsendall",t("tx_sendall",{n:got.length}),"",!got.length)+'</div>';
+    s+='<div class="scroll" style="max-height:none"><table class="tbl"><thead><tr><th>'+esc(t("client"))+'</th><th>'+esc(t("pe_ins"))+'</th><th>'+esc(t("tx_prod"))+'</th><th>'+esc(t("tx_deposits",{y:y}))+'</th><th>'+esc(t("ot_st"))+'</th><th></th></tr></thead><tbody>';
+    T.certs.forEach(function(c){
+      var nxt=c.st==="need"?["txreq",t("tx_req1")]:c.st==="req"?["txgot",t("tx_got1")]:c.st==="got"?["txsend",t("tx_send1")]:null;
+      s+='<tr><td dir="auto">'+esc(nm(c.client))+'</td><td>'+esc(insn(c.ins))+'</td><td>'+esc(t("pr_"+c.prod))+'</td><td dir="ltr">'+money(c.amt)+'</td><td><span class="badge '+(c.st==="need"?"r":c.st==="sent"?"":"a")+'">'+esc(t("tx_c_"+c.st))+'</span></td><td>'+(nxt?ab(nxt[0],nxt[1],"",false,c.id):"")+'</td></tr>'});
+    s+='</tbody></table></div>';
+  }else if(T.sec==="coord"){
+    s+='<p class="note">'+esc(t("tx_scope"))+'</p>';
+    T.coord.forEach(function(k){
+      s+='<div class="card icard" style="margin-bottom:10px"><b dir="auto">'+esc(nm(k.client))+'</b> <span class="badge">'+esc(t("tx_k_"+k.kind))+'</span>';
+      k.steps.forEach(function(v,i){s+='<div class="step"><button class="chip" data-a="txk" data-v="'+k.id+":"+i+'" aria-pressed="'+!!v+'">'+(v?"✓":"○")+'</button> '+esc(t("tx_st"+(i+1)))+'</div>'});
+      s+='</div>'});
+  }else if(T.sec==="resid"){
+    s+='<p class="note">'+esc(t("tx_r_note"))+'</p><table class="tbl"><thead><tr><th>'+esc(t("client"))+'</th><th>'+esc(t("f_tax"))+'</th><th>'+esc(t("ot_st"))+'</th><th></th></tr></thead><tbody>';
+    T.resid.forEach(function(r){s+='<tr><td dir="auto">'+esc(nm(r.client))+'</td><td>'+esc(t("tx_"+r.decl))+'</td><td><span class="badge '+(r.st==="missing"?"r":r.st==="sent"?"a":"")+'">'+esc(t("tx_c_"+(r.st==="missing"?"need":r.st==="sent"?"req":"got")))+'</span></td><td>'+(r.st==="missing"?ab("txrf",t("tx_r_form"),"",false,r.id):r.st==="sent"?ab("txrg",t("tx_r_got"),"",false,r.id):"")+'</td></tr>'});
+    s+='</tbody></table>';
+  }else{
+    s+='<p class="note">'+esc(t("tx_a_alloc"))+tagv()+'</p><table class="tbl"><thead><tr><th></th><th>'+esc(t("tx_due"))+'</th><th></th></tr></thead><tbody>';
+    T.agency.forEach(function(a){
+      var label=t("tx_a_"+a.k,{i:a.ins?insn(a.ins):""});
+      s+='<tr><td>'+esc(label)+'</td><td>'+(a.st==="done"?'<span class="tick">✓</span>':a.due<0?'<b class="flag">'+esc(t("tx_late",{n:-a.due}))+'</b>':esc(t("tx_in",{n:a.due})))+'</td><td>'+(a.st==="done"?"":ab("txad",t("tx_done1"),"",false,a.id))+'</td></tr>'});
+    s+='</tbody></table>';
+  }
+  B.innerHTML=s;
+  bind(B,{
+    txreq:function(v){var c=T.certs.filter(function(x){return x.id===v})[0];c.st="req";queueCert(c);drawTax()},
+    txgot:function(v){T.certs.filter(function(x){return x.id===v})[0].st="got";drawTax()},
+    txsend:function(v){var c=T.certs.filter(function(x){return x.id===v})[0];c.st="sent";logAudit(who(),t("tx_audit",{a:t("tx_send1")+" / "+c.client}));toast("✓ "+t("tx_send1"));drawTax()},
+    txreqall:function(){var n=0;T.certs.forEach(function(c){if(c.st==="need"){c.st="req";queueCert(c);n++}});toast("✓ "+t("tx_reqn",{n:n}));drawTax()},
+    txsendall:function(){var n=0;T.certs.forEach(function(c){if(c.st==="got"){c.st="sent";n++}});logAudit(who(),t("tx_audit",{a:t("tx_sentn",{n:n})}));toast("✓ "+t("tx_sentn",{n:n}));drawTax()},
+    txk:function(v){var p=v.split(":"),k=T.coord.filter(function(x){return x.id===p[0]})[0];k.steps[+p[1]]=k.steps[+p[1]]?0:1;drawTax()},
+    txrf:function(v){var r=T.resid.filter(function(x){return x.id===v})[0];r.st="sent";S.out.q.unshift({id:"o"+Date.now(),client:r.client,doc:t("tp_kyc"),ch:"email",kind:"service",st:"queued",reg:false,track:""});toast("✓ "+t("tp_audit_q",{d:t("tp_kyc"),c:nm(r.client),ch:t("ot_email")}));drawTax()},
+    txrg:function(v){T.resid.filter(function(x){return x.id===v})[0].st="got";drawTax()},
+    txad:function(v){var a=T.agency.filter(function(x){return x.id===v})[0];a.st="done";logAudit(who(),t("tx_audit",{a:t("tx_a_"+a.k,{i:a.ins?insn(a.ins):""})}));drawTax()}
+  });
+}
+function queueCert(c){S.out.q.unshift({id:"o"+Date.now()+c.id,client:c.client,doc:t("tp_taxreq")+" ("+insn(c.ins)+")",ch:"email",kind:"service",st:"queued",reg:false,track:""})}
+
+/* ================= EXTENSION 2: marketing, overview, today, client file, client app ================= */
+S.mk={sec:"camp",camps:[],sel:"m0",stop:5,log:[],show:false};S.fd={};S.pd={};S.ir={};
+S.file={client:NAMES[0],tab:"over",sheet:null,pi:0,pt:"gen",q:""};
+S.today={tk:"today",bk:"today",tasks:[]};
+S.app={scr:"invite",tab:"home",client:NAMES[0],pi:0,pt:"gen",svc:{travel:1,savings:1},vis:{prod:1,docs:1,proc:1},ch:{wa:1,ph:1,em:1,link:1},ag:0,bio:0,terms:0,code:"",sheet:null,pd:null,notif:{proc:1,rec:1,bday:1,docs:1},waOk:1,buy:null};
+
+reg({
+ pr_pension:["Pension fund","קרן פנסיה"],pr_exec:["Managers' insurance","ביטוח מנהלים"],pr_provident:["Provident fund","קופת גמל"],pr_study:["Study fund","קרן השתלמות"],pr_life:["Life insurance","ביטוח חיים"],pr_health:["Health insurance","ביטוח בריאות"],pr_car:["Car insurance","ביטוח רכב"],pr_home:["Home insurance","ביטוח דירה"],pr_loan:["Loan","הלוואה"],pr_invest:["Investment portfolio","תיק השקעות"],
+ /* marketing */
+ mk_intro:["Marketing: campaigns go only to clients who agreed to receive them. The manager approves every campaign. Replies become Inbox items for agents.","שיווק: קמפיינים יוצאים רק ללקוחות שהסכימו לקבל. המנהל מאשר כל קמפיין. תגובות הופכות למשימות בתיבת הסוכנים."],
+ mk_camp:["Campaigns","קמפיינים"],mk_cons:["Consent registry","מרשם הסכמות"],mk_seg:["Segments","פלחים"],
+ mk_name:["Campaign","קמפיין"],mk_aud:["Audience","קהל"],mk_ok:["May receive","רשאים לקבל"],mk_excl:["Excluded (no consent)","לא נשלח (אין הסכמה)"],mk_st:["Status","סטטוס"],
+ mk_s_draft:["Draft","טיוטה"],mk_s_pending:["Waiting for approval","ממתין לאישור"],mk_s_approved:["Approved","מאושר"],mk_s_sent:["Sent","נשלח"],
+ mk_submit:["Submit for manager approval","שליחה לאישור מנהל"],mk_approve:["Approve (manager)","אישור (מנהל)"],mk_send:["Send to consenting clients","שליחה ללקוחות שהסכימו"],
+ mk_checkc:["Check consent","בדיקת הסכמות"],mk_c_in:["Opted in","אישרו דיוור"],mk_c_none:["No consent on file","אין הסכמה בתיק"],mk_c_out:["Opted out","הסירו עצמם"],
+ mk_res:["Result: {s} sent, {r} replies, {o} opt-outs","תוצאה: נשלחו {s}, {r} תגובות, {o} הסרות"],
+ mk_audit_sub:["Campaign {c} submitted for approval","קמפיין {c} נשלח לאישור"],mk_audit_app:["Campaign {c} approved","קמפיין {c} אושר"],mk_audit_send:["Campaign {c} sent to {n} consenting clients","קמפיין {c} נשלח ל־{n} לקוחות שהסכימו"],
+ mk_src:["Source of consent","מקור ההסכמה"],mk_src1:["Web form","טופס אתר"],mk_src2:["WhatsApp reply","תשובה בוואטסאפ"],mk_src3:["Signed paper","טופס חתום"],mk_src4:["Imported","יבוא"],
+ mk_stop:["Process unsubscribe replies ({n} waiting)","עיבוד בקשות הסרה ({n} ממתינות)"],mk_stopd:["{n} clients moved to opted out","{n} לקוחות עברו להסרה"],mk_setc:["Set consent for a client","עדכון הסכמה ללקוח"],mk_log:["Recent changes","שינויים אחרונים"],
+ mk_rule:["Marketing messages need explicit opt-in and a working way to opt out. Service messages (a renewal notice, a document copy) do not.","הודעות שיווק דורשות הסכמה מפורשת ואפשרות הסרה. הודעות שירות (חידוש, עותק מסמך) אינן דורשות."],
+ mk_seg_n:["Clients","לקוחות"],mk_use:["Create campaign draft","יצירת טיוטת קמפיין"],
+ sg_renew:["Car policy renews in 60 days","פוליסת רכב מתחדשת בתוך 60 יום"],sg_pension:["Pension rule change notice","הודעה על שינוי בכללי הפנסיה"],sg_ru:["Russian-speaking clients","לקוחות דוברי רוסית"],sg_ar:["Arabic-speaking clients","לקוחות דוברי ערבית"],sg_fr:["French-speaking clients","לקוחות דוברי צרפתית"],sg_birth:["Birthdays this month","ימי הולדת החודש"],sg_nodis:["No disability cover found","לא נמצא כיסוי אובדן כושר עבודה"],
+ cp_n1:["Renewal reminder: car","תזכורת חידוש: רכב"],cp_n2:["Pension rules update","עדכון כללי פנסיה"],cp_n3:["Review your portfolio","סקירת תיק"],cp_n4:["Happy new year greeting","ברכת שנה טובה"],cp_n5:["Travel insurance offer","הצעה לביטוח נסיעות"],cp_n6:["Disability cover gap","פער בכיסוי אובדן כושר"],
+ /* overview */
+ ov_intro:["Manager overview: what needs a decision today, and what is slipping.","סקירת מנהל: מה דורש החלטה היום ומה מחליק."],
+ ov_req:["Insurer requests waiting","פניות מחברות ביטוח ממתינות"],ov_od:["overdue","באיחור"],ov_id:["New clients without registration","לקוחות חדשים שלא נרשמו"],ov_tax:["Tax items due within 14 days","פריטי מס בתוך 14 יום"],ov_cam:["Campaigns waiting for approval","קמפיינים ממתינים לאישור"],ov_out:["Letters waiting to go out","מכתבים שממתינים לשליחה"],ov_urg:["Urgent items per Inbox","דחופים בכל תיבה"],ov_go:["Open","פתיחה"],ov_lic:["Licences and training due","רישיונות והשתלמויות"],ov_cert:["Tax certificates not received","אישורי מס שלא התקבלו"],
+ /* today */
+ td_intro:["Your day: leads, processes, tasks, recent clients and birthdays.","היום שלך: לידים, תהליכים, משימות, לקוחות אחרונים ויום הולדת."],
+ td_leads:["Open leads","לידים פתוחים"],td_wf:["Open processes","תהליכים פתוחים"],td_tasks:["Tasks","משימות"],td_last:["Last clients","לקוחות אחרונים"],td_bd:["Birthdays","ימי הולדת"],
+ tk_today:["Today","היום"],tk_over:["Overdue","באיחור"],tk_next:["Next","הבאות"],tk_done:["Done","בוצעו"],tk_deleg:["Delegated","הועברו"],
+ bd_today:["Today","היום"],bd_recent:["Recent","לאחרונה"],bd_next:["Next","בקרוב"],bd_greet:["Send greeting","שליחת ברכה"],bd_sent:["Greeting sent by WhatsApp (simulated)","ברכה נשלחה בוואטסאפ (הדמיה)"],bd_block:["No marketing consent: greeting is a service-free message only if the client agreed. Blocked.","אין הסכמת דיוור: הברכה חסומה."],
+ qa_new:["New client","לקוח חדש"],qa_lead:["New lead","ליד חדש"],qa_mtg:["New meeting","פגישה חדשה"],
+ /* client file */
+ fl_intro:["One client file: overview, products, activities, documents, employment, leads, meetings, related clients, reports and processes. Create anything from here.","תיק לקוח אחד: סקירה, מוצרים, פעילויות, מסמכים, תעסוקה, לידים, פגישות, קשורים, דוחות ותהליכים. אפשר ליצור הכול מכאן."],
+ fl_search:["Search client","חיפוש לקוח"],fl_tab_over:["Overview","סקירה"],fl_tab_prod:["Products","מוצרים"],fl_tab_act:["Activities","פעילויות"],fl_tab_docs:["Documents","מסמכים"],fl_tab_emp:["Employment","תעסוקה"],fl_tab_leads:["Leads","לידים"],fl_tab_mtg:["Meetings","פגישות"],fl_tab_rel:["Related","קשורים"],fl_tab_rep:["Reports","דוחות"],fl_tab_wf:["Processes","תהליכים"],fl_tab_info:["Information request","בקשת מידע"],
+ fl_status:["Status","סטטוס"],fl_class:["Class","סיווג"],fl_src:["Source","מקור"],fl_mgr:["Handler","מטפל"],fl_lang:["Language","שפה"],fl_cons:["Marketing","דיוור"],fl_c_in:["approved","מאושר"],fl_c_none:["not asked","לא נשאל"],fl_c_out:["removed","הוסר"],
+ fl_new:["Create","יצירה"],fl_none:["Nothing here yet","אין עדיין"],
+ sh_client:["Client","לקוח"],sh_lead:["Lead","ליד"],sh_employer:["Employer","מעסיק"],sh_act:["Activity","פעילות"],sh_task:["Task or reminder","משימה או תזכורת"],sh_mtg:["Meeting","פגישה"],sh_sum:["Meeting summary","סיכום פגישה"],sh_wf:["Process","תהליך"],sh_rep:["Report","דוח"],sh_emp:["Employment","תעסוקה"],sh_rel:["Related client","לקוח קשור"],
+ sf_type:["Type","סוג"],sf_subject:["Subject","נושא"],sf_desc:["Description","תיאור"],sf_handler:["Handler","מטפל"],sf_interest:["Interest","עניין"],sf_status:["Status","סטטוס"],sf_date:["Date","תאריך"],sf_time:["Time","שעה"],sf_name:["Name","שם"],sf_phone:["Phone","טלפון"],sf_id:["ID number","מספר זהות"],sf_employer:["Employer","מעסיק"],sf_salary:["Reported salary","שכר מדווח"],sf_rel:["Relationship","קשר"],sf_period:["Period","תקופה"],sf_text:["Notes","הערות"],
+ sf_req:["Required: {f}","שדה חובה: {f}"],sf_ok:["Saved","נשמר"],sf_badid:["ID number is not valid","מספר הזהות אינו תקין"],
+ ty_phone:["Phone","שיחה"],ty_email:["Email","מייל"],ty_text:["Text","הודעה"],mt_in:["In person","פרונטלית"],mt_ph:["Phone","טלפונית"],mt_on:["Online","מקוונת"],
+ em_emp:["Employee","שכיר"],em_self:["Self-employed","עצמאי"],em_both:["Employee and self-employed","שכיר ועצמאי"],em_none:["Not employed","לא מועסק"],
+ rl_spouse:["Spouse","בן/בת זוג"],rl_child:["Child","ילד/ה"],rl_parent:["Parent","הורה"],rl_sibling:["Sibling","אח/ות"],rl_grand:["Grandchild","נכד/ה"],
+ ld_t1:["New policy","פוליסה חדשה"],ld_t2:["Pension","פנסיה"],ld_t3:["Car","רכב"],ld_t4:["Home","דירה"],ld_s1:["New","חדש"],ld_s2:["In contact","בקשר"],ld_s3:["Offer sent","הצעה נשלחה"],ld_s4:["Closed","נסגר"],
+ wf_t1:["Policy issuance","הפקת פוליסה"],wf_t2:["Claim","תביעה"],wf_t3:["Information request","הזמנת מידעים"],wf_t4:["Renewal","חידוש"],wf_s1:["Open","פתוח"],wf_s2:["Waiting for client","ממתין ללקוח"],wf_s3:["Handled","טופל"],
+ dc_add:["Upload","העלאה"],dc_cam:["Camera","מצלמה"],dc_file:["File","קובץ"],dc_shot:["Screenshot","צילום מסך"],dc_pwd:["Password protected","מוגן בסיסמה"],dc_share:["Share","שיתוף"],dc_dl:["Download","הורדה"],dc_done:["Uploaded","הועלה"],
+ rp_prev:["Preview and send","תצוגה מקדימה ושליחה"],rp_freq:["Send automatically","שליחה אוטומטית"],rp_m:["Monthly","חודשי"],rp_q:["Quarterly","רבעוני"],rp_y:["Yearly","שנתי"],rp_off:["Off","כבוי"],rp_sent:["Report sent to the client","הדוח נשלח ללקוח"],
+ rm_confirm:["Click again to confirm removal","לחצו שוב לאישור הסרה"],rm_ok:["Removed","הוסר"],
+ pd_list:["Products from the clearing house and Har HaBituach","מוצרים מהמסלקה ומהר הביטוח"],pd_asof:["Data as of {d}","נכון ל־{d}"],pd_gen:["General","כללי"],pd_cov:["Coverages","כיסויים"],pd_ben:["Beneficiaries","מוטבים"],pd_dep:["Deposits and fees","הפקדות ודמי ניהול"],pd_ret:["Returns and projection","תשואות וחיזוי"],pd_clm:["Claims","תביעות"],pd_notes:["Notes","הערות"],
+ pd_bal:["Balance","יתרה"],pd_prem:["Premium per month","פרמיה לחודש"],pd_no:["Policy number","מספר פוליסה"],pd_ins:["Insurer","חברה"],pd_emp:["Employer deposit","הפקדת מעסיק"],pd_ee:["Employee deposit","הפקדת עובד"],pd_sev:["Severance deposit","הפקדת פיצויים"],pd_feed:["Fee on deposit","דמי ניהול מהפקדה"],pd_feeb:["Fee on balance","דמי ניהול מצבירה"],pd_ytd:["Return since start of year","תשואה מתחילת השנה"],pd_avg:["Average yearly return (36 months)","תשואה שנתית ממוצעת (36 חודשים)"],pd_proj:["Projected balance at retirement (no deposits)","צבירה חזויה לפרישה (ללא הפקדות)"],pd_pens:["Projected monthly pension (no deposits)","קצבה חודשית צפויה (ללא הפקדות)"],
+ pd_c1:["Death cover","כיסוי למקרה מוות"],pd_c2:["Disability pension","קצבת נכות"],pd_c3:["Widow pension","קצבת שארים לאלמן/ה"],pd_c4:["Waiver of premium","שחרור מתשלום פרמיה"],pd_nocov:["No coverage data","אין נתוני כיסוי"],
+ pd_noben:["The client has not named beneficiaries","הלקוח לא קבע מוטבים"],pd_noclm:["No claims","אין תביעות"],pd_lien:["There is a lien on this product","קיים עיקול/שעבוד במוצר"],pd_excl:["There is an exclusion in this product","קיימת החרגה במוצר"],pd_rec:["Recommendation","המלצה"],pd_rec1:["Consider moving severance pay to a lower-fee fund to cut fees.","שקלו להעביר פיצויים לקופה בדמי ניהול נמוכים."],pd_rec2:["No disability cover found. Offer a quote.","לא נמצא כיסוי אובדן כושר עבודה. הציעו הצעת מחיר."],pd_nonote:["No notes for this product","אין הערות למוצר זה"],pd_total:["Total savings","סך החיסכון"],
+ /* information request */
+ ir_hdr:["Order information from the clearing house and Har HaBituach","הזמנת מידעים מהמסלקה והר הביטוח"],
+ ir_a:["Insurers: policy information","חברות ביטוח: מידע על פוליסות"],ir_b:["Har HaBituach (appendix E)","הר הביטוח (נספח ה)"],ir_c:["Pension clearing house (appendix A)","מסלקה פנסיונית (נספח א)"],
+ ir_signed:["Signed {d}","נחתם {d}"],ir_unsigned:["Not signed","לא נחתם"],ir_exp:["Expires in {n} days","פג תוקף בעוד {n} ימים"],ir_soon:["Expires within 6 months: ask to re-sign","פג תוקף בתוך 6 חודשים: יש לבקש חתימה מחדש"],
+ ir_office:["Sign now in the office","חתימה עכשיו במשרד"],ir_link:["Send signing link to the client","שליחת קישור לחתימה ללקוח"],ir_spouse:["Also send a link to the spouse","שליחה גם לבן/בת הזוג"],ir_resign:["Ask to re-sign","בקשת חתימה מחדש"],ir_sent:["Link sent (simulated)","קישור נשלח (הדמיה)"],
+ ir_order:["Order information","הזמנת מידעים"],ir_progress:["Progress","התקדמות"],ir_p1:["Request sent","הבקשה נשלחה"],ir_p2:["Waiting for institutions (about 3 business days)","ממתין למוסדות (כ־3 ימי עסקים)"],ir_p3:["Files received and filed","קבצים התקבלו ותויקו"],ir_p4:["Information request finished","תהליך הזמנת המידעים הסתיים"],ir_ff:["Simulate next step","הדמיית שלב הבא"],ir_need:["The request is blocked until all three authorizations are signed.","הבקשה חסומה עד שכל שלושת ייפויי הכוח חתומים."],
+ /* app preview */
+ ap_intro:["What the client sees, and how the agency controls it. Phone on the left, agency settings on the right. Invitation only, no public sign-up.","מה הלקוח רואה ואיך הסוכנות שולטת בזה. הטלפון משמאל, הגדרות הסוכנות מימין. הצטרפות בהזמנה בלבד."],
+ ap_cfg:["Agency settings","הגדרות הסוכנות"],ap_c1:["Extra services: buy travel insurance and a savings policy through the agent's link","שירותים נוספים: רכישת ביטוח נסיעות וקופת חיסכון דרך קישור הסוכן"],ap_c2:["What is shown: products, documents, processes","מה מוצג: מוצרים, מסמכים, תהליכים"],ap_c3:["Which clients get access","אילו לקוחות מקבלים גישה"],ap_c4:["Invitation by email and SMS with a download link","הזמנה במייל ובמסרון עם קישור הורדה"],ap_c5:["Contact channels shown to clients","ערוצי יצירת קשר שיוצגו ללקוח"],
+ ap_ch_wa:["WhatsApp","וואטסאפ"],ap_ch_ph:["Phone","טלפון"],ap_ch_em:["Email","מייל"],ap_ch_link:["Meeting booking link","קישור לקביעת פגישה"],ap_svc_travel:["Travel insurance","ביטוח נסיעות"],ap_svc_sav:["Savings policy","פוליסת חיסכון"],ap_v_prod:["Products","מוצרים"],ap_v_docs:["Documents","מסמכים"],ap_v_proc:["Processes","תהליכים"],
+ ap_inv_title:["The invitation the client receives","ההזמנה שהלקוח מקבל"],ap_inv_txt:["Hello {n}, {a} invites you to the app: all your insurance and pension in one place. Download: https://link.example/one/{k}","שלום {n}, {a} מזמינה אותך לאפליקציה: כל הביטוח והפנסיה שלך במקום אחד. הורדה: https://link.example/one/{k}"],ap_open_link:["Open the link on the phone","פתיחת הקישור בטלפון"],
+ ap_welcome:["All your insurance and pension in one place","כל תיק הביטוח והפנסיה שלי, במקום אחד"],ap_pick_ag:["Choose agency","בחרו סוכנות"],ap_nolink:["I have no link","אין לי קישור"],ap_nolink_t:["You need a personal link from your agency. Send them this request:","כדי להתחבר צריך קישור אישי מהסוכנות. שלחו להם את הבקשה הזו:"],ap_nolink_m:["Hi, I would like to start using the app. Please activate it and send me a personal login link.","היי, אשמח להתחיל להשתמש באפליקציה. אפשר להפעיל לי ולשלוח קישור התחברות אישי."],ap_share_wa:["Share by WhatsApp","שיתוף בוואטסאפ"],
+ ap_terms:["Terms of use and privacy","תנאי שימוש ופרטיות"],ap_terms_t:["Before you continue, accept the terms. The agency, not the software vendor, controls your data. AI systems may be used to process information in the app.","לפני שממשיכים יש לאשר את התנאים. הסוכנות, ולא ספקית התוכנה, שולטת במידע. ייתכן שימוש במערכות בינה מלאכותית לעיבוד מידע באפליקציה."],ap_accept:["I accept","אני מסכים/ה"],
+ ap_login:["Login","התחברות"],ap_phone:["Mobile number","מספר נייד"],ap_sendcode:["Send code","שליחת קוד"],ap_code:["Enter the code (demo: 1234)","הזינו את הקוד (בהדגמה: 1234)"],ap_verify:["Verify","אימות"],ap_wrong:["Wrong code, try again","קוד שגוי, נסו שוב"],
+ ap_bio:["Quick login with biometrics","התחברות מהירה עם זיהוי ביומטרי"],ap_bio_t:["To protect the account and sign in quickly, turn on biometric protection.","כדי להגן על החשבון ולהיכנס מהר, הפעילו הגנה ביומטרית."],ap_bio_on:["Turn on","הפעלה"],ap_bio_skip:["Not now","לא עכשיו"],
+ ap_home:["Home","בית"],ap_products:["Products","מוצרים"],ap_proc:["Processes","תהליכים"],ap_docs:["Documents","מסמכים"],ap_profile:["Profile","פרופיל"],
+ ap_gm:["Good morning","בוקר טוב"],ap_ga:["Good afternoon","צהריים טובים"],ap_ge:["Good evening","ערב טוב"],ap_bday:["Happy birthday from your agency!","יום הולדת שמח מהסוכנות שלך!"],ap_saved:["Saved to date","עד היום חסכת"],ap_ytd:["Return since start of year","תשואה מתחילת השנה"],ap_t_dep:["Deposits per month","הפקדות לחודש"],ap_t_ann:["Projected annuity","קצבה חזויה"],ap_t_loan:["Loan repayments","החזר הלוואות"],ap_t_prem:["Premium per month","פרמיה לחודש"],
+ ap_rec:["Recommendation from your agent","המלצה מהסוכן שלך"],ap_new:["New information on a process","מידע חדש בתהליך"],ap_qa_meet:["Schedule a meeting","קביעת פגישה"],ap_qa_quote:["Request a quote","בקשת הצעת מחיר"],ap_qa_contact:["Contact the agency","יצירת קשר"],
+ ap_buy_travel:["Buy travel insurance","רכישת ביטוח נסיעות"],ap_buy_sav:["Open a savings policy","פתיחת פוליסת חיסכון"],ap_buy_note:["You are taken to the agency's own link, so the purchase is registered under your agent.","מועברים לקישור של הסוכנות, כך שהרכישה נרשמת על שם הסוכן שלכם."],
+ ap_contact:["Contact the agency","יצירת קשר עם הסוכנות"],ap_no_wa:["WhatsApp is not installed. Go to the store?","וואטסאפ לא מותקן. לעבור לחנות?"],ap_inq:["Ask about this product","פנייה בנוגע למוצר"],
+ ap_doc_sum:["Meeting summaries","סיכומי פגישות"],ap_doc_rep:["Reports","דוחות"],ap_doc_frm:["Forms","טפסים"],ap_view:["View","צפייה"],ap_save:["Download","הורדה"],ap_share:["Share","שיתוף"],
+ ap_pi:["Personal details","פרטים אישיים"],ap_zip_bad:["Enter a valid postal code (5-7 digits)","יש להזין מיקוד תקין (5-7 ספרות)"],ap_notif:["Notification settings","הגדרות התראות"],ap_n_proc:["Process updates","עדכוני תהליכים"],ap_n_rec:["Recommendations","המלצות"],ap_n_bday:["Birthday greeting","ברכת יום הולדת"],ap_n_docs:["New documents","מסמכים חדשים"],ap_signout:["Sign out","התנתקות"],ap_reset:["Restart the demo","התחלה מחדש"],
+ ap_preparing:["Your data is being prepared. This may take a few moments.","הנתונים שלך בהכנה. זה עשוי להימשך מספר רגעים."],ap_noproc:["No processes yet","אין עדיין תהליכים"],
+ ap_pt:["Tabs","לשוניות"],ap_docs_n:["{n} documents","{n} מסמכים"],ap_cov_pct:["{p}% of insured salary","{p}% מהשכר המבוטח"]
+});
+
+/* ---------- shared sample data ---------- */
+var SAV={pension:1,exec:1,provident:1,study:1,invest:1},PFAM=["pension","exec","provident","study","life","health","car","home","loan","invest"];
+function prods(n){
+  if(S.pd[n])return S.pd[n];
+  var r=rng(Hn(n)+7),fams=PFAM.slice().sort(function(){return r()-.5}),k=4+Math.floor(r()*3),out=[];
+  for(var i=0;i<k;i++){
+    var f=fams[i],sav=!!SAV[f],ins=INSURERS[Math.floor(r()*INSURERS.length)],bal=sav?40000+Math.floor(r()*860000):0;
+    out.push({f:f,ins:ins,no:String(1000000+Math.floor(r()*8999999)),bal:bal,prem:sav?0:150+Math.floor(r()*750),
+      dep:sav&&f!=="invest"?{emp:Math.round(600+r()*1500),ee:Math.round(300+r()*800),sev:Math.round(500+r()*1100)}:null,
+      feeD:+(0.4+r()*3.4).toFixed(2),feeB:+(0.05+r()*0.7).toFixed(2),ytd:+(2+r()*7).toFixed(1),avg:+(3+r()*5).toFixed(1),
+      proj:sav?Math.round(bal*(1.6+r()))+0:0,pens:sav?Math.round(bal*(1.6+r())/190):0,
+      cov:f==="pension"||f==="exec"||f==="life"||f==="health"?[["pd_c1",Math.round(300+r()*900)*1000],["pd_c2",Math.round(6+r()*14)*1000],["pd_c3",Math.round(3+r()*7)*1000],["pd_c4",1]].slice(0,2+Math.floor(r()*3)):[],
+      ben:r()>.3?[["ben1",60],["ben2",40]]:[],clm:r()>.82?[{no:"C"+Math.floor(r()*90000),st:"open",amt:Math.round(5+r()*40)*1000}]:[],
+      lien:r()>.92,excl:r()>.9,asof:dstr(-Math.floor(r()*40)).slice(0,7)});
+  }
+  return S.pd[n]=out;
+}
+function fdata(n){
+  if(S.fd[n])return S.fd[n];
+  var h=Hn(n),r=rng(h),d=S.fd[n]={acts:[],docs:[],emp:[],leads:[],mtg:[],sum:[],rel:[],rep:[],wf:[]};
+  var ks=["phone","email","text"];
+  for(var i=0;i<2+h%3;i++)d.acts.push({k:ks[(h+i)%3],txt:["שיחה בנושא חידוש","שלחתי הצעת מחיר","ביקש עותק פוליסה","עדכון כתובת"][(h+i)%4],date:dstr(-i*9-1),dur:ks[(h+i)%3]==="phone"?60+(h*i)%500:0});
+  ["תעודת זהות","ייפוי כוח","פוליסה","טופס הצעה","דוח מסלקה"].slice(0,2+h%3).forEach(function(x,i){d.docs.push({name:x,date:dstr(-i*20-3),pwd:x==="דוח מסלקה"})});
+  d.emp.push({employer:["אלקטרה בע\"מ","עיריית חיפה","משרד עו\"ד כהן","בית חולים","סטארטאפ לדוגמה"][h%5],type:["em_emp","em_self","em_both"][h%3],salary:9000+(h%12)*1000,from:(2005+h%18)+"-01-01"});
+  if(h%3!==0)d.leads.push({type:"ld_t"+(1+h%4),interest:["ביטוח","חיסכון"][h%2],st:"ld_s"+(1+h%3)});
+  d.mtg.push({type:["mt_in","mt_ph","mt_on"][h%3],date:dstr(-14-h%30),subject:"סקירת תיק"});
+  d.sum.push({title:"סיכום פגישה: סקירת תיק פנסיוני",date:dstr(-14-h%30)});
+  if(h%2===0)d.rel.push({name:NAMES[(h+3)%NAMES.length],rel:"rl_spouse"});
+  d.rep.push({period:t("rp_q"),date:dstr(-30)});
+  d.wf.push({type:"wf_t"+(1+h%4),handler:AGENT.name,st:"wf_s"+(1+h%3)});
+  return d;
+}
+function lvl(p){return p}
+function prodDetailHtml(p,tab,app){
+  var s="";
+  if(tab==="gen"){
+    s+='<dl class="kv"><dt>'+esc(t("pd_ins"))+'</dt><dd>'+esc(insn(p.ins))+'</dd><dt>'+esc(t("pd_no"))+'</dt><dd dir="ltr">'+p.no+'</dd>'+(SAV[p.f]?'<dt>'+esc(t("pd_bal"))+'</dt><dd dir="ltr">'+money(p.bal)+'</dd>':'<dt>'+esc(t("pd_prem"))+'</dt><dd dir="ltr">'+money(p.prem)+'</dd>')+'<dt>'+esc(t("pd_asof",{d:""}).replace(/\s+$/,""))+'</dt><dd>'+p.asof+'</dd></dl>';
+    if(p.lien)s+='<div class="alert">'+esc(t("pd_lien"))+'</div>';if(p.excl)s+='<div class="alert">'+esc(t("pd_excl"))+'</div>';
+  }else if(tab==="cov"){
+    s+=p.cov.length?'<table class="tbl"><tbody>'+p.cov.map(function(c){return '<tr><td>'+esc(t(c[0]))+'</td><td dir="ltr">'+(c[1]>1?money(c[1]):"✓")+'</td>'+(app&&c[1]>1?'<td>'+esc(t("ap_cov_pct",{p:Math.min(100,Math.round(c[1]/10000))}))+'</td>':"")+'</tr>'}).join("")+'</tbody></table>':'<div class="empty">'+esc(t("pd_nocov"))+'</div>';
+  }else if(tab==="ben"){
+    s+=p.ben.length?'<table class="tbl"><tbody>'+p.ben.map(function(b,i){return '<tr><td>'+esc(NAMES[(Hn(p.no)+i*7)%NAMES.length])+'</td><td dir="ltr">'+b[1]+'%</td></tr>'}).join("")+'</tbody></table>':'<div class="empty">'+esc(t("pd_noben"))+'</div>';
+  }else if(tab==="dep"){
+    s+=p.dep?'<dl class="kv"><dt>'+esc(t("pd_emp"))+'</dt><dd dir="ltr">'+money(p.dep.emp)+'</dd><dt>'+esc(t("pd_ee"))+'</dt><dd dir="ltr">'+money(p.dep.ee)+'</dd><dt>'+esc(t("pd_sev"))+'</dt><dd dir="ltr">'+money(p.dep.sev)+'</dd><dt>'+esc(t("pd_feed"))+'</dt><dd dir="ltr">'+p.feeD+'%</dd><dt>'+esc(t("pd_feeb"))+'</dt><dd dir="ltr">'+p.feeB+'%</dd></dl>':'<div class="empty">'+esc(t("fl_none"))+'</div>';
+  }else if(tab==="ret"){
+    s+=SAV[p.f]?'<dl class="kv"><dt>'+esc(t("pd_ytd"))+'</dt><dd dir="ltr">'+p.ytd+'%</dd><dt>'+esc(t("pd_avg"))+'</dt><dd dir="ltr">'+p.avg+'%</dd><dt>'+esc(t("pd_proj"))+'</dt><dd dir="ltr">'+money(p.proj)+'</dd><dt>'+esc(t("pd_pens"))+'</dt><dd dir="ltr">'+money(p.pens)+'</dd></dl>':'<div class="empty">'+esc(t("fl_none"))+'</div>';
+  }else if(tab==="clm"){
+    s+=p.clm.length?'<table class="tbl"><tbody>'+p.clm.map(function(c){return '<tr><td dir="ltr">'+c.no+'</td><td>'+esc(t("wf_s1"))+'</td><td dir="ltr">'+money(c.amt)+'</td></tr>'}).join("")+'</tbody></table>':'<div class="empty">'+esc(t("pd_noclm"))+'</div>';
+  }else{
+    s+=SAV[p.f]&&p.feeD>2.5?'<div class="msg"><small>'+esc(t("pd_rec"))+'</small>'+esc(t("pd_rec1"))+'</div>':!p.cov.length&&!SAV[p.f]?'<div class="msg"><small>'+esc(t("pd_rec"))+'</small>'+esc(t("pd_rec2"))+'</div>':'<div class="empty">'+esc(t("pd_nonote"))+'</div>';
+  }
+  return s;
+}
+
+/* ======================= MARKETING ======================= */
+var SEGS=[
+ {k:"renew",f:function(n){return Hn(n)%5===0}},{k:"pension",f:function(n){return Hn(n)%3===0}},{k:"ru",f:function(n){return CLANG[n]==="ru"}},{k:"ar",f:function(n){return CLANG[n]==="ar"}},
+ {k:"fr",f:function(n){return CLANG[n]==="fr"}},{k:"birth",f:function(n){return Hn(n)%12===new Date().getMonth()}},{k:"nodis",f:function(n){return Hn(n)%4===1}}
+];
+function segList(k){var s=SEGS.filter(function(x){return x.k===k})[0];return NAMES.filter(s.f)}
+function seedMk(){
+  var spec=[["cp_n1","wa","renew","draft"],["cp_n2","em","pension","pending"],["cp_n3","wa","pension","approved"],["cp_n4","wa","ru","sent"],["cp_n5","em","birth","draft"],["cp_n6","wa","nodis","draft"]];
+  S.mk.camps=spec.map(function(a,i){return {id:"m"+i,name:a[0],ch:a[1],seg:a[2],st:a[3],res:a[3]==="sent"?{s:7,r:2,o:0}:null}});
+}
+seedMk();
+function mkCount(c){var l=segList(c.seg),i=0,no=0,ou=0;l.forEach(function(n){var k=consent(n);if(k==="in")i++;else if(k==="out")ou++;else no++});return {aud:l.length,ok:i,none:no,out:ou}}
+function renderMkt(){
+  var s=S.mk;
+  $("main").innerHTML=sim2()+'<p class="note">'+esc(t("mk_intro"))+'</p>'+chipRow("mksec",[["camp",t("mk_camp")],["cons",t("mk_cons")],["seg",t("mk_seg")]],s.sec)+'<div id="mkBody"></div>';
+  bind($("main"),{mksec:function(v){s.sec=v;renderMkt()}});
+  var B=$("mkBody");
+  if(s.sec==="camp")drawCamp(B);else if(s.sec==="cons")drawCons(B);else drawSeg(B);
+}
+function drawCamp(B){
+  var s=S.mk,h='<div class="grid"><div class="card" style="padding:12px">';
+  s.camps.forEach(function(c){var n=mkCount(c);h+='<div class="prow" data-a="mkpick" data-v="'+c.id+'" style="'+(s.sel===c.id?"border-color:var(--accent);background:var(--accent-soft)":"")+'"><span class="pn">'+esc(t(c.name))+'</span><span class="pid">'+esc(t("ch_"+c.ch))+' · '+n.ok+'/'+n.aud+'</span><span class="badge '+(c.st==="pending"?"a":"")+'">'+esc(t("mk_s_"+c.st))+'</span></div>'});
+  h+='</div><div class="card" style="padding:14px" id="mkDet"></div></div>';B.innerHTML=h;
+  bind(B,{mkpick:function(v){s.sel=v;s.show=false;renderMkt()}});
+  var c=s.camps.filter(function(x){return x.id===s.sel})[0]||s.camps[0],n=mkCount(c),d=$("mkDet");
+  var x='<span class="badge">'+esc(t("mk_s_"+c.st))+'</span><h2 style="margin:6px 0;font-size:18px">'+esc(t(c.name))+'</h2><div class="note">'+esc(t("ch_"+c.ch))+' · '+esc(t("sg_"+c.seg))+'</div>'+
+    '<dl class="kv"><dt>'+esc(t("mk_aud"))+'</dt><dd>'+n.aud+'</dd><dt>'+esc(t("mk_ok"))+'</dt><dd><b class="tick">'+n.ok+'</b></dd><dt>'+esc(t("mk_excl"))+'</dt><dd><b class="flag">'+(n.none+n.out)+'</b></dd></dl>';
+  if(s.show)x+='<div class="msg"><small>'+esc(t("mk_checkc"))+'</small>'+esc(t("mk_c_in"))+': '+n.ok+' · '+esc(t("mk_c_none"))+': '+n.none+' · '+esc(t("mk_c_out"))+': '+n.out+'</div>';
+  x+='<p class="note">'+esc(t("mk_rule"))+tagv()+'</p>';
+  if(c.res)x+='<div class="msg">'+esc(t("mk_res",{s:c.res.s,r:c.res.r,o:c.res.o}))+'</div>';
+  x+='<div class="actions">'+ab("mkchk",t("mk_checkc"))+(c.st==="draft"?ab("mksub",t("mk_submit"),"primary"):"")+(c.st==="pending"?ab("mkapp",t("mk_approve"),"primary",S.role!=="mgr"):"")+(c.st==="approved"?ab("mksend",t("mk_send"),"primary"):"")+'</div>';
+  d.innerHTML=x;
+  bind(d,{
+   mkchk:function(){s.show=!s.show;renderMkt()},
+   mksub:function(){c.st="pending";S.items.mgr.unshift(mkItem("mgr","campaign2",NAMES[0],n.ok));logAudit(who(),t("mk_audit_sub",{c:t(c.name)}));toast("✓ "+t("mk_audit_sub",{c:t(c.name)}));renderMkt()},
+   mkapp:function(){c.st="approved";logAudit(who(),t("mk_audit_app",{c:t(c.name)}));toast("✓ "+t("mk_audit_app",{c:t(c.name)}));renderMkt()},
+   mksend:function(){c.st="sent";var rp=Math.max(1,Math.floor(n.ok*.2)),op=Math.floor(n.ok*.05);c.res={s:n.ok,r:rp,o:op};
+     S.items.mkt.unshift(mkItem("mkt","mk_result",NAMES[0],n.ok));if(op)S.items.mkt.unshift(mkItem("mkt","mk_optout",NAMES[1],op));
+     S.items.agent.unshift(mkItem("agent","campaign",segList(c.seg)[0]||NAMES[2],1));
+     logAudit(who(),t("mk_audit_send",{c:t(c.name),n:n.ok}));toast("✓ "+t("mk_audit_send",{c:t(c.name),n:n.ok}));renderMkt()}
+  });
+}
+function drawCons(B){
+  var s=S.mk,cnt={in:0,none:0,out:0};NAMES.forEach(function(n){cnt[consent(n)]++});
+  var h='<p class="note">'+esc(t("mk_rule"))+tagv()+'</p><div class="cards"><div class="card icard"><b>'+esc(t("mk_c_in"))+'</b><div style="font-size:26px;color:var(--green)">'+cnt.in+'</div></div><div class="card icard"><b>'+esc(t("mk_c_none"))+'</b><div style="font-size:26px;color:var(--amber)">'+cnt.none+'</div></div><div class="card icard"><b>'+esc(t("mk_c_out"))+'</b><div style="font-size:26px;color:var(--red)">'+cnt.out+'</div></div></div>';
+  h+='<div class="actions" style="margin:12px 0">'+ab("mkstop",t("mk_stop",{n:s.stop}),"primary",!s.stop)+'</div>';
+  h+='<div class="card" style="padding:12px;margin-bottom:12px"><b>'+esc(t("mk_setc"))+'</b><div class="actions">'+nmSel("mkcl",NAMES[0])+'<select id="mkcs"><option value="in">'+esc(t("mk_c_in"))+'</option><option value="out">'+esc(t("mk_c_out"))+'</option><option value="none">'+esc(t("mk_c_none"))+'</option></select><select id="mksrc">'+[1,2,3,4].map(function(i){return '<option>'+esc(t("mk_src"+i))+'</option>'}).join("")+'</select>'+b("mkset",t("save"))+'</div></div>';
+  h+='<b>'+esc(t("mk_log"))+'</b><div class="scroll"><table class="tbl"><tbody>'+s.log.slice(0,12).map(function(l){return '<tr><td dir="auto">'+esc(nm(l.c))+'</td><td>'+esc(t("mk_c_"+l.k))+'</td><td>'+esc(l.src)+'</td><td dir="ltr">'+esc(fmtTime(l.ts,true))+'</td></tr>'}).join("")+'</tbody></table></div>';
+  B.innerHTML=h;
+  bind(B,{mkstop:function(){var done=0;NAMES.forEach(function(n){if(done<s.stop&&consent(n)==="in"){S.cons[n]="out";s.log.unshift({c:n,k:"out",src:t("mk_src2"),ts:Date.now()});done++}});s.stop=0;logAudit(who(),t("mk_stopd",{n:done}));toast("✓ "+t("mk_stopd",{n:done}));drawCons(B)}});
+  $("mkset").onclick=function(){var n=$("mkcl").value,k=$("mkcs").value;S.cons[n]=k;s.log.unshift({c:n,k:k,src:$("mksrc").value,ts:Date.now()});logAudit(who(),t("mk_c_"+k)+" / "+n);toast("✓ "+t("sf_ok"));drawCons(B)};
+}
+function drawSeg(B){
+  var h='<table class="tbl"><thead><tr><th></th><th>'+esc(t("mk_seg_n"))+'</th><th>'+esc(t("mk_ok"))+'</th><th></th></tr></thead><tbody>';
+  SEGS.forEach(function(sg){var l=segList(sg.k),ok=l.filter(function(n){return consent(n)==="in"}).length;h+='<tr><td>'+esc(t("sg_"+sg.k))+'</td><td>'+l.length+'</td><td>'+ok+'</td><td>'+ab("sguse",t("mk_use"),"",false,sg.k)+'</td></tr>'});
+  B.innerHTML=h+'</tbody></table>';
+  bind(B,{sguse:function(k){S.mk.camps.unshift({id:"m"+Date.now(),name:"cp_n3",ch:"wa",seg:k,st:"draft",res:null});S.mk.sel=S.mk.camps[0].id;S.mk.sec="camp";toast("✓ "+t("mk_s_draft"));renderMkt()}});
+}
+
+/* ======================= MANAGER OVERVIEW ======================= */
+function renderOverview(){
+  var open=S.req.items.filter(function(r){return r.st!=="done"}),od=open.filter(function(r){return r.due<0}).length;
+  var idn=S.idc.cases.filter(function(c){return c.st!=="done"}).length,pend=S.mk.camps.filter(function(c){return c.st==="pending"}).length,outq=S.out.q.filter(function(o){return o.st==="queued"}).length;
+  var taxd=S.tax.agency.filter(function(a){return a.st!=="done"&&a.due<=14}).length,cert=S.tax.certs.filter(function(c){return c.st==="need"||c.st==="req"}).length;
+  function K(label,val,sub,tab,sec,red){return '<div class="card icard"><div class="d">'+esc(label)+'</div><div style="font-size:28px;font-weight:700;color:'+(red?"var(--red)":"var(--ink)")+'">'+val+'</div><div class="d">'+esc(sub||"")+'</div>'+ab("goto",t("ov_go"),"",false,tab+":"+sec)+'</div>'}
+  var h='<p class="note">'+esc(t("ov_intro"))+'</p><div class="cards">'+K(t("ov_req"),open.length,od+" "+t("ov_od"),"desk","req",od>0)+K(t("ov_id"),idn,"","desk","id",idn>0)+K(t("ov_tax"),taxd,"","desk","tax",taxd>0)+K(t("ov_cert"),cert,"","desk","tax",false)+K(t("ov_cam"),pend,"","mkt","camp",false)+K(t("ov_out"),outq,"","desk","out",false)+'</div>';
+  h+='<h3 style="margin:16px 0 6px">'+esc(t("ov_urg"))+'</h3><table class="tbl"><tbody>'+ROLES.map(function(r){var a=S.items[r];return '<tr><td>'+esc(roleName(r))+'</td><td>'+a.length+'</td><td><span class="badge r">'+a.filter(function(i){return i.urg===2}).length+'</span></td></tr>'}).join("")+'</tbody></table>';
+  $("main").innerHTML=h;
+  bind($("main"),{goto:function(v){var p=v.split(":");S.tab=p[0];if(p[0]==="desk")S.desk.sec=p[1];if(p[0]==="mkt")S.mk.sec=p[1];render()}});
+}
+
+/* ======================= TODAY (agent dashboard) ======================= */
+function seedToday(){
+  var tx=["להתקשר לגבי חידוש רכב","לשלוח הצעה לביטוח דירה","לאסוף אישור שנתי","לתאם פגישת סקירה","לבדוק מסמך חסר","לעדכן כתובת"];
+  S.today.tasks=tx.map(function(x,i){return {id:"k"+i,txt:x,client:NAMES[(i*7+2)%NAMES.length],due:[0,0,-2,3,-1,5][i],done:i===5,deleg:i===3}});
+  S.today.tasks.push({id:"k9",txt:"לבדוק ציון קבלה מהמסלקה",client:NAMES[9],due:-4,done:true,deleg:false});
+}
+seedToday();
+function renderToday(){
+  var T=S.today,h=sim2()+'<p class="note">'+esc(t("td_intro"))+'</p><div class="actions" style="margin:0 0 12px">'+ab("qa","+ "+t("qa_new"),"",false,"client")+ab("qa","+ "+t("qa_lead"),"",false,"lead")+ab("qa","+ "+t("qa_mtg"),"",false,"mtg")+'</div><div class="cards" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr))">';
+  var leads=NAMES.filter(function(n){return Hn(n)%3!==0}).slice(0,6);
+  h+='<div class="card icard"><b>'+esc(t("td_leads"))+' ('+leads.length+')</b>'+leads.map(function(n){return '<div class="prow" data-a="openc" data-v="'+esc(n)+'"><span class="pn" dir="auto">'+esc(nm(n))+'</span><span class="pid">'+esc(t("ld_s"+(1+Hn(n)%3)))+'</span></div>'}).join("")+'</div>';
+  h+='<div class="card icard"><b>'+esc(t("td_wf"))+' (8)</b>'+NAMES.slice(0,5).map(function(n){return '<div class="prow" data-a="openc" data-v="'+esc(n)+'"><span class="pn" dir="auto">'+esc(nm(n))+'</span><span class="pid">'+esc(t("wf_t"+(1+Hn(n)%4)))+'</span></div>'}).join("")+'</div>';
+  var tk=T.tasks.filter(function(x){return T.tk==="today"?!x.done&&x.due===0:T.tk==="over"?!x.done&&x.due<0:T.tk==="next"?!x.done&&x.due>0:T.tk==="done"?x.done:x.deleg});
+  h+='<div class="card icard"><b>'+esc(t("td_tasks"))+'</b>'+chipRow("tk",[["today",t("tk_today")],["over",t("tk_over")],["next",t("tk_next")],["done",t("tk_done")],["deleg",t("tk_deleg")]],T.tk)+(tk.map(function(x){return '<div class="step"><button class="chip" data-a="tkd" data-v="'+x.id+'" aria-pressed="'+x.done+'">'+(x.done?"✓":"○")+'</button> '+esc(x.txt)+' <span class="pid" dir="auto">'+esc(nm(x.client))+'</span></div>'}).join("")||'<div class="empty">'+esc(t("fl_none"))+'</div>')+'</div>';
+  h+='<div class="card icard"><b>'+esc(t("td_last"))+'</b>'+NAMES.slice(-5).reverse().map(function(n){return '<div class="prow" data-a="openc" data-v="'+esc(n)+'"><span class="pn" dir="auto">'+esc(nm(n))+'</span><span class="pid" dir="ltr">'+esc(clientId(n))+'</span></div>'}).join("")+'</div>';
+  var bd=NAMES.filter(function(n){return Hn(n)%9===T.bk.length%9}),bl=NAMES.slice(0,12).filter(function(n){return Hn(n)%4===({today:0,recent:1,next:2}[T.bk]||0)}).slice(0,4);
+  h+='<div class="card icard"><b>'+esc(t("td_bd"))+'</b>'+chipRow("bk",[["today",t("bd_today")],["recent",t("bd_recent")],["next",t("bd_next")]],T.bk)+bl.map(function(n){return '<div class="prow"><span class="pn" dir="auto">'+esc(nm(n))+'</span>'+ab("greet",t("bd_greet"),"",false,n)+'</div>'}).join("")+'</div></div>';
+  $("main").innerHTML=h;
+  bind($("main"),{
+   qa:function(v){S.tab="file";S.file.sheet=v;render()},openc:function(v){S.file.client=v;S.file.tab="over";S.tab="file";render()},
+   tk:function(v){T.tk=v;renderToday()},bk:function(v){T.bk=v;renderToday()},tkd:function(v){var x=T.tasks.filter(function(y){return y.id===v})[0];x.done=!x.done;renderToday()},
+   greet:function(v){if(consent(v)==="in"){logAudit(who(),t("bd_sent")+" / "+v);toast("✓ "+t("bd_sent"))}else toast(t("bd_block"))}
+  });
+}
+
+/* ======================= CLIENT FILE ======================= */
+var SHEETS={
+ client:{f:[["name","sf_name","text",1],["idn","sf_id","text",1],["phone","sf_phone","text"]],g:"c"},
+ lead:{f:[["type","sf_type","sel:ld_t1,ld_t2,ld_t3,ld_t4",1],["interest","sf_interest","text"],["st","sf_status","sel:ld_s1,ld_s2,ld_s3,ld_s4"]]},
+ employer:{f:[["name","sf_name","text",1],["phone","sf_phone","text"]],g:"e"},
+ act:{f:[["k","sf_type","sel:ty_phone,ty_email,ty_text",1],["txt","sf_desc","text",1]]},
+ task:{f:[["txt","sf_desc","text",1],["date","sf_date","date",1]]},
+ mtg:{f:[["type","sf_type","sel:mt_in,mt_ph,mt_on",1],["date","sf_date","date",1],["subject","sf_subject","text",1]]},
+ sum:{f:[["title","sf_subject","text",1],["text","sf_text","text"]]},
+ wf:{f:[["type","sf_type","sel:wf_t1,wf_t2,wf_t3,wf_t4",1],["handler","sf_handler","text"],["desc","sf_desc","text",1]]},
+ rep:{f:[["period","sf_period","sel:rp_m,rp_q,rp_y",1]]},
+ emp:{f:[["employer","sf_employer","text",1],["type","sf_type","sel:em_emp,em_self,em_both,em_none",1],["salary","sf_salary","text"]]},
+ rel:{f:[["name","sf_name","sel:@names",1],["rel","sf_rel","sel:rl_spouse,rl_child,rl_parent,rl_sibling,rl_grand",1]]}
+};
+function sheetHtml(key){
+  var S0=SHEETS[key];
+  var h='<div class="card" style="padding:14px;margin-bottom:12px;border-color:var(--accent)"><b>'+esc(t("fl_new"))+': '+esc(t("sh_"+(key==="task"?"task":key)))+'</b><div class="form" style="margin-top:8px">';
+  S0.f.forEach(function(f){
+    var inp;
+    if(f[2].indexOf("sel:")===0){var o=f[2].slice(4);inp='<select data-sf="'+f[0]+'">'+(o==="@names"?NAMES.map(function(n){return '<option value="'+esc(n)+'">'+esc(nm(n))+'</option>'}).join(""):o.split(",").map(function(k){return '<option value="'+k+'">'+esc(t(k))+'</option>'}).join(""))+'</select>'}
+    else inp='<input data-sf="'+f[0]+'" type="'+(f[2]==="date"?"date":"text")+'" dir="auto">';
+    h+=field(t(f[1])+(f[3]?" *":""),inp)});
+  return h+'</div><div class="actions">'+b("shSave",t("save"),"primary")+b("shCancel",t("cancel"))+'</div></div>';
+}
+function saveSheet(key,c){
+  var S0=SHEETS[key],v={},miss=[],box=$("flSheet");
+  box.querySelectorAll("[data-sf]").forEach(function(el){v[el.dataset.sf]=el.value.trim()});
+  S0.f.forEach(function(f){if(f[3]&&!v[f[0]])miss.push(t(f[1]))});
+  if(miss.length){toast(t("sf_req",{f:miss.join(", ")}));return false}
+  var d=fdata(c);
+  if(key==="client"){if(!idValid(v.idn)){toast(t("sf_badid"));return false}NAMES.push(v.name);CLANG[v.name]="he";IDS[v.name]=v.idn;S.prof[v.name]=Object.assign(prof(v.name),{phone:v.phone||""});S.file.client=v.name}
+  else if(key==="lead")d.leads.unshift({type:v.type,interest:v.interest,st:v.st||"ld_s1"});
+  else if(key==="employer")d.emp.unshift({employer:v.name,type:"em_emp",salary:0,from:dstr(0)});
+  else if(key==="act")d.acts.unshift({k:v.k.replace("ty_",""),txt:v.txt,date:dstr(0),dur:0});
+  else if(key==="task")S.today.tasks.unshift({id:"k"+Date.now(),txt:v.txt,client:c,due:Math.round((new Date(v.date)-new Date(dstr(0)))/DAYMS),done:false,deleg:false});
+  else if(key==="mtg")d.mtg.unshift({type:v.type,date:v.date,subject:v.subject});
+  else if(key==="sum")d.sum.unshift({title:v.title,date:dstr(0)});
+  else if(key==="wf")d.wf.unshift({type:v.type,handler:v.handler||AGENT.name,st:"wf_s1"});
+  else if(key==="rep")d.rep.unshift({period:t(v.period),date:dstr(0)});
+  else if(key==="emp")d.emp.unshift({employer:v.employer,type:v.type,salary:+v.salary||0,from:dstr(0)});
+  else if(key==="rel")d.rel.push({name:v.name,rel:v.rel});
+  logAudit(who(),t("sh_"+key)+" / "+c);toast("✓ "+t("sf_ok"));return true;
+}
+function renderFile(){
+  var F=S.file,c=F.client,p=prof(c),tabs=["over","prod","act","docs","emp","leads","mtg","rel","rep","wf","info"];
+  var opts=NAMES.filter(function(n){return !F.q||matchClient(n,F.q)}).slice(0,200);
+  var h='<p class="note">'+esc(t("fl_intro"))+'</p><div class="toolbar"><input id="flQ" type="search" placeholder="'+esc(t("fl_search"))+'" value="'+esc(F.q)+'"><select id="flC" dir="auto">'+(opts.indexOf(c)<0?'<option value="'+esc(c)+'" selected>'+esc(nm(c))+'</option>':"")+opts.map(function(n){return '<option value="'+esc(n)+'"'+(n===c?" selected":"")+'>'+esc(nm(n))+'</option>'}).join("")+'</select><span class="sp"></span>'+
+   ["client","lead","employer","act","task","mtg","sum","wf","rep"].map(function(k){return ab("flnew","+ "+t("sh_"+k),"",false,k)}).join("")+'</div>';
+  h+='<div class="card" style="padding:12px;margin-bottom:10px"><b style="font-size:17px" dir="auto">'+esc(nm(c))+'</b> <span class="pid" dir="ltr">'+esc(clientId(c))+'</span><dl class="kv" style="grid-template-columns:repeat(4,auto 1fr)"><dt>'+esc(t("fl_status"))+'</dt><dd>'+esc(p.status)+'</dd><dt>'+esc(t("fl_class"))+'</dt><dd>'+esc(p.cls)+'</dd><dt>'+esc(t("fl_src"))+'</dt><dd>'+esc(p.src)+'</dd><dt>'+esc(t("fl_mgr"))+'</dt><dd>'+esc(AGENT.name)+'</dd><dt>'+esc(t("fl_lang"))+'</dt><dd>'+esc(LNAME[clang(c)])+'</dd><dt>'+esc(t("fl_cons"))+'</dt><dd>'+esc(t("fl_c_"+consent(c)))+'</dd><dt>'+esc(t("sf_phone"))+'</dt><dd dir="ltr">'+esc(p.phone)+'</dd><dt>'+esc(t("f_addr"))+'</dt><dd dir="auto">'+esc(p.addr+", "+p.city)+'</dd></dl></div>';
+  h+='<div id="flSheet"></div><div class="toolbar">'+tabs.map(function(k){return '<button class="chip" data-a="fltab" data-v="'+k+'" aria-pressed="'+(F.tab===k)+'">'+esc(t("fl_tab_"+k))+'</button>'}).join("")+'</div><div id="flBody"></div>';
+  $("main").innerHTML=h;
+  $("flQ").oninput=function(){F.q=this.value;var pos=this.selectionStart;renderFile();var q=$("flQ");q.focus();try{q.setSelectionRange(pos,pos)}catch(e){}};
+  $("flC").onchange=function(){F.client=this.value;F.pi=0;renderFile()};
+  bind($("main"),{fltab:function(v){F.tab=v;renderFile()},flnew:function(v){F.sheet=v;renderFile()}});
+  if(F.sheet){var sh=$("flSheet");sh.innerHTML=sheetHtml(F.sheet);
+    $("shCancel").onclick=function(){F.sheet=null;renderFile()};
+    $("shSave").onclick=function(){var k=F.sheet;if(saveSheet(k,F.client)){F.sheet=null;renderFile()}}}
+  drawFileTab();
+}
+function listOrNone(a,fn){return a.length?a.map(fn).join(""):'<div class="empty">'+esc(t("fl_none"))+'</div>'}
+function drawFileTab(){
+  var F=S.file,c=F.client,d=fdata(c),B=$("flBody"),h="";
+  var del=function(arr,i){return ab("fldel",t("rm_ok").replace(/.*/,"✕"),"",false,arr+":"+i)};
+  if(F.tab==="over"){
+    var ps=prods(c),fam={};ps.forEach(function(p){fam[p.f]=(fam[p.f]||0)+1});var tot=ps.reduce(function(a,p){return a+p.bal},0);
+    h+='<div class="cards"><div class="card icard"><b>'+esc(t("pd_total"))+'</b><div style="font-size:26px" dir="ltr">'+money(tot)+'</div></div>'+Object.keys(fam).map(function(k){return '<div class="card icard"><div class="d">'+esc(t("pr_"+k))+'</div><b>'+fam[k]+'</b></div>'}).join("")+'</div>';
+    var wk=ps.filter(function(p){return !p.cov.length&&!SAV[p.f]});
+    h+='<h3 style="margin:14px 0 6px">'+esc(t("pd_rec"))+'</h3>'+(ps.some(function(p){return SAV[p.f]&&p.feeD>2.5})?'<div class="msg">'+esc(t("pd_rec1"))+'</div>':"")+(wk.length?'<div class="msg">'+esc(t("pd_rec2"))+'</div>':"")+(!wk.length&&!ps.some(function(p){return SAV[p.f]&&p.feeD>2.5})?'<div class="empty">'+esc(t("pd_nonote"))+'</div>':"");
+  }else if(F.tab==="prod"){
+    var pl=prods(c);F.pi=Math.min(F.pi,pl.length-1);var p=pl[F.pi];
+    h+='<p class="note">'+esc(t("pd_list"))+'</p><div class="grid"><div class="card" style="padding:10px">'+pl.map(function(x,i){return '<div class="prow" data-a="flprod" data-v="'+i+'" style="'+(i===F.pi?"border-color:var(--accent);background:var(--accent-soft)":"")+'"><span class="pn">'+esc(t("pr_"+x.f))+'</span><span class="pid">'+esc(insn(x.ins))+'</span><b dir="ltr">'+(x.bal?money(x.bal):money(x.prem)+"/m")+'</b></div>'}).join("")+'</div><div class="card" style="padding:14px"><b>'+esc(t("pr_"+p.f))+' · '+esc(insn(p.ins))+'</b><div class="toolbar" style="margin-top:8px">'+["gen","cov","ben","dep","ret","clm","notes"].map(function(k){return '<button class="chip" data-a="flpt" data-v="'+k+'" aria-pressed="'+(F.pt===k)+'">'+esc(t("pd_"+k))+'</button>'}).join("")+'</div>'+prodDetailHtml(p,F.pt)+'</div></div>';
+  }else if(F.tab==="act"){
+    h+=listOrNone(d.acts,function(a,i){return '<div class="step"><span class="badge">'+esc(t("ty_"+a.k))+'</span> '+esc(a.txt)+' <span class="pid">'+a.date+(a.dur?" · "+Math.floor(a.dur/60)+":"+String(a.dur%60).padStart(2,"0"):"")+'</span> '+del("acts",i)+'</div>'});
+  }else if(F.tab==="docs"){
+    h+='<div class="actions" style="margin:0 0 8px">'+ab("fldoc",t("dc_cam"),"",false,"cam")+ab("fldoc",t("dc_file"),"",false,"file")+ab("fldoc",t("dc_shot"),"",false,"shot")+'</div>'+listOrNone(d.docs,function(x,i){return '<div class="step">📄 '+esc(x.name)+' <span class="pid">'+x.date+'</span>'+(x.pwd?' <span class="badge a">'+esc(t("dc_pwd"))+'</span>':"")+' '+ab("fldocs",t("dc_share"),"",false,"s")+ab("fldocs",t("dc_dl"),"",false,"d")+del("docs",i)+'</div>'});
+  }else if(F.tab==="emp"){
+    h+=listOrNone(d.emp,function(x,i){return '<div class="step"><b dir="auto">'+esc(x.employer)+'</b> · '+esc(t(x.type))+' · '+money(x.salary)+' <span class="pid">'+x.from+'</span> '+ab("flrm",t("rm_ok"),"",false,"emp:"+i)+'</div>'});
+  }else if(F.tab==="leads"){
+    h+=listOrNone(d.leads,function(x){return '<div class="step"><span class="badge">'+esc(t(x.type))+'</span> '+esc(x.interest)+' · '+esc(t(x.st))+'</div>'});
+  }else if(F.tab==="mtg"){
+    h+='<h3 style="margin:0 0 6px;font-size:15px">'+esc(t("td_wf").replace(/.*/,t("fl_tab_mtg")))+'</h3>'+listOrNone(d.mtg,function(x){return '<div class="step"><span class="badge">'+esc(t(x.type))+'</span> '+esc(x.subject)+' <span class="pid">'+x.date+'</span></div>'})+'<h3 style="margin:12px 0 6px;font-size:15px">'+esc(t("sh_sum"))+'</h3>'+listOrNone(d.sum,function(x){return '<div class="step">📝 '+esc(x.title)+' <span class="pid">'+x.date+'</span> '+ab("fldocs",t("ap_view"),"",false,"v")+'</div>'});
+  }else if(F.tab==="rel"){
+    h+=listOrNone(d.rel,function(x,i){return '<div class="step"><b dir="auto">'+esc(nm(x.name))+'</b> · '+esc(t(x.rel))+' '+ab("flrm",t("rm_ok"),"",false,"rel:"+i)+'</div>'})+'<div class="actions">'+ab("flnew","+ "+t("sh_rel"),"",false,"rel")+ab("flnew","+ "+t("sh_emp"),"",false,"emp")+'</div>';
+  }else if(F.tab==="rep"){
+    h+='<div class="actions" style="margin:0 0 8px"><span>'+esc(t("rp_freq"))+':</span>'+["rp_off","rp_m","rp_q","rp_y"].map(function(k){return '<button class="chip" data-a="flrf" data-v="'+k+'" aria-pressed="'+((d.rf||"rp_q")===k)+'">'+esc(t(k))+'</button>'}).join("")+'</div>'+listOrNone(d.rep,function(x){return '<div class="step">📊 '+esc(x.period)+' <span class="pid">'+x.date+'</span> '+ab("flrp",t("rp_prev"))+'</div>'});
+  }else if(F.tab==="wf"){
+    h+=listOrNone(d.wf,function(x){return '<div class="step"><span class="badge">'+esc(t(x.type))+'</span> '+esc(x.handler)+' · '+esc(t(x.st))+'</div>'});
+  }else{
+    var R=S.ir[c]||(S.ir[c]={a:Hn(c)%2?dstr(-60):"",b:Hn(c)%3?dstr(-20):"",c:Hn(c)%5?dstr(-30):"",exp:{a:150,b:400,c:40},step:0});
+    h+='<h3 style="margin:0 0 6px;font-size:16px">'+esc(t("ir_hdr"))+'</h3>';
+    var allOk=true;
+    [["a","ir_a"],["b","ir_b"],["c","ir_c"]].forEach(function(x){
+      var s=R[x[0]],ex=R.exp[x[0]];if(!s)allOk=false;
+      h+='<div class="card icard" style="margin-bottom:8px"><b>'+esc(t(x[1]))+'</b> <span class="badge '+(s?"":"r")+'">'+esc(s?t("ir_signed",{d:s}):t("ir_unsigned"))+'</span>'+(s?'<div class="d '+(ex<180?"flag":"")+'">'+esc(t("ir_exp",{n:ex}))+(ex<180?" - "+esc(t("ir_soon")):"")+'</div>':"")+'<div class="actions">'+(!s?ab("irsign",t("ir_office"),"",false,x[0])+ab("irlink",t("ir_link"),"",false,x[0])+ab("irsp",t("ir_spouse"),"",false,x[0]):(ex<180?ab("irlink",t("ir_resign"),"",false,x[0]):""))+'</div></div>'});
+    h+=(allOk?"":'<div class="alert">'+esc(t("ir_need"))+'</div>')+'<div class="actions">'+ab("irorder",t("ir_order"),"primary",!allOk||R.step>0)+'</div>';
+    if(R.step>0){h+='<h3 style="margin:12px 0 6px;font-size:15px">'+esc(t("ir_progress"))+'</h3>'+[1,2,3,4].map(function(i){return '<div class="step"><span class="'+(R.step>=i?"tick":"")+'">'+(R.step>=i?"✓":"○")+'</span> '+esc(t("ir_p"+i))+'</div>'}).join("")+(R.step<4?'<div class="actions">'+ab("irff",t("ir_ff"))+'</div>':"")}
+  }
+  B.innerHTML=h;
+  bind(B,{
+   flprod:function(v){F.pi=+v;drawFileTab()},flpt:function(v){F.pt=v;drawFileTab()},
+   fldel:function(v){var p=v.split(":");d[p[0]].splice(+p[1],1);toast("✓ "+t("rm_ok"));drawFileTab()},
+   flrm:function(v,el){if(el.dataset.arm!=="1"){el.dataset.arm="1";el.textContent=t("rm_confirm");return}var p=v.split(":");d[p[0]].splice(+p[1],1);toast("✓ "+t("rm_ok"));drawFileTab()},
+   fldoc:function(v){d.docs.unshift({name:t("dc_"+v),date:dstr(0),pwd:false});toast("✓ "+t("dc_done"));drawFileTab()},fldocs:function(){toast("✓ "+t("sim"))},
+   flrf:function(v){d.rf=v;drawFileTab()},flrp:function(){logAudit(who(),t("rp_sent")+" / "+c);toast("✓ "+t("rp_sent"))},
+   flnew:function(v){F.sheet=v;renderFile()},
+   irsign:function(v){var R=S.ir[c];R[v]=dstr(0);R.exp[v]=365;logAudit(who(),t("ir_signed",{d:dstr(0)})+" / "+c);drawFileTab()},
+   irlink:function(v){toast("✓ "+t("ir_sent"))},irsp:function(){toast("✓ "+t("ir_sent"))},
+   irorder:function(){S.ir[c].step=1;logAudit(who(),t("ir_p1")+" / "+c);drawFileTab()},irff:function(){var R=S.ir[c];R.step=Math.min(4,R.step+1);if(R.step===4){logAudit(who(),t("ir_p4")+" / "+c);toast("✓ "+t("ir_p4"))}drawFileTab()}
+  });
+}
+
+/* ======================= CLIENT APP PREVIEW ======================= */
+function renderApp(){
+  var A=S.app,h=sim2()+'<p class="note">'+esc(t("ap_intro"))+'</p><div class="grid" style="grid-template-columns:minmax(0,380px) minmax(0,1fr)"><div><div class="phone" id="phone"></div></div><div class="card" style="padding:14px" id="appCfg"></div></div>';
+  $("main").innerHTML=h;
+  drawPhone();drawAppCfg();
+}
+function drawAppCfg(){
+  var A=S.app,box=$("appCfg");
+  function sw(g,k,label){return '<label class="chk"><input type="checkbox" data-sw="'+g+'.'+k+'"'+(A[g][k]?" checked":"")+'> '+esc(label)+'</label>'}
+  var h='<b>'+esc(t("ap_cfg"))+'</b><div class="step"><b>1</b> '+esc(t("ap_c1"))+'<br>'+sw("svc","travel",t("ap_svc_travel"))+sw("svc","savings",t("ap_svc_sav"))+'</div>'+
+   '<div class="step"><b>2</b> '+esc(t("ap_c2"))+'<br>'+sw("vis","prod",t("ap_v_prod"))+sw("vis","docs",t("ap_v_docs"))+sw("vis","proc",t("ap_v_proc"))+'</div>'+
+   '<div class="step"><b>3</b> '+esc(t("ap_c3"))+': '+nmSel("apC",A.client)+'</div>'+
+   '<div class="step"><b>4</b> '+esc(t("ap_c4"))+'<div class="msg" dir="auto">'+esc(t("ap_inv_txt",{n:nm(A.client),a:AGENT.name,k:fnv(A.client).slice(0,6)}))+'</div></div>'+
+   '<div class="step"><b>5</b> '+esc(t("ap_c5"))+'<br>'+sw("ch","wa",t("ap_ch_wa"))+sw("ch","ph",t("ap_ch_ph"))+sw("ch","em",t("ap_ch_em"))+sw("ch","link",t("ap_ch_link"))+'</div>'+
+   '<div class="actions">'+b("apReset",t("ap_reset"))+'</div>';
+  box.innerHTML=h;
+  box.querySelectorAll("[data-sw]").forEach(function(el){el.onchange=function(){var p=el.dataset.sw.split(".");A[p[0]][p[1]]=el.checked?1:0;drawPhone()}});
+  $("apC").onchange=function(){A.client=this.value;A.pi=0;A.scr="invite";A.tab="home";drawAppCfg();drawPhone()};
+  $("apReset").onclick=function(){A.scr="invite";A.tab="home";A.sheet=null;A.terms=0;A.bio=0;A.pd=null;A.buy=null;drawPhone()};
+}
+function drawPhone(){
+  var A=S.app,P=$("phone");if(!P)return;var c=A.client,h="";
+  function top(title,back){return '<div class="ptop">'+(back?'<button class="pback" data-a="pback">‹</button>':"")+'<b>'+esc(title)+'</b></div>'}
+  var scr=A.scr;
+  if(scr==="invite"){
+    h=top(t("ap_inv_title"))+'<div class="pbody"><div class="msg" dir="auto"><small>SMS / '+esc(t("ot_email"))+'</small>'+esc(t("ap_inv_txt",{n:nm(c),a:AGENT.name,k:fnv(c).slice(0,6)}))+'</div><div class="actions">'+ab("pgo",t("ap_open_link"),"primary",false,"welcome")+'</div></div>';
+  }else if(scr==="welcome"){
+    h=top("SurenseOne".replace("SurenseOne","ansurance"))+'<div class="pbody pc"><div class="plogo">ansurance</div><h3>'+esc(t("ap_welcome"))+'</h3><div class="note">'+esc(t("ap_pick_ag"))+'</div><select id="apAg"><option value="0">'+esc(AGENCY.name)+'</option><option value="1">סוכנות ביטוח צפון</option></select><div class="actions" style="justify-content:center">'+ab("pgo",t("ap_login"),"primary",false,"terms")+'</div><div class="actions" style="justify-content:center">'+ab("pgo",t("ap_nolink"),"",false,"nolink")+'</div></div>';
+  }else if(scr==="nolink"){
+    h=top(t("ap_nolink"),1)+'<div class="pbody"><p>'+esc(t("ap_nolink_t"))+'</p><div class="msg" dir="auto">'+esc(t("ap_nolink_m"))+'</div><div class="actions">'+ab("pshare",t("ap_share_wa"),"primary")+'</div></div>';
+  }else if(scr==="terms"){
+    h=top(t("ap_terms"),1)+'<div class="pbody"><p>'+esc(t("ap_terms_t"))+'</p><label class="chk"><input type="checkbox" id="apTerms"'+(A.terms?" checked":"")+'> '+esc(t("ap_accept"))+'</label><div class="actions">'+b("apTermsGo",t("ap_login"),"primary",!A.terms)+'</div></div>';
+  }else if(scr==="login"){
+    h=top(t("ap_login"),1)+'<div class="pbody"><label class="fld"><span>'+esc(t("ap_phone"))+'</span><input id="apPh" value="'+esc(prof(c).phone)+'" dir="ltr"></label><div class="actions">'+ab("pgo",t("ap_sendcode"),"primary",false,"code")+'</div></div>';
+  }else if(scr==="code"){
+    h=top(t("ap_code"),1)+'<div class="pbody"><input id="apCode" inputmode="numeric" maxlength="4" dir="ltr" style="font-size:22px;letter-spacing:8px;text-align:center;width:100%"><div id="apCodeErr" class="flag"></div><div class="actions">'+b("apVerify",t("ap_verify"),"primary")+'</div></div>';
+  }else if(scr==="bio"){
+    h=top(t("ap_bio"))+'<div class="pbody pc"><div style="font-size:42px">🔒</div><p>'+esc(t("ap_bio_t"))+'</p><div class="actions" style="justify-content:center">'+ab("pbio",t("ap_bio_on"),"primary",false,"1")+ab("pbio",t("ap_bio_skip"),"",false,"0")+'</div></div>';
+  }else{
+    h=drawPhoneApp();
+  }
+  P.innerHTML=h;
+  bind(P,{
+   pgo:function(v){A.scr=v;drawPhone()},pback:function(){A.scr=A.scr==="nolink"?"welcome":A.scr==="terms"?"welcome":A.scr==="login"?"terms":"welcome";if(A.pd!==null&&A.scr==="app"){A.pd=null}drawPhone()},
+   pbio:function(v){A.bio=+v;A.scr="app";A.tab="home";drawPhone()},pshare:function(){toast("✓ "+t("sim"))},
+   ptab:function(v){A.tab=v;A.pd=null;A.sheet=null;A.buy=null;drawPhone()},
+   pprod:function(v){A.pd=+v;A.pt="gen";drawPhone()},ppt:function(v){A.pt=v;drawPhone()},pclose:function(){A.sheet=null;A.pd=null;A.buy=null;drawPhone()},
+   psheet:function(v){A.sheet=v;drawPhone()},pbuy:function(v){A.buy=v;drawPhone()},pwa:function(){if(!A.waOk){toast(t("ap_no_wa"))}else toast("✓ "+t("sim"))},
+   pnote:function(v){toast("✓ "+t("sim"))},psign:function(){A.scr="welcome";A.sheet=null;drawPhone()}
+  });
+  if($("apAg"))$("apAg").onchange=function(){A.ag=+this.value};
+  if($("apTerms"))$("apTerms").onchange=function(){A.terms=this.checked?1:0;drawPhone()};
+  if($("apTermsGo"))$("apTermsGo").onclick=function(){A.scr="login";drawPhone()};
+  if($("apVerify"))$("apVerify").onclick=function(){if($("apCode").value==="1234"){A.scr="bio";drawPhone()}else $("apCodeErr").textContent=t("ap_wrong")};
+  P.querySelectorAll("[data-pn]").forEach(function(el){el.onchange=function(){A.notif[el.dataset.pn]=el.checked?1:0}});
+  if($("apZipSave"))$("apZipSave").onclick=function(){var z=$("apZip").value.trim();if(!/^\d{5,7}$/.test(z)){$("apZipErr").textContent=t("ap_zip_bad");return}S.prof[c]=Object.assign(prof(c),{zip:z});toast("✓ "+t("sf_ok"))};
+}
+function drawPhoneApp(){
+  var A=S.app,c=A.client,p=prof(c),ps=prods(c),h="",r=rng(Hn(c)+3),hr=new Date().getHours();
+  var tabs=[["home","ap_home","⌂"],["prod","ap_products","▤"],["proc","ap_proc","⟳"],["docs","ap_docs","▭"],["prof","ap_profile","☺"]].filter(function(x){return x[0]==="home"||x[0]==="prof"||(x[0]==="prod"&&A.vis.prod)||(x[0]==="proc"&&A.vis.proc)||(x[0]==="docs"&&A.vis.docs)});
+  var body="";
+  var tot=ps.reduce(function(a,x){return a+x.bal},0),dep=ps.reduce(function(a,x){return a+(x.dep?x.dep.emp+x.dep.ee+x.dep.sev:0)},0),ann=ps.reduce(function(a,x){return a+x.pens},0),loan=ps.filter(function(x){return x.f==="loan"}).length*1900,prem=ps.reduce(function(a,x){return a+x.prem},0);
+  if(A.sheet==="contact"){
+    body='<div class="sheet"><b>'+esc(t("ap_contact"))+'</b>'+(A.ch.wa?'<div class="actions">'+ab("pwa",t("ap_ch_wa"),"primary")+'</div>':"")+(A.ch.ph?'<div class="actions">'+ab("pnote",t("ap_ch_ph")+" "+AGENCY.zip.slice(0,0)+"03-5550100")+'</div>':"")+(A.ch.em?'<div class="actions">'+ab("pnote",t("ap_ch_em"))+'</div>':"")+(A.ch.link?'<div class="actions">'+ab("pnote",t("ap_ch_link"))+'</div>':"")+(!A.waOk?"":"")+'<div class="actions">'+ab("pclose",t("close"))+'</div></div>';
+  }else if(A.buy){
+    body='<div class="sheet"><b>'+esc(t(A.buy==="travel"?"ap_buy_travel":"ap_buy_sav"))+'</b><p class="note">'+esc(t("ap_buy_note"))+'</p><div class="msg" dir="ltr">https://link.example/one/'+esc(fnv(c).slice(0,6))+'/'+A.buy+'</div><div class="actions">'+ab("pnote",t("ap_open_link"),"primary")+ab("pclose",t("close"))+'</div></div>';
+  }else if(A.tab==="home"){
+    var bars=[0,1,2,3,4,5,6].map(function(){return 40+Math.floor(r()*55)});
+    var bday=Hn(c)%7===0;
+    body='<div class="phead"><div>'+esc(hr<12?t("ap_gm"):hr<18?t("ap_ga"):t("ap_ge"))+', <b dir="auto">'+esc(nm(c))+'</b></div>'+(bday?'<div class="pbd">🎂 '+esc(t("ap_bday"))+'</div>':"")+'</div>'+
+     '<div class="pcard"><div class="d">'+esc(t("ap_saved"))+'</div><div class="big" dir="ltr">'+money(tot)+'</div><div class="d">'+esc(t("ap_ytd"))+': <b class="tick" dir="ltr">'+(ps[0]?ps[0].ytd:0)+'% ↗</b></div><div class="pbars">'+bars.map(function(x){return '<i style="height:'+x+'%"></i>'}).join("")+'</div></div>'+
+     '<div class="ptiles"><div><span>'+esc(t("ap_t_dep"))+'</span><b dir="ltr">'+money(dep)+'</b></div><div><span>'+esc(t("ap_t_ann"))+'</span><b dir="ltr">'+money(ann)+'</b></div><div><span>'+esc(t("ap_t_loan"))+'</span><b dir="ltr">'+money(loan)+'</b></div><div><span>'+esc(t("ap_t_prem"))+'</span><b dir="ltr">'+money(prem)+'</b></div></div>'+
+     '<div class="pcard"><div class="d">💡 '+esc(t("ap_rec"))+'</div>'+esc(t("pd_rec1"))+'</div>'+(A.vis.proc?'<div class="pcard"><div class="d">'+esc(t("ap_new"))+'</div>'+esc(t("wf_t"+(1+Hn(c)%4)))+'</div>':"")+
+     '<div class="actions">'+ab("psheet",t("ap_qa_meet"),"",false,"contact")+ab("psheet",t("ap_qa_quote"),"",false,"contact")+ab("psheet",t("ap_qa_contact"),"primary",false,"contact")+'</div>'+
+     '<div class="actions">'+(A.svc.travel?ab("pbuy",t("ap_buy_travel"),"",false,"travel"):"")+(A.svc.savings?ab("pbuy",t("ap_buy_sav"),"",false,"sav"):"")+'</div>';
+  }else if(A.tab==="prod"){
+    if(A.pd!==null&&ps[A.pd]){var pp=ps[A.pd];body='<b>'+esc(t("pr_"+pp.f))+' · '+esc(insn(pp.ins))+'</b><div class="toolbar" style="margin-top:6px">'+["gen","cov","ben","dep","ret","clm"].map(function(k){return '<button class="chip" data-a="ppt" data-v="'+k+'" aria-pressed="'+(A.pt===k)+'">'+esc(t("pd_"+k))+'</button>'}).join("")+'</div>'+prodDetailHtml(pp,A.pt,1)+'<div class="actions">'+ab("psheet",t("ap_inq"),"primary",false,"contact")+ab("pclose",t("close"))+'</div>'}
+    else{var groups={};ps.forEach(function(x,i){(groups[x.f]=groups[x.f]||[]).push(i)});body=Object.keys(groups).map(function(k){return '<div class="d">'+esc(t("pr_"+k))+'</div>'+groups[k].map(function(i){var x=ps[i];return '<div class="prow" data-a="pprod" data-v="'+i+'"><span class="pn">'+esc(insn(x.ins))+'</span><b dir="ltr">'+(x.bal?money(x.bal):money(x.prem)+"/m")+'</b></div>'}).join("")}).join("")}
+  }else if(A.tab==="proc"){
+    body=ps.length?[0,1,2].map(function(i){return '<div class="pcard"><b>'+esc(t("wf_t"+(1+(Hn(c)+i)%4)))+'</b><div class="d">'+esc(insn(INSURERS[(Hn(c)+i)%INSURERS.length]))+' · '+dstr(-i*6)+' · '+esc(t("ap_docs_n",{n:1+i}))+'</div>'+(i===0?'<span class="badge a">'+esc(t("ap_new"))+'</span>':"")+'</div>'}).join(""):'<div class="empty">'+esc(t("ap_noproc"))+'</div>';
+  }else if(A.tab==="docs"){
+    body=[["ap_doc_sum",["סיכום פגישה: סקירת תיק פנסיוני","סיכום פגישה: בדיקת כיסויים"]],["ap_doc_rep",["דוח רבעוני","דוח פרודוקציה"]],["ap_doc_frm",["טופס הסכמה לביטוח"]]].map(function(g){return '<div class="d">'+esc(t(g[0]))+'</div>'+g[1].map(function(x){return '<div class="prow"><span class="pn">'+esc(x)+'</span>'+ab("pnote",t("ap_view"))+ab("pnote","⬇")+ab("pnote","⇪")+'</div>'}).join("")}).join("");
+  }else{
+    body='<b>'+esc(t("ap_pi"))+'</b><div class="form" style="grid-template-columns:1fr"><label class="fld"><span>'+esc(t("f_addr"))+'</span><input value="'+esc(p.addr)+'" dir="auto"></label><label class="fld"><span>'+esc(t("f_zip"))+'</span><input id="apZip" value="'+esc(p.zip)+'" dir="ltr"></label><div id="apZipErr" class="flag"></div></div><div class="actions">'+b("apZipSave",t("save"),"primary")+'</div>'+
+     '<b>'+esc(t("ap_notif"))+'</b>'+[["proc","ap_n_proc"],["rec","ap_n_rec"],["bday","ap_n_bday"],["docs","ap_n_docs"]].map(function(x){return '<label class="chk"><input type="checkbox" data-pn="'+x[0]+'"'+(A.notif[x[0]]?" checked":"")+'> '+esc(t(x[1]))+'</label>'}).join("")+'<div class="actions">'+ab("psign",t("ap_signout"))+'</div>';
+  }
+  return top(AGENCY.name,0)+'<div class="pbody">'+body+'</div><div class="pnav">'+tabs.map(function(x){return '<button data-a="ptab" data-v="'+x[0]+'" aria-pressed="'+(A.tab===x[0]&&!A.sheet)+'"><span>'+x[2]+'</span>'+esc(t(x[1]))+'</button>'}).join("")+'</div>';
+  function top(title){return '<div class="ptop"><b>'+esc(title)+'</b></div>'}
+}
+
 /* ---------- boot ---------- */
 (function(){
   var l=load("lang");if(l&&I[l])S.lang=l;
-  var th=load("theme");if(th==="light"||th==="dark")S.theme=th;
-  var r=load("role");if(r&&ROLES.indexOf(r)>=0)S.role=r;
+  var th=load("theme");S.theme=th==="dark"?"dark":th==="system"?null:"light";
+  var r=load("role");S.role=(r&&ROLES.indexOf(r)>=0)?r:"back";S.tab=HOME[S.role];
   try{var sp=JSON.parse(load("prefs")||"null");if(sp)Object.assign(S.prefs,sp)}catch(e){}
   try{var cp=JSON.parse(load("cp")||"null");if(cp){S.cp=cp;Object.keys(cp).forEach(refreshMsgs)}}catch(e){}
   applyPrefs();

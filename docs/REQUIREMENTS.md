@@ -3,7 +3,7 @@
 Custom CRM for a small Israeli insurance agency.
 
 - Status: draft v0.1 (2026-11-04)
-- Team: 5 agents, 2 back-office clerks, 1 manager (8 users)
+- Team: 5 agents, 2 back-office clerks, 1 marketing person, 1 manager (9 users, four roles)
 - Jurisdiction: Israel (Capital Market, Insurance and Savings Authority, "CMISA", Privacy Protection Law)
 
 Items marked **[verify]** come from web research that was thin or contradictory and must be confirmed against the primary source (gov.il, the insurer, or counsel) before they become hard requirements.
@@ -18,21 +18,45 @@ Goals:
 4. Every role starts the day in its own Inbox.
 5. Regulatory duties (licensing, KYC/AML, complaints, privacy, record keeping) are built into the flows and not left to memory.
 
-Non-goals (v1): insurer-side policy administration, claims adjudication, investment management (agents hold no Securities Authority licence, see Calcalist note in section 11), a client mobile app (WhatsApp is the client channel).
+Non-goals (v1): insurer-side policy administration, claims adjudication, investment management (agents hold no Securities Authority licence, see Calcalist note in section 11), a client mobile app in v1 (WhatsApp is the client channel; the mock includes a preview of a client app, see section 9.3 and 9.4 for what it is modelled on).
 
 ## 2. Roles and permissions
 
-| Role | Count | Main job | Sees |
-|---|---|---|---|
-| Agent | 5 | Sell, advise, retain clients | Own clients and policies; team-shared clients by explicit share |
-| Back-office | 2 | Issue, endorse, renew, file, reconcile | All clients (work queue); no commission totals per agent |
-| Manager | 1 | Oversight, compliance, commissions, licences | Everything, including audit log and commission statements |
+Four roles. The back-office role is the one the product is built around (see F11 to F15): most paperwork passes through it.
+
+| Role | Count | Main job | Sees | Home screen |
+|---|---|---|---|---|
+| Agent / sales | 5 | Sell, advise, retain clients | Own clients and policies; team-shared clients by explicit share | Today: open leads, open processes, tasks (today, overdue, next, done, delegated), last clients, birthdays |
+| Back-office | 2 | Get the ID, register the client, fill the forms, send post and email, print labels, answer other insurers, keep the tax files, issue, endorse, renew, file | All clients (work queue); no commission totals per agent | Desk: the five back-office areas with counts, then the Inbox |
+| Marketing | 1 | Campaigns, segments, consent registry, unsubscribe handling, campaign results | Contact details, language, consent status and segment flags only; no documents, KYC, health or claim data **[verify with counsel: data minimization under Amendment 13]** | Campaigns |
+| Manager | 1 | Oversight, approvals, compliance, commissions, licences, tax deadlines | Everything, including audit log and commission statements | Overview: what waits for a decision today and what is slipping |
+
+Tabs per role (the mock implements exactly this):
+
+| Role | Tabs |
+|---|---|
+| Agent | Today, Inbox, Client file, WhatsApp, Live call, Pension, Client app preview, Clients (preferences), Settings |
+| Back-office | Desk, Inbox, Client file, Intake (fax, email), Pension, WhatsApp, Excel (join), Integrations, Clients (preferences), Settings |
+| Marketing | Campaigns, Inbox, WhatsApp, Excel (join), Clients (preferences), Settings |
+| Manager | Overview, Inbox, Desk, Campaigns, Client file, Client app preview, Integrations, Trust (audit), Clients (preferences), Settings |
+
+Other roles considered (not separate roles in v1):
+
+| Candidate | Decision |
+|---|---|
+| Compliance and AML officer | A hat the manager wears. Permissions are named capabilities (approve KYC flag, approve campaign, approve agent change, see audit) so the agency can later give them to a named person without a new role. |
+| Finance and bookkeeping | A hat of the manager or a back-office clerk (commission reconciliation F7, agency invoices and VAT in F15). The external accountant gets a read-only export, not a login. |
+| IT or system administrator | Not a role: user and permission admin belongs to the manager; hosting is managed (section 7). |
+| Client | External and read-only to their own data; later phase (client app preview in the mock). Never sees other clients, internal notes or the audit log. |
+| External accountant or tax adviser | Read-only package of tax certificates and the agency's yearly files (F15). No login in v1. |
+| Insurer or partner | No login. Exchanges only through adapters and documents (section 9). |
 
 Rules:
 
 - Role-based access plus per-client ownership (the agent of record).
-- A role switcher in the UI (see section 8) is a view switch for demo and for the manager. For real users it only offers roles they actually hold.
+- A role switcher in the UI (see section 8) is a view switch for demo and for the manager. For real users it only offers roles they actually hold. A user may hold more than one role.
 - Every read of a client record is audit-logged (section 7).
+- Work can be handed between roles from the Inbox (reassign with a note). An item that needs another role's approval goes to that role's Inbox, never by side channel.
 
 ## 3. Core flows
 
@@ -43,7 +67,7 @@ Each flow lists trigger, steps, actors, outputs and regulatory hooks.
 - Trigger: inbound lead (phone, WhatsApp, email, walk-in) or referral.
 - Steps:
   1. Agent creates the lead; duplicate check on ID number (9 digits, Luhn check digit validated) and phone.
-  2. Collect ID card plus the paper addendum (Sefach), proof of address if needed. Client may send photos over WhatsApp or email; they route through the intake pipeline (F6).
+  2. Collect ID card plus the paper addendum (Sefach), proof of address if needed. Client may send photos over WhatsApp or email; they route through the intake pipeline (F6). The back-office steps of getting the ID and registering the client are F11.
   3. KYC form completed: identity, beneficiary, controlling shareholder for corporate clients, source of funds for large or unusual products.
   4. Client signs a mandate/representation letter and a consent for data lookup (section F5). Marketing consent (per channel, yes or no) is asked separately and stored in the consent registry, because F10 depends on it.
   5. Manager approval is required only for flagged cases (high risk, politically exposed, large single premium).
@@ -90,13 +114,14 @@ Each flow lists trigger, steps, actors, outputs and regulatory hooks.
 
 - Trigger: annual review, new client, job change, or client request.
 - Steps:
-  1. Client signs a data-lookup authorization form.
+  1. Client signs the data-lookup authorizations. There are three, each with its own legal text, signing date and expiry: for the insurers (policy information), for Har HaBituach and for the pension clearing house. The client can sign in the office or through a link sent to the client (and to the spouse). An authorization that expires within 6 months is flagged and a re-sign request is offered **[verify the validity period of each form]**.
   2. Back-office sends an information request through the pension clearing house and a Har HaBituach request. Sources say institutions must answer within about 3 business days and the consumer fee is about 20-40 NIS **[verify]**.
   3. Results are parsed into the client portfolio: all policies, funds, premiums, coverage periods, management fees.
   4. Agent prepares a review: gaps, duplicates, fee comparison, recommendation.
   5. If the client moves a product, the agent mandate/appointment letter is generated and sent to the insurer (how the formal transfer works between agents was not confirmed) **[verify]**.
 - Integration: Mislaka-API (third-party REST gateway for clearing house requests, Har HaBituach requests and the authorization form) or direct clearing-house connection **[verify]**.
-- Acceptance: portfolio view shows external policies next to the agency's own, with a "last refreshed" stamp. No lookup runs without a valid signed authorization on file.
+- Progress is shown as: request sent, waiting for the institutions, files received and filed, finished.
+- Acceptance: portfolio view shows external policies next to the agency's own, with a "last refreshed" stamp. No lookup runs without all three valid signed authorizations on file. Each product opens to tabs: general, coverages (with percent of insured salary), beneficiaries, deposits and fees, returns and projection, claims, notes and recommendations; with flags for liens and exclusions and a "data as of" month.
 
 ### F6. Automatic intake of fax, email and WhatsApp (digitize, classify, attribute)
 
@@ -159,6 +184,69 @@ See section 5.
   - Check the national do-not-call register before voice campaigns **[verify]**.
 - Outputs: campaign record, audience snapshot (who was selected and why), consent evidence per recipient, send log, replies, conversions.
 - Acceptance: no message leaves without a passing consent check recorded on the recipient; every campaign keeps an immutable audience snapshot; an unsubscribe in any channel suppresses all marketing channels within one minute; the manager sees campaigns pending approval in the Inbox.
+
+### F11. Get the ID and register the client (back-office)
+
+- Trigger: a new client or lead needs a file (from F1, a walk-in, a campaign reply, an insurer transfer).
+- Steps:
+  1. Case appears in the Desk list with a state: ID missing, ID requested, to check, registered.
+  2. ID missing: one click sends a request in the client's own language (Hebrew, Arabic, Russian, French, English) over the channel the client uses (WhatsApp, email), asking for both sides of the ID card and the address page. The case moves to "ID requested" and an Inbox reminder is set.
+  3. When the photo arrives (any channel, including fax and scan) the intake pipeline (F6) reads it. The case opens with the fields as read and a confidence figure per document; the clerk corrects fields in place.
+  4. Checks before registering (all shown as a list, blocking ones stop the button): ID has 9 digits; check digit valid (a failure usually means an OCR error); ID document not expired; not already in the database (same ID number or phone: offer merge instead of creating a duplicate); address complete with a 7-digit postal code; mobile number valid (warning); tax residency declared (Israel only, US citizen or resident, other country).
+  5. Register: creates the client with source, ID, address, phone, language and tax residency, stores the source system ID where relevant (section 9.1) and writes an audit entry with the ID masked. Marketing consent stays off until the client agrees (consent registry); it is never inferred.
+  6. For a US or foreign tax resident a tax self-declaration task is created at once (F15).
+  7. Next step is offered: fill the welcome letter, the three powers of attorney (F5) and the KYC form (F12).
+- Outputs: client record, ID image filed to the client, audit entry, tasks.
+- Acceptance: no client without a valid ID number, address and tax residency can be set to active; a duplicate can never be created silently; the audit log never shows a full ID number.
+
+### F12. Fill templates (back-office)
+
+- Trigger: any step that needs a letter or form: powers of attorney, agent appointment letter, address change, cancellation, KYC and tax residency declaration, request for an annual tax certificate, reply to another insurer (F14).
+- Steps:
+  1. Pick the client and the template. Fields that the system knows (name, ID, address, phone, email, date, agent name and licence, agency) are filled from the client record and shown as filled.
+  2. Fields it cannot know (insurer, policy number, new address, effective date, tax year, their reference) are asked for. The preview marks each empty field in red with its name.
+  3. The document is shown as it will be printed. Institutional documents are in Hebrew; client-facing documents go out in the client's language (section 5).
+  4. While any field is empty the document cannot be saved, signed or queued. When complete: save to the client file, send for e-signature, or add to the dispatch queue as email or post (F13).
+- Templates are owned by the manager (legal text reviewed by counsel), versioned, and every use is audit-logged with the template version.
+- Outputs: document in the client file, signature request or dispatch item.
+- Acceptance: a document with an empty field never leaves; changing a template does not change documents already generated.
+
+### F13. Outgoing post and email, labels (back-office)
+
+- Trigger: a document is queued from F12, a campaign letter, a renewal notice, a tax certificate to a client, a request to an insurer.
+- Steps:
+  1. The dispatch queue lists each item with client, document, channel (email or post, changeable) and status: queued, blocked, sent, posted.
+  2. Checks per item: email channel needs an email on file; post needs a complete postal address; a marketing item needs a valid opt-in (F10). A failed check blocks the item and says why.
+  3. Email: send the selected items; each send is logged against the client.
+  4. Post: print the letters; print address labels on a sheet (sender line, recipient name, street, city, 7-digit postal code, barcode, registered-mail marker); then mark the items as posted with the registered-mail number, which is stored for tracking.
+  5. Returned or undelivered post comes back as an Inbox item to fix the address (F11 checks).
+- Outputs: send log, posted items with tracking number, printed labels.
+- Acceptance: nothing is marked sent without an action by a named user; a blocked item cannot be force-sent except by the manager with a reason; label printing works from the browser print dialog on common label stock **[verify the label sizes the agency uses]**.
+
+### F14. Requests from another insurance company (back-office)
+
+- Trigger: another insurer, or the same insurer's other department, writes, faxes or sends a portal message about a client of the agency (found by the intake pipeline F6 or typed in).
+- Types: request for policy information; agent-of-record change; policy transfer between insurers; claim information; tax or withholding certificate; commission query.
+- Rule: no request stays unanswered. Each has an owner and a reply-by date from the moment it arrives; the list shows open, overdue, due within 2 days and answered. The time limits come from CMISA circulars and agreements with the insurers; the mock uses 7 days **[verify the limits per type]**.
+- Steps:
+  1. Verify the client and the authority: a valid power of attorney or the agent of record on file.
+  2. Gather the data and documents asked for.
+  3. Draft the reply from the template (F12) with their reference number.
+  4. Manager approval when the client or the policy changes hands (agent-of-record change, policy transfer). The clerk escalates from the request; it lands in the manager's Inbox.
+  5. Send the reply through the channel it came in on (or the one they ask for) and log the reference.
+- Outputs: reply on file, reference, audit entries, closed request.
+- Acceptance: a request past its reply-by date turns red and appears in the manager's Overview; the reply cannot be sent until steps 1 to 3 (and 4 where required) are done; every answered request keeps the exact text sent.
+
+### F15. Tax-related work (back-office, manager, external accountant)
+
+Principle: the agency supplies documents and keeps deadlines; tax advice and filing stay with the client or their accountant (agents hold no tax-adviser licence). All rules and dates below are working assumptions and each must be confirmed with the agency's accountant **[verify]**.
+
+- A. Annual deposit certificates. Each year insurers and funds issue a certificate of deposits and payments that a client uses for the tax credit or deduction on pension and life insurance deposits. For every client and product the system tracks: to request, requested, received, sent to the client. Bulk actions: request all missing (creates the request letters in the dispatch queue, F13), send all received to the clients. Missing certificates after the agreed date create Inbox items.
+- B. Tax coordination and refunds. Cases for a client who has several income sources or starts a pension payment (tax coordination certificate for the payer), withdraws severance or other funds (tax-exempt amounts), or whose tax refund file needs the deposit certificates. Steps per case: collect the ID and the payer's letter; get the balance statement from the clearing house or insurer; prepare the documents for the client or accountant; client or accountant files with the Tax Authority; certificate received and filed.
+- C. Tax residency declarations. Insurers ask for a self-declaration of tax residency (a US citizen or resident, or a resident of another country needs an additional form). Collected at F11; clients without a declaration or with a foreign residency and no form are listed with "send form" (F12 template) and "mark received".
+- D. The agency's own taxes. Monthly commission invoices to each insurer (invoice allocation numbers are required above a threshold that has been phased in), withholding-at-source certificates received from insurers (yearly), the periodic VAT report, and the annual package to the accountant. Each has a due date and a done mark; items due within 14 days appear on the manager's Overview and as an Inbox item.
+- Outputs: certificates filed to the client, sent letters, tasks, a read-only yearly package for the accountant.
+- Acceptance: for every tax year the manager can see, per client and product, whether the certificate was requested, received and sent; an agency tax deadline cannot pass without an Inbox item for the manager.
 
 ## 4. Automatic intake pipeline (fax, email, WhatsApp)
 
@@ -236,8 +324,11 @@ Every role has an Inbox as the home screen. An Inbox item is anything that needs
 | Role | Typical items | Urgent rules |
 |---|---|---|
 | Agent | Renewals due, client replies, auto-filed documents for my clients, unsigned applications, callbacks, claim updates, birthday and policy-anniversary nudges, campaign replies | Renewal under 10 days, client waiting over 1 business day |
-| Back-office | Review queue (medium-confidence documents), Unassigned queue, applications to submit, endorsements, claim document gaps, commission mismatches, campaign send failures | Item older than same-day SLA |
-| Manager | Approvals (KYC flags, payouts), complaints over SLA, compliance expiries, misfile reports, team workload, retention leaks, campaigns awaiting approval | Any regulatory deadline within 7 days |
+| Back-office | Review queue (medium-confidence documents), Unassigned queue, ID missing or unreadable, requests from other insurers, tax certificates not received, letters waiting to print or post, applications to submit, endorsements, claim document gaps, commission mismatches, campaign send failures | Item older than same-day SLA; insurer request within 5 days of its reply-by date |
+| Marketing | Campaign drafts needing a consent check, opt-outs to process, bounced messages, campaign results, campaign replies to hand to agents | Opt-out waiting (must be applied within one minute of receipt in the registry, so any waiting item is urgent) |
+| Manager | Approvals (KYC flags, payouts, agent changes), insurer requests escalated, complaints over SLA, compliance expiries, agency tax deadlines, misfile reports, team workload, retention leaks, campaigns awaiting approval | Any regulatory deadline within 7 days |
+
+Each Inbox item of the back-office, marketing and manager types has an "Open in work area" action that jumps to the right place on the Desk or in Campaigns.
 
 Behaviour:
 
@@ -265,12 +356,12 @@ Behaviour:
 
 Borrowed from the praxis-demo project (larytet/praxis-demo, GitHub Pages demo):
 
-1. **Light and dark theme**: follows the OS setting by default, manual toggle, remembered per user. Contrast checked in both.
+1. **Light and dark theme**: light by default (an office tool used in daylight and on printed-style documents), manual toggle to dark, remembered per user; "follow the system" is a user preference. Contrast checked in both.
 2. **Language switcher**: UI in Hebrew, Arabic, Russian, French and English; remembered per user; right-to-left flips the whole layout. Document text stays in its original language, with translation shown next to it.
-3. **Role switcher**: one click to view the app as Agent, Back-office or Manager (limited to roles the user holds; the manager can preview all). Makes demos and training easy.
-4. **Show me**: a guided tour mode where the app moves the highlight from hint to hint on its own and opens the details in place, for onboarding and for explaining a flow to a new hire. Each flow F1 to F9 ships with a Show me script.
+3. **Role switcher**: one click to view the app as Agent, Back-office, Marketing or Manager (limited to roles the user holds; the manager can preview all). Each role gets its own home screen and its own set of tabs (section 2) so a role sees only what it works with. Makes demos and training easy.
+4. **Show me**: a guided tour mode where the app moves the highlight from hint to hint on its own and opens the details in place, for onboarding and for explaining a flow to a new hire. Each flow F1 to F15 ships with a Show me script.
 5. **Lens for long lists**: a draggable sliding window over a long list or timeline. Items inside the lens are shown in full; items outside are squashed into thin colored bars (red urgent, amber important). Drag the handle, scroll, use arrow keys, or click a bar to jump. Header shows the window position ("41-60 of 312"). Used on Inbox, client timeline and renewals calendar.
-6. **Inbox-first home**: the first screen is always the user's Inbox with counts and urgency.
+6. **Role-first home**: the first screen is the role's work area (Today for agents, Desk for back-office, Campaigns for marketing, Overview for the manager), with the Inbox one click away and every Inbox item able to open its work area. Counts and urgency are always visible.
 7. **Trust page**: shows the audit log, with the verify-chain button.
 8. Plain language, one primary action per item, nothing touchable that does nothing: every element drills in or opens detail.
 9. **Client picker, never a plain drop-down**: wherever a client (or several) is chosen, the control is a quick-search box (name in any script, transliteration, or any digits of the ID number) plus the Lens over the result list and multi-select with select-all-matching. It must stay usable with hundreds of clients. The Inbox has the same quick search.
@@ -451,22 +542,48 @@ Customers (with classes, ID types, sources, statuses, mailing statuses, dashboar
 
 #### What this adds for ansurance
 
-- **Navigation baseline for the mock.** The customer tab list above is a fair baseline for the client card tabs; the mock already has most of them, missing are "related customers" with relationship types, employments, and per-client report settings.
+- **Navigation baseline.** The customer tab list above was used for the Client file tab of the mock (overview, products, activities, documents, employment, leads, meetings and summaries, related clients, reports, processes, information request). Coverage of every flow is in 9.4.
 - **Fields to consider:** "email for filing" (a per-client address that files copied emails into the record), a mailing status with three values (approved, not approved, removed), ID type, English spelling of names, and a "consent required" flag on first use of the client app.
 - **Information request as a guided flow:** three powers of attorney with legal text, signing date, a warning six months before expiry, and a re-sign action. This should be an explicit sub-flow of F5.
 - **Client app:** invitation-only onboarding with a ready-made message the client can send to the agency, multi-agency membership, quick login with biometrics, "data is being prepared" state, and the data-controller wording (the agency is the controller) are worth copying into the F10 design.
 - **Not copied:** the vendor keeps heavy reporting on the web, so the mobile views are read-oriented; this split also suits ansurance.
 
+### 9.4 Coverage of the vendor flows in the spec and the mock
+
+The 57 flows found in the two mobile apps (9.3) were checked against this spec and against the mock (`index.html`). "Mock" means a clickable simulation with fictional data. Status: Yes, Partly (simplified), No (not in the mock; reason given).
+
+| Flows | Spec | Mock |
+|---|---|---|
+| Sign-in with a hosted identity provider, biometric lock | Yes, section 7 (SSO with two-factor, session timeout) | Partly: biometric quick login in the client app preview; agent sign-in not mocked (no accounts in a demo) |
+| Account lock after inactivity and one-tap unlock email; forced and optional app update | Section 7 (session timeout, device list) | No: operational behaviour, not a workflow to demonstrate |
+| Push notifications, notification list, support chat, bug report | Section 8 (Inbox is the notification centre) | Partly: client notification settings; bug report and support chat No |
+| Home dashboard: open leads, processes, tasks (today, overdue, next, done, delegated), last clients, birthdays with greeting | Section 2 (Agent home) | Yes: Today tab; the greeting is blocked without marketing consent |
+| Create client, lead, employer, employment, related client, activity, task or reminder, meeting, meeting summary, process, report | F1, F2, F3, F10, F11 | Yes: Client file "+" sheets with required-field checks and ID check digit; registration with 7 checks in the Desk |
+| Customer card tabs: overview and products summary, activities, documents (camera, file, screenshot, share, download, password-protected), employments, leads, meetings and summaries, related clients (relationship types), reports (frequency, preview, send), processes | Section 2, F5 | Yes: Client file tabs |
+| Employer screen (employees, activities, documents, processes) | Not specified: employers matter only for payroll-deducted products | Partly: employer can be created; employer screen No |
+| Information request: three powers of attorney with legal text and signing date, in office or remote link (also for the spouse), invite proxies, 6-month expiry warning with re-sign, progress to "finished" | F5 | Yes: Client file "Information request" tab; bulk version in the Pension tab |
+| Product views from clearing house data: coverages, claims, fees, deposits, projection, returns, beneficiaries, liens and exclusions, notes and recommendations | F5 | Yes: Client file "Products" tab (7 sub-tabs) |
+| Direct issuance of selected products (including a savings policy) | F2 (issuance through insurer adapters, 9) | No: needs insurer APIs; spec only |
+| Client app onboarding: invitation by email and SMS with deep link, welcome, choose agency, terms before continuing, phone login with one-time code, biometric prompt, "no link" request message | F10 and phase 5 | Yes: Client app preview (full path; demo code 1234) |
+| Client home: greeting, birthday banner, total saved, year-to-date return with bars, tiles, recommendations, new-information card, quick actions | Phase 5 | Yes |
+| Client products with detail tabs, processes, documents (summaries, reports, forms), contact sheet (WhatsApp, phone, email, meeting link) | Phase 5 | Yes (loans tab merged into general) |
+| Client profile edit with postal-code check, notification settings, sign out | Phase 5 | Yes |
+| Self-purchase of travel insurance and a savings policy through an agent-number link | F2, F10 | Yes: links in the client app, switchable in the agency settings |
+| Agency settings for the client app: services, what is shown, which clients, invitation, contact channels | Phase 5 | Yes: panel next to the phone |
+| Provisioning ("data is being prepared") and blocked screens | Phase 5 | No |
+
+Beyond the vendor flows, the mock adds: the back-office Desk (F11 to F15), the Marketing role (campaigns with consent check, approval and send, consent registry, segments), the manager Overview, the role-specific tabs, and light theme by default.
+
 ## 10. Phasing
 
 | Phase | Content |
 |---|---|
-| 0 (2-3 weeks) | Clients, policies, documents, roles, Inbox (all three), audit log, theme/language/role switchers, consent registry (opt-in, opt-out, source), import from the existing agency system (9.1) |
-| 1 | F6 intake: email and WhatsApp first, then fax; ID-number attribution; Review and Unassigned queues |
-| 2 | F1, F2, F3, F4 flows with e-signature |
+| 0 (2-3 weeks) | Clients, policies, documents, four roles with their home screens, Inbox (all four roles), audit log, theme/language/role switchers (light by default), consent registry (opt-in, opt-out, source), import from the existing agency system (9.1), F11 get the ID and register |
+| 1 | F6 intake: email and WhatsApp first, then fax; ID-number attribution; Review and Unassigned queues; F12 templates and F13 outgoing post, email and labels |
+| 2 | F1, F2, F3, F4 flows with e-signature; F14 requests from other insurers |
 | 3 | F9 live translation on calls, translation inline on WhatsApp and email |
-| 4 | F5 clearing house and Har HaBituach, F7 commissions, F8 compliance dashboard, F10 notify client (consent registry must exist from phase 0) |
-| 5 | Lens, Show me scripts, polish, Arabic RTL review |
+| 4 | F5 clearing house and Har HaBituach, F7 commissions, F8 compliance dashboard, F10 notify client (consent registry must exist from phase 0), F15 tax work, marketing role screens, manager Overview |
+| 5 | Lens, Show me scripts, polish, Arabic RTL review, client app (read-only, invitation only) |
 
 ## 11. Research notes and sources
 
