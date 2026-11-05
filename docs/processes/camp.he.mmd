@@ -1,0 +1,18 @@
+%%{init: {"flowchart": {"wrappingWidth": 380}}}%%
+flowchart LR
+  classDef agent fill:#dbe8fd,stroke:#1f6feb,color:#111
+  classDef back fill:#d9f2e4,stroke:#2a9d63,color:#111
+  classDef mgr fill:#fbefd5,stroke:#b7791f,color:#111
+  classDef mkt fill:#ece1fb,stroke:#8250df,color:#111
+  classDef end1 fill:#fff,stroke:#333,color:#111
+  start(["קמפיין שיווקי עם הסכמה"]):::end1
+  s_seg["<b>1. פילוח והסכמה</b><br/>תפקיד: שיווק<br/>☐ נבנה פילוח<br/>☐ נכללו רק לקוחות עם הסכמה לשיווק<br/>☐ הסרות וחזרות הוסרו"]:::mkt
+  s_dr["<b>2. ניסוח ותרגום</b><br/>תפקיד: שיווק<br/>☐ הודעה נוסחה<br/>☐ שפת כל לקוח הופעלה<br/>☐ נכלל קישור להסרה"]:::mkt
+  s_apr["<b>3. אישור מנהל</b><br/>תפקיד: מנהל<br/>☐ הודעה וקהל אושרו"]:::mgr
+  s_snd["<b>4. שליחה ומדידה</b><br/>תפקיד: שיווק<br/>☐ נשלח בערוץ שנבחר<br/>☐ תגובות הופנו לתיבת הסוכנים<br/>☐ תוצאות נרשמו"]:::mkt
+  start --> s_seg
+  s_seg --> s_dr
+  s_dr --> s_apr
+  s_apr --> s_snd
+  fin(["הושלם: כל השלבים סגורים"]):::end1
+  s_snd --> fin

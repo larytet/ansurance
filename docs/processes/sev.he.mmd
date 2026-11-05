@@ -1,0 +1,19 @@
+%%{init: {"flowchart": {"wrappingWidth": 380}}}%%
+flowchart LR
+  classDef agent fill:#dbe8fd,stroke:#1f6feb,color:#111
+  classDef back fill:#d9f2e4,stroke:#2a9d63,color:#111
+  classDef mgr fill:#fbefd5,stroke:#b7791f,color:#111
+  classDef mkt fill:#ece1fb,stroke:#8250df,color:#111
+  classDef end1 fill:#fff,stroke:#333,color:#111
+  start(["שחרור פיצויים וטפסי מס (160, 161, 161ד)"]):::end1
+  s_emp["<b>1. הודעת מעסיק (161)</b><br/>תפקיד: משרד אחורי<br/>☐ טופס 161 התבקש מהמעסיק<br/>☐ טופס 161 התקבל ונבדק"]:::back
+  s_fix["<b>2. קיבוע זכויות (161ד)</b><br/>תפקיד: משרד אחורי<br/>☐ טופס 161ד הוכן עם פרטי פטור<br/>☐ נחתם על ידי הלקוח<br/>☐ נשלח לרשות המסים"]:::back
+  s_rel["<b>3. בקשת שחרור לקרן</b><br/>תפקיד: משרד אחורי<br/>☐ בקשה עם טפסים 161 ו-160 או 161ד<br/>☐ הוזהר כי בלי 160 או 161 המס המרבי ינוכה<br/>☐ נשלח לקרן"]:::back
+  s_pay["<b>4. תשלום ואישור</b><br/>תפקיד: משרד אחורי<br/>☐ התקבל תשלום וניכוי המס תואם<br/>☐ הלקוח עודכן עם אישור<br/>☐ נבדקה תביעת החזר (עד 6 שנים אחורה)"]:::back
+  start --> s_emp
+  start --> s_fix
+  s_emp --> s_rel
+  s_fix --> s_rel
+  s_rel --> s_pay
+  fin(["הושלם: כל השלבים סגורים"]):::end1
+  s_pay --> fin

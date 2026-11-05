@@ -1,0 +1,16 @@
+%%{init: {"flowchart": {"wrappingWidth": 380}}}%%
+flowchart LR
+  classDef agent fill:#dbe8fd,stroke:#1f6feb,color:#111
+  classDef back fill:#d9f2e4,stroke:#2a9d63,color:#111
+  classDef mgr fill:#fbefd5,stroke:#b7791f,color:#111
+  classDef mkt fill:#ece1fb,stroke:#8250df,color:#111
+  classDef end1 fill:#fff,stroke:#333,color:#111
+  start(["Fill and sign a template"]):::end1
+  s_pick["<b>1. Choose the template</b><br/>Role: Back-office<br/>☐ Template and client chosen<br/>☐ Empty fields highlighted and reviewed"]:::back
+  s_fill["<b>2. Fill and review</b><br/>Role: Back-office<br/>☐ All fields filled from the client file<br/>☐ Second pair of eyes on the amounts and dates"]:::back
+  s_sig["<b>3. Signature</b><br/>Role: Agent<br/>☐ Sent to the client for signature<br/>☐ Signed copy received<br/>☐ Signed copy filed"]:::agent
+  start --> s_pick
+  s_pick --> s_fill
+  s_fill --> s_sig
+  fin(["Complete: every stage final"]):::end1
+  s_sig --> fin

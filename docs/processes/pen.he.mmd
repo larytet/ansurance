@@ -1,0 +1,18 @@
+%%{init: {"flowchart": {"wrappingWidth": 380}}}%%
+flowchart LR
+  classDef agent fill:#dbe8fd,stroke:#1f6feb,color:#111
+  classDef back fill:#d9f2e4,stroke:#2a9d63,color:#111
+  classDef mgr fill:#fbefd5,stroke:#b7791f,color:#111
+  classDef mkt fill:#ece1fb,stroke:#8250df,color:#111
+  classDef end1 fill:#fff,stroke:#333,color:#111
+  start(["סקירת תיק פנסיוני וחיסכון"]):::end1
+  s_auth["<b>1. שלושה כתבי הרשאה</b><br/>תפקיד: משרד אחורי<br/>☐ הרשאה להר הביטוח נחתמה<br/>☐ הרשאה למסלקה נחתמה<br/>☐ ייפוי כוח מתמשך (נספח ב1) נחתם לכל מבטח"]:::back
+  s_data["<b>2. קבלת נתונים</b><br/>תפקיד: משרד אחורי<br/>☐ דוח הר הביטוח התבקש<br/>☐ נתוני מסלקה התבקשו<br/>☐ הנתונים יובאו ושויכו ללקוח"]:::back
+  s_ana["<b>3. ניתוח</b><br/>תפקיד: סוכן<br/>☐ נמצאו כפילויות וכספים רדומים<br/>☐ דמי ניהול הושוו<br/>☐ פערים נרשמו (אובדן כושר, מוות, סיעוד)"]:::agent
+  s_rec["<b>4. המלצה וחתימה</b><br/>תפקיד: סוכן<br/>☐ המלצה עם נימוקים נכתבה<br/>☐ התקיימה פגישה עם הלקוח<br/>☐ רשומת ייעוץ נחתמה"]:::agent
+  start --> s_auth
+  s_auth --> s_data
+  s_data --> s_ana
+  s_ana --> s_rec
+  fin(["הושלם: כל השלבים סגורים"]):::end1
+  s_rec --> fin

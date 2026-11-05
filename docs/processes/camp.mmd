@@ -1,0 +1,18 @@
+%%{init: {"flowchart": {"wrappingWidth": 380}}}%%
+flowchart LR
+  classDef agent fill:#dbe8fd,stroke:#1f6feb,color:#111
+  classDef back fill:#d9f2e4,stroke:#2a9d63,color:#111
+  classDef mgr fill:#fbefd5,stroke:#b7791f,color:#111
+  classDef mkt fill:#ece1fb,stroke:#8250df,color:#111
+  classDef end1 fill:#fff,stroke:#333,color:#111
+  start(["Marketing campaign with consent"]):::end1
+  s_seg["<b>1. Segment and consent</b><br/>Role: Marketing<br/>☐ Segment defined<br/>☐ Only clients with marketing consent included<br/>☐ Opt-outs and bounces removed"]:::mkt
+  s_dr["<b>2. Draft and translate</b><br/>Role: Marketing<br/>☐ Message drafted<br/>☐ Language of each client applied<br/>☐ Unsubscribe link included"]:::mkt
+  s_apr["<b>3. Manager approval</b><br/>Role: Manager<br/>☐ Message and audience approved"]:::mgr
+  s_snd["<b>4. Send and measure</b><br/>Role: Marketing<br/>☐ Sent through the chosen channel<br/>☐ Replies routed to the agents' Inbox<br/>☐ Results recorded"]:::mkt
+  start --> s_seg
+  s_seg --> s_dr
+  s_dr --> s_apr
+  s_apr --> s_snd
+  fin(["Complete: every stage final"]):::end1
+  s_snd --> fin

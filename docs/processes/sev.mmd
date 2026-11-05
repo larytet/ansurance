@@ -1,0 +1,19 @@
+%%{init: {"flowchart": {"wrappingWidth": 380}}}%%
+flowchart LR
+  classDef agent fill:#dbe8fd,stroke:#1f6feb,color:#111
+  classDef back fill:#d9f2e4,stroke:#2a9d63,color:#111
+  classDef mgr fill:#fbefd5,stroke:#b7791f,color:#111
+  classDef mkt fill:#ece1fb,stroke:#8250df,color:#111
+  classDef end1 fill:#fff,stroke:#333,color:#111
+  start(["Severance release and tax forms (160, 161, 161d)"]):::end1
+  s_emp["<b>1. Employer notice (161)</b><br/>Role: Back-office<br/>☐ Form 161 requested from the employer<br/>☐ Form 161 received and checked"]:::back
+  s_fix["<b>2. Rights fixation (161d)</b><br/>Role: Back-office<br/>☐ Form 161d prepared with exemption details<br/>☐ Signed by the client<br/>☐ Sent to the tax authority"]:::back
+  s_rel["<b>3. Release request to the fund</b><br/>Role: Back-office<br/>☐ Request with Forms 161 and 160 or 161d<br/>☐ Without 160 or 161 the fund withholds the maximum: warned<br/>☐ Sent to the fund"]:::back
+  s_pay["<b>4. Payment and certificate</b><br/>Role: Back-office<br/>☐ Payment received and tax withheld matches<br/>☐ Client informed with the certificate<br/>☐ Refund claim checked (up to 6 years back)"]:::back
+  start --> s_emp
+  start --> s_fix
+  s_emp --> s_rel
+  s_fix --> s_rel
+  s_rel --> s_pay
+  fin(["Complete: every stage final"]):::end1
+  s_pay --> fin

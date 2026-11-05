@@ -1,0 +1,16 @@
+%%{init: {"flowchart": {"wrappingWidth": 380}}}%%
+flowchart LR
+  classDef agent fill:#dbe8fd,stroke:#1f6feb,color:#111
+  classDef back fill:#d9f2e4,stroke:#2a9d63,color:#111
+  classDef mgr fill:#fbefd5,stroke:#b7791f,color:#111
+  classDef mkt fill:#ece1fb,stroke:#8250df,color:#111
+  classDef end1 fill:#fff,stroke:#333,color:#111
+  start(["מעבר סוכן (כתב מינוי)"]):::end1
+  s_sign["<b>1. חתימה על כתב מינוי</b><br/>תפקיד: סוכן<br/>☐ ייפוי כוח מתמשך (נספח ב1) נחתם<br/>☐ הלקוח עודכן על השפעה על הסוכן הקודם"]:::agent
+  s_fwd["<b>2. העברה למבטחים</b><br/>תפקיד: משרד אחורי<br/>☐ נשלח לכל מבטח עד 10 ימי עסקים<br/>☐ התקבל אישור מכל מבטח"]:::back
+  s_eff["<b>3. אישור התוקף</b><br/>תפקיד: משרד אחורי<br/>☐ הרשאת הסוכן הקודם בוטלה (כ-10 ימי עסקים)<br/>☐ זרם העמלות הועבר<br/>☐ מועד סיום תוקף (7-10 שנים) ביומן"]:::back
+  start --> s_sign
+  s_sign --> s_fwd
+  s_fwd --> s_eff
+  fin(["הושלם: כל השלבים סגורים"]):::end1
+  s_eff --> fin

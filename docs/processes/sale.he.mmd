@@ -1,0 +1,18 @@
+%%{init: {"flowchart": {"wrappingWidth": 380}}}%%
+flowchart LR
+  classDef agent fill:#dbe8fd,stroke:#1f6feb,color:#111
+  classDef back fill:#d9f2e4,stroke:#2a9d63,color:#111
+  classDef mgr fill:#fbefd5,stroke:#b7791f,color:#111
+  classDef mkt fill:#ece1fb,stroke:#8250df,color:#111
+  classDef end1 fill:#fff,stroke:#333,color:#111
+  start(["הצעה, מכירה והנפקת פוליסה"]):::end1
+  s_need["<b>1. צרכים והתאמה</b><br/>תפקיד: סוכן<br/>☐ צרכי הלקוח נרשמו<br/>☐ הושוו לפחות שתי חלופות<br/>☐ נבדק כיסוי קיים (כפילות או החלפה)<br/>☐ מסמך נימוקים נוסח"]:::agent
+  s_quote["<b>2. הצעות ממבטחים</b><br/>תפקיד: משרד אחורי<br/>☐ הוגשה הצעה בטופס לכל מבטח<br/>☐ התקבלו הצעות וצורפו<br/>☐ שאלות חיתום נענו"]:::back
+  s_sign["<b>3. החלטת לקוח וחתימה</b><br/>תפקיד: סוכן<br/>☐ גילוי עמלות ודמי ניהול נמסר<br/>☐ הצעה ומסמך נימוקים נחתמו<br/>☐ ייפוי כוח נחתם"]:::agent
+  s_issue["<b>4. הנפקה וארכוב</b><br/>תפקיד: משרד אחורי<br/>☐ ההצעה נשלחה למבטח<br/>☐ התקבל מספר פוליסה<br/>☐ הפוליסה תויקה והלקוח עודכן<br/>☐ נקבעה פנייה לאחר המכירה (30 + 10 ימי עסקים)"]:::back
+  start --> s_need
+  s_need --> s_quote
+  s_quote --> s_sign
+  s_sign --> s_issue
+  fin(["הושלם: כל השלבים סגורים"]):::end1
+  s_issue --> fin

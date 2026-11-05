@@ -1,0 +1,16 @@
+%%{init: {"flowchart": {"wrappingWidth": 380}}}%%
+flowchart LR
+  classDef agent fill:#dbe8fd,stroke:#1f6feb,color:#111
+  classDef back fill:#d9f2e4,stroke:#2a9d63,color:#111
+  classDef mgr fill:#fbefd5,stroke:#b7791f,color:#111
+  classDef mkt fill:#ece1fb,stroke:#8250df,color:#111
+  classDef end1 fill:#fff,stroke:#333,color:#111
+  start(["Incoming document intake"]):::end1
+  s_dig["<b>1. Digitize and classify</b><br/>Role: Back-office<br/>☐ Fax, email or WhatsApp captured<br/>☐ OCR and type classification done<br/>☐ Language detected"]:::back
+  s_att["<b>2. Attribute to the client</b><br/>Role: Back-office<br/>☐ Client matched (ID, name, policy number)<br/>☐ Low confidence sent to review"]:::back
+  s_rte["<b>3. Route and file</b><br/>Role: Back-office<br/>☐ Filed in the client file<br/>☐ Task created for the right role"]:::back
+  start --> s_dig
+  s_dig --> s_att
+  s_att --> s_rte
+  fin(["Complete: every stage final"]):::end1
+  s_rte --> fin

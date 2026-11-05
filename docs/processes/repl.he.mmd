@@ -1,0 +1,16 @@
+%%{init: {"flowchart": {"wrappingWidth": 380}}}%%
+flowchart LR
+  classDef agent fill:#dbe8fd,stroke:#1f6feb,color:#111
+  classDef back fill:#d9f2e4,stroke:#2a9d63,color:#111
+  classDef mgr fill:#fbefd5,stroke:#b7791f,color:#111
+  classDef mkt fill:#ece1fb,stroke:#8250df,color:#111
+  classDef end1 fill:#fff,stroke:#333,color:#111
+  start(["ייעוץ להחלפת פוליסה"]):::end1
+  s_cmp["<b>1. השוואת ישן וחדש</b><br/>תפקיד: סוכן<br/>☐ תנאי הפוליסה הישנה והחרגות נרשמו<br/>☐ תקופות המתנה ותמחור הושוו<br/>☐ נבדק אובדן זכויות צבורות"]:::agent
+  s_adv["<b>2. רשומת ייעוץ</b><br/>תפקיד: סוכן<br/>☐ ייעוץ בכתב עם נימוקים<br/>☐ הלקוח חתם שהסיכונים הוסברו"]:::agent
+  s_can["<b>3. ביטול הפוליסה הישנה רק אחרי שהחדשה בתוקף</b><br/>תפקיד: משרד אחורי<br/>☐ הפוליסה החדשה אושרה בתוקף<br/>☐ בקשת ביטול נשלחה למבטח הישן<br/>☐ נענתה בדיקת המבטח לגבי ביטול"]:::back
+  start --> s_cmp
+  s_cmp --> s_adv
+  s_adv --> s_can
+  fin(["הושלם: כל השלבים סגורים"]):::end1
+  s_can --> fin

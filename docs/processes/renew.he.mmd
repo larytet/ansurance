@@ -1,0 +1,16 @@
+%%{init: {"flowchart": {"wrappingWidth": 380}}}%%
+flowchart LR
+  classDef agent fill:#dbe8fd,stroke:#1f6feb,color:#111
+  classDef back fill:#d9f2e4,stroke:#2a9d63,color:#111
+  classDef mgr fill:#fbefd5,stroke:#b7791f,color:#111
+  classDef mkt fill:#ece1fb,stroke:#8250df,color:#111
+  classDef end1 fill:#fff,stroke:#333,color:#111
+  start(["חידוש ועדכון פוליסה"]):::end1
+  s_prep["<b>1. הכנת החידוש</b><br/>תפקיד: משרד אחורי<br/>☐ התקבלה הודעת חידוש מהמבטח<br/>☐ שינוי הפרמיה מול אשתקד נבדק<br/>☐ נעשתה השוואת שוק לשינוי גדול"]:::back
+  s_adv["<b>2. ייעוץ ללקוח</b><br/>תפקיד: סוכן<br/>☐ נוצר קשר עם הלקוח<br/>☐ נשאל על שינוי במצב החיים<br/>☐ ההחלטה נרשמה: חידוש, שינוי או ביטול"]:::agent
+  s_exe["<b>3. ביצוע ואישור</b><br/>תפקיד: משרד אחורי<br/>☐ ההוראה נשלחה למבטח<br/>☐ התקבל אישור בכתב<br/>☐ גבייה נבדקה<br/>☐ תיק הלקוח עודכן"]:::back
+  start --> s_prep
+  s_prep --> s_adv
+  s_adv --> s_exe
+  fin(["הושלם: כל השלבים סגורים"]):::end1
+  s_exe --> fin

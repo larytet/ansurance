@@ -1,0 +1,18 @@
+%%{init: {"flowchart": {"wrappingWidth": 380}}}%%
+flowchart LR
+  classDef agent fill:#dbe8fd,stroke:#1f6feb,color:#111
+  classDef back fill:#d9f2e4,stroke:#2a9d63,color:#111
+  classDef mgr fill:#fbefd5,stroke:#b7791f,color:#111
+  classDef mkt fill:#ece1fb,stroke:#8250df,color:#111
+  classDef end1 fill:#fff,stroke:#333,color:#111
+  start(["Claim handling"]):::end1
+  s_open["<b>1. Open the claim</b><br/>Role: Agent<br/>☐ Event details and date recorded<br/>☐ Policy cover confirmed<br/>☐ Client told which documents to bring"]:::agent
+  s_docs["<b>2. Collect documents</b><br/>Role: Back-office<br/>☐ Claim form filled<br/>☐ Supporting documents received (medical, invoices, police)<br/>☐ Client signature on the release"]:::back
+  s_sub["<b>3. Submit to the insurer</b><br/>Role: Back-office<br/>☐ Claim submitted and number received<br/>☐ Response deadline set in business days"]:::back
+  s_foll["<b>4. Follow up and close</b><br/>Role: Agent<br/>☐ Insurer questions answered<br/>☐ Decision explained to the client<br/>☐ Payment confirmed or appeal filed<br/>☐ Claim closed"]:::agent
+  start --> s_open
+  s_open --> s_docs
+  s_docs --> s_sub
+  s_sub --> s_foll
+  fin(["Complete: every stage final"]):::end1
+  s_foll --> fin

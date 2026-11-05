@@ -1,0 +1,16 @@
+%%{init: {"flowchart": {"wrappingWidth": 380}}}%%
+flowchart LR
+  classDef agent fill:#dbe8fd,stroke:#1f6feb,color:#111
+  classDef back fill:#d9f2e4,stroke:#2a9d63,color:#111
+  classDef mgr fill:#fbefd5,stroke:#b7791f,color:#111
+  classDef mkt fill:#ece1fb,stroke:#8250df,color:#111
+  classDef end1 fill:#fff,stroke:#333,color:#111
+  start(["Get the ID and register the client"]):::end1
+  s_req["<b>1. Request the ID</b><br/>Role: Back-office<br/>☐ Missing-ID case opened from the Inbox<br/>☐ Request sent (WhatsApp, email or post)<br/>☐ Reminder set for 3 business days"]:::back
+  s_chk["<b>2. Validate</b><br/>Role: Back-office<br/>☐ Both sides legible<br/>☐ Check digit valid<br/>☐ Match with the declared name"]:::back
+  s_reg["<b>3. Register</b><br/>Role: Back-office<br/>☐ Record created or updated<br/>☐ Copy filed in the client file<br/>☐ Case closed in the Inbox"]:::back
+  start --> s_req
+  s_req --> s_chk
+  s_chk --> s_reg
+  fin(["Complete: every stage final"]):::end1
+  s_reg --> fin

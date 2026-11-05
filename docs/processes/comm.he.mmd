@@ -1,0 +1,18 @@
+%%{init: {"flowchart": {"wrappingWidth": 380}}}%%
+flowchart LR
+  classDef agent fill:#dbe8fd,stroke:#1f6feb,color:#111
+  classDef back fill:#d9f2e4,stroke:#2a9d63,color:#111
+  classDef mgr fill:#fbefd5,stroke:#b7791f,color:#111
+  classDef mkt fill:#ece1fb,stroke:#8250df,color:#111
+  classDef end1 fill:#fff,stroke:#333,color:#111
+  start(["התאמת עמלות (חודשי)"]):::end1
+  s_imp["<b>1. ייבוא דוחות</b><br/>תפקיד: משרד אחורי<br/>☐ התקבל דוח מכל מבטח<br/>☐ הדוחות יובאו (אקסל או קובץ)"]:::back
+  s_mat["<b>2. התאמה לפוליסות</b><br/>תפקיד: משרד אחורי<br/>☐ בוצעה התאמה ברמת פוליסה<br/>☐ הפרשים ועמלות חסרות רוכזו"]:::back
+  s_qry["<b>3. פניות למבטחים</b><br/>תפקיד: משרד אחורי<br/>☐ פניות נשלחו עם ראיות<br/>☐ תשובות התקבלו ונרשמו"]:::back
+  s_apr["<b>4. אישור מנהל</b><br/>תפקיד: מנהל<br/>☐ הדוח הסופי נבדק<br/>☐ החודש נסגר"]:::mgr
+  start --> s_imp
+  s_imp --> s_mat
+  s_mat --> s_qry
+  s_qry --> s_apr
+  fin(["הושלם: כל השלבים סגורים"]):::end1
+  s_apr --> fin

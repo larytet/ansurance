@@ -1,0 +1,18 @@
+%%{init: {"flowchart": {"wrappingWidth": 380}}}%%
+flowchart LR
+  classDef agent fill:#dbe8fd,stroke:#1f6feb,color:#111
+  classDef back fill:#d9f2e4,stroke:#2a9d63,color:#111
+  classDef mgr fill:#fbefd5,stroke:#b7791f,color:#111
+  classDef mkt fill:#ece1fb,stroke:#8250df,color:#111
+  classDef end1 fill:#fff,stroke:#333,color:#111
+  start(["Commission reconciliation (monthly)"]):::end1
+  s_imp["<b>1. Import statements</b><br/>Role: Back-office<br/>☐ Statement from each insurer received<br/>☐ Statements imported (Excel or file)"]:::back
+  s_mat["<b>2. Match to policies</b><br/>Role: Back-office<br/>☐ Policy-level matching done<br/>☐ Differences and missing commissions listed"]:::back
+  s_qry["<b>3. Queries to the insurers</b><br/>Role: Back-office<br/>☐ Queries sent with evidence<br/>☐ Answers received and booked"]:::back
+  s_apr["<b>4. Manager approval</b><br/>Role: Manager<br/>☐ Final report reviewed<br/>☐ Month closed"]:::mgr
+  start --> s_imp
+  s_imp --> s_mat
+  s_mat --> s_qry
+  s_qry --> s_apr
+  fin(["Complete: every stage final"]):::end1
+  s_apr --> fin

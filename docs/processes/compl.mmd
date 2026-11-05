@@ -1,0 +1,18 @@
+%%{init: {"flowchart": {"wrappingWidth": 380}}}%%
+flowchart LR
+  classDef agent fill:#dbe8fd,stroke:#1f6feb,color:#111
+  classDef back fill:#d9f2e4,stroke:#2a9d63,color:#111
+  classDef mgr fill:#fbefd5,stroke:#b7791f,color:#111
+  classDef mkt fill:#ece1fb,stroke:#8250df,color:#111
+  classDef end1 fill:#fff,stroke:#333,color:#111
+  start(["Complaint handling"]):::end1
+  s_rcv["<b>1. Receive and register</b><br/>Role: Back-office<br/>☐ Complaint logged with date<br/>☐ First reply to the client within 2 business days"]:::back
+  s_inv["<b>2. Investigate</b><br/>Role: Agent<br/>☐ Facts and documents collected<br/>☐ Insurer asked for its position (30 days, 21 for seniors)"]:::agent
+  s_res["<b>3. Resolve and answer</b><br/>Role: Manager<br/>☐ Resolution approved<br/>☐ Written answer sent<br/>☐ Referral to the Commissioner mentioned if rejected"]:::mgr
+  s_cls["<b>4. Close and learn</b><br/>Role: Manager<br/>☐ Root cause recorded<br/>☐ Complaint closed"]:::mgr
+  start --> s_rcv
+  s_rcv --> s_inv
+  s_inv --> s_res
+  s_res --> s_cls
+  fin(["Complete: every stage final"]):::end1
+  s_cls --> fin

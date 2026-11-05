@@ -1,0 +1,19 @@
+%%{init: {"flowchart": {"wrappingWidth": 380}}}%%
+flowchart LR
+  classDef agent fill:#dbe8fd,stroke:#1f6feb,color:#111
+  classDef back fill:#d9f2e4,stroke:#2a9d63,color:#111
+  classDef mgr fill:#fbefd5,stroke:#b7791f,color:#111
+  classDef mkt fill:#ece1fb,stroke:#8250df,color:#111
+  classDef end1 fill:#fff,stroke:#333,color:#111
+  start(["New client onboarding (KYC/AML)"]):::end1
+  s_id["<b>1. Identify the client</b><br/>Role: Back-office<br/>☐ ID card and appendix received (both sides)<br/>☐ ID number check digit valid<br/>☐ Name and date of birth match the ID<br/>☐ Duplicate search in the database done"]:::back
+  s_kyc["<b>2. KYC and risk profile</b><br/>Role: Agent<br/>☐ Source of funds and occupation recorded<br/>☐ FATCA/CRS self-certification signed<br/>☐ Needs analysis questionnaire completed<br/>☐ Politically exposed person check"]:::agent
+  s_reg["<b>3. Register in the database</b><br/>Role: Back-office<br/>☐ Client record created<br/>☐ Contact details and language preference saved<br/>☐ Marketing consent recorded (separately, optional)<br/>☐ Welcome message and app invitation sent"]:::back
+  s_fin["<b>4. Approve and file</b><br/>Role: Manager<br/>☐ Risk rating approved<br/>☐ Documents archived with 7-year retention"]:::mgr
+  start --> s_id
+  start --> s_kyc
+  s_id --> s_reg
+  s_kyc --> s_reg
+  s_reg --> s_fin
+  fin(["Complete: every stage final"]):::end1
+  s_fin --> fin

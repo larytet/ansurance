@@ -248,6 +248,30 @@ Principle: the agency supplies documents and keeps deadlines; tax advice and fil
 - Outputs: certificates filed to the client, sent letters, tasks, a read-only yearly package for the accountant.
 - Acceptance: for every tax year the manager can see, per client and product, whether the certificate was requested, received and sent; an agency tax deadline cannot pass without an Inbox item for the manager.
 
+### 3.1 Processes: stages and checklists
+
+Every flow above is also run as a **process**, in the way banks and financial institutions run controlled procedures.
+
+- A process is a pipeline of **stages**. Each stage has an owner role and one or more **checklists** of things to do, fill, verify or send. Check kinds: fill, verify, send, do.
+- A stage is **finalized** by its owner role or a manager (maker and checker). It cannot be finalized until every check is ticked.
+- Order is defined per process by dependencies: a stage is **locked** until the stages it depends on are final; stages with no dependency between them run **in parallel**.
+- The process is **complete** only when every stage is final. Starting a stage and finalizing it are written to the audit chain.
+- Each role has a **My work** list (stages waiting for it), and every screen that belongs to a process shows a banner with the pipeline and a link to open it.
+- Each process has an **editable diagram**: a Mermaid source generated from the definition, opened in Mermaid Live (edit, export SVG or PNG) or imported into draw.io. The sources are in [`docs/processes/`](processes/) and the checklists are listed in [PROCESSES.md](PROCESSES.md).
+- A process definition is data (stages, roles, dependencies, checks). A later phase lets a manager edit or create definitions in the UI (a closed step vocabulary, versioned, with running cases keeping the version they started with).
+
+| Process | Flow | Process | Flow |
+|---|---|---|---|
+| New client onboarding | F1 | Complaint handling | F8 |
+| Quote, sale and issuance | F2 | Marketing campaign with consent | F10 |
+| Renewal and endorsement | F3 | Get the ID and register | F11 |
+| Claim handling | F4 | Fill and sign a template | F12 |
+| Pension and savings review | F5 | Outgoing post and email batch | F13 |
+| Incoming document intake | F6 | Request from another insurer | F14 |
+| Commission reconciliation | F7 | Agent transfer, policy replacement, severance release, annual tax cycle | F5, F2, F14, F15 |
+
+**Exit to retirement planning** (ten stages, 54 checks) is the reference process. Interview and goals run in parallel with authorizations and data (Har HaBituach, clearing house, B1). Then: gap analysis, a recommendation (products to suggest, tax points, investment strategy changes, savings programs, record), manager review, client decision and signing, back-office execution (forms from templates, labels, post and email), inquiries to the insurers with business-day deadlines in parallel with the tax filings (Form 161d, tax coordination), and closing with follow-up. Tax statements in it are marked [verify].
+
 ## 4. Automatic intake pipeline (fax, email, WhatsApp)
 
 ### 4.1 Channels

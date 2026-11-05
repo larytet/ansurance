@@ -1,0 +1,16 @@
+%%{init: {"flowchart": {"wrappingWidth": 380}}}%%
+flowchart LR
+  classDef agent fill:#dbe8fd,stroke:#1f6feb,color:#111
+  classDef back fill:#d9f2e4,stroke:#2a9d63,color:#111
+  classDef mgr fill:#fbefd5,stroke:#b7791f,color:#111
+  classDef mkt fill:#ece1fb,stroke:#8250df,color:#111
+  classDef end1 fill:#fff,stroke:#333,color:#111
+  start(["Agent transfer (appointment letter)"]):::end1
+  s_sign["<b>1. Sign the appointment</b><br/>Role: Agent<br/>☐ Continuing authorization (appendix B1) signed<br/>☐ Client told about the effect on the old agent"]:::agent
+  s_fwd["<b>2. Forward to the insurers</b><br/>Role: Back-office<br/>☐ Sent to each insurer within 10 business days<br/>☐ Receipt confirmed by each insurer"]:::back
+  s_eff["<b>3. Confirm the effect</b><br/>Role: Back-office<br/>☐ Previous agent's authorization cancelled (about 10 business days)<br/>☐ Commission stream moved<br/>☐ Validity end date (7-10 years) in the calendar"]:::back
+  start --> s_sign
+  s_sign --> s_fwd
+  s_fwd --> s_eff
+  fin(["Complete: every stage final"]):::end1
+  s_eff --> fin

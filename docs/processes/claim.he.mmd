@@ -1,0 +1,18 @@
+%%{init: {"flowchart": {"wrappingWidth": 380}}}%%
+flowchart LR
+  classDef agent fill:#dbe8fd,stroke:#1f6feb,color:#111
+  classDef back fill:#d9f2e4,stroke:#2a9d63,color:#111
+  classDef mgr fill:#fbefd5,stroke:#b7791f,color:#111
+  classDef mkt fill:#ece1fb,stroke:#8250df,color:#111
+  classDef end1 fill:#fff,stroke:#333,color:#111
+  start(["טיפול בתביעה"]):::end1
+  s_open["<b>1. פתיחת תביעה</b><br/>תפקיד: סוכן<br/>☐ פרטי האירוע ותאריכו נרשמו<br/>☐ כיסוי הפוליסה אומת<br/>☐ הלקוח קיבל רשימת מסמכים"]:::agent
+  s_docs["<b>2. איסוף מסמכים</b><br/>תפקיד: משרד אחורי<br/>☐ טופס תביעה מולא<br/>☐ התקבלו מסמכים תומכים<br/>☐ חתימת הלקוח על ויתור סודיות"]:::back
+  s_sub["<b>3. הגשה למבטח</b><br/>תפקיד: משרד אחורי<br/>☐ התביעה הוגשה והתקבל מספר<br/>☐ נקבע מועד תשובה בימי עסקים"]:::back
+  s_foll["<b>4. מעקב וסגירה</b><br/>תפקיד: סוכן<br/>☐ שאלות המבטח נענו<br/>☐ ההחלטה הוסברה ללקוח<br/>☐ התשלום אושר או הוגש ערעור<br/>☐ התביעה נסגרה"]:::agent
+  start --> s_open
+  s_open --> s_docs
+  s_docs --> s_sub
+  s_sub --> s_foll
+  fin(["הושלם: כל השלבים סגורים"]):::end1
+  s_foll --> fin

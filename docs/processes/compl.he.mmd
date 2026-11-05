@@ -1,0 +1,18 @@
+%%{init: {"flowchart": {"wrappingWidth": 380}}}%%
+flowchart LR
+  classDef agent fill:#dbe8fd,stroke:#1f6feb,color:#111
+  classDef back fill:#d9f2e4,stroke:#2a9d63,color:#111
+  classDef mgr fill:#fbefd5,stroke:#b7791f,color:#111
+  classDef mkt fill:#ece1fb,stroke:#8250df,color:#111
+  classDef end1 fill:#fff,stroke:#333,color:#111
+  start(["טיפול בתלונה"]):::end1
+  s_rcv["<b>1. קבלה ורישום</b><br/>תפקיד: משרד אחורי<br/>☐ התלונה נרשמה עם תאריך<br/>☐ מענה ראשון ללקוח תוך 2 ימי עסקים"]:::back
+  s_inv["<b>2. בירור</b><br/>תפקיד: סוכן<br/>☐ עובדות ומסמכים נאספו<br/>☐ המבטח התבקש להגיש עמדה (30 ימים, 21 לבני 60 ומעלה)"]:::agent
+  s_res["<b>3. פתרון ומענה</b><br/>תפקיד: מנהל<br/>☐ הפתרון אושר<br/>☐ תשובה בכתב נשלחה<br/>☐ צוינה פנייה לממונה אם נדחתה"]:::mgr
+  s_cls["<b>4. סגירה ולקחים</b><br/>תפקיד: מנהל<br/>☐ שורש הבעיה נרשם<br/>☐ התלונה נסגרה"]:::mgr
+  start --> s_rcv
+  s_rcv --> s_inv
+  s_inv --> s_res
+  s_res --> s_cls
+  fin(["הושלם: כל השלבים סגורים"]):::end1
+  s_cls --> fin

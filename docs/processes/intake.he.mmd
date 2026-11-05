@@ -1,0 +1,16 @@
+%%{init: {"flowchart": {"wrappingWidth": 380}}}%%
+flowchart LR
+  classDef agent fill:#dbe8fd,stroke:#1f6feb,color:#111
+  classDef back fill:#d9f2e4,stroke:#2a9d63,color:#111
+  classDef mgr fill:#fbefd5,stroke:#b7791f,color:#111
+  classDef mkt fill:#ece1fb,stroke:#8250df,color:#111
+  classDef end1 fill:#fff,stroke:#333,color:#111
+  start(["קליטת מסמך נכנס"]):::end1
+  s_dig["<b>1. דיגיטציה וסיווג</b><br/>תפקיד: משרד אחורי<br/>☐ פקס, מייל או וואטסאפ נקלטו<br/>☐ זיהוי טקסט וסיווג סוג בוצעו<br/>☐ זוהתה שפה"]:::back
+  s_att["<b>2. שיוך ללקוח</b><br/>תפקיד: משרד אחורי<br/>☐ לקוח הותאם (ת.ז., שם, פוליסה)<br/>☐ ביטחון נמוך נשלח לבדיקה"]:::back
+  s_rte["<b>3. ניתוב וארכוב</b><br/>תפקיד: משרד אחורי<br/>☐ תויק בתיק הלקוח<br/>☐ נוצרה משימה לתפקיד המתאים"]:::back
+  start --> s_dig
+  s_dig --> s_att
+  s_att --> s_rte
+  fin(["הושלם: כל השלבים סגורים"]):::end1
+  s_rte --> fin

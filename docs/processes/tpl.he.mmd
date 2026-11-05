@@ -1,0 +1,16 @@
+%%{init: {"flowchart": {"wrappingWidth": 380}}}%%
+flowchart LR
+  classDef agent fill:#dbe8fd,stroke:#1f6feb,color:#111
+  classDef back fill:#d9f2e4,stroke:#2a9d63,color:#111
+  classDef mgr fill:#fbefd5,stroke:#b7791f,color:#111
+  classDef mkt fill:#ece1fb,stroke:#8250df,color:#111
+  classDef end1 fill:#fff,stroke:#333,color:#111
+  start(["מילוי תבנית וחתימה"]):::end1
+  s_pick["<b>1. בחירת תבנית</b><br/>תפקיד: משרד אחורי<br/>☐ נבחרו תבנית ולקוח<br/>☐ שדות ריקים הודגשו ונסקרו"]:::back
+  s_fill["<b>2. מילוי ובדיקה</b><br/>תפקיד: משרד אחורי<br/>☐ כל השדות מולאו מתיק הלקוח<br/>☐ בדיקה שנייה בסכומים ובתאריכים"]:::back
+  s_sig["<b>3. חתימה</b><br/>תפקיד: סוכן<br/>☐ נשלח ללקוח לחתימה<br/>☐ התקבל עותק חתום<br/>☐ עותק חתום תויק"]:::agent
+  start --> s_pick
+  s_pick --> s_fill
+  s_fill --> s_sig
+  fin(["הושלם: כל השלבים סגורים"]):::end1
+  s_sig --> fin

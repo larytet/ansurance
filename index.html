@@ -149,6 +149,36 @@ body.compact .card.detail,body.compact .icard{padding:10px}
 .ptiles{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}.ptiles div{border:1px solid var(--line);border-radius:10px;padding:8px}.ptiles span{display:block;font-size:11px;color:var(--muted)}
 .pnav{display:flex;border-top:1px solid var(--line)}.pnav button{flex:1;border:0;background:none;padding:6px 2px;font-size:11px}.pnav button span{display:block;font-size:18px}.pnav button[aria-pressed="true"]{color:var(--accent);font-weight:700}
 .sheet{border:1px solid var(--accent);border-radius:12px;padding:12px;background:var(--panel)}
+
+.ptab{font-weight:700;color:var(--ink)!important;background:var(--accent-soft)!important;border-radius:8px 8px 0 0}
+.pintro{background:var(--accent-soft);border:1px solid var(--accent);border-radius:12px;padding:12px 16px;margin-bottom:12px}.pintro p{margin:6px 0}
+.rtag{display:inline-block;font-size:12px;padding:1px 8px;border-radius:999px;border:1px solid var(--rc);color:var(--rc);font-weight:600;margin-inline-start:6px}
+.pipe{display:flex;align-items:center;gap:4px;overflow-x:auto;padding:10px 4px;margin:6px 0}
+.pcol{display:flex;flex-direction:column;gap:6px;justify-content:center}.pcol.par{border:1px dashed var(--muted);border-radius:10px;padding:4px}
+.pcl{font-size:11px;color:var(--muted);text-align:center}
+.parr{font-size:26px;color:var(--muted);line-height:1}html[dir=rtl] .parr{transform:scaleX(-1)}
+.pst{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-width:150px;text-align:start;background:var(--panel);border:2px solid var(--rc);border-radius:10px;padding:6px 10px;position:relative}
+.pst .xpn,.stgh .xpn{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--rc);color:#fff;font-size:12px;font-weight:700;flex:none}
+.pst .pnm{font-weight:600;font-size:13px}.pst .pm{font-size:11px;color:var(--muted)}
+.pst.locked{opacity:.55;border-style:dashed}.pst.done{background:var(--green-soft)}.pst.ready{box-shadow:0 0 0 3px var(--amber-soft)}.pst.open{box-shadow:0 0 0 3px var(--accent-soft)}
+.pipe.mini{padding:2px}.pipe.mini .pst{min-width:0;padding:3px;border-width:2px;border-radius:50%}.pipe.mini .parr{font-size:16px}.pipe.mini .pcol.par{padding:2px;gap:3px}
+.pbanner{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;border:2px solid var(--rc);border-inline-start-width:8px;border-radius:12px;background:var(--panel);padding:8px 12px;margin-bottom:12px}
+.pbt{background:var(--rc);color:#fff;border-radius:6px;padding:1px 8px;font-size:12px;font-weight:700}.pbm{flex:1;min-width:120px;overflow:hidden}
+.stgs{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:12px;margin-top:10px}
+.stg{background:var(--panel);border:1px solid var(--line);border-inline-start:6px solid var(--rc);border-radius:12px;padding:10px 12px}
+.stg.locked{opacity:.6}.stg.done{background:var(--green-soft)}.stg.ready{outline:2px solid var(--amber)}
+.stgh{display:flex;flex-wrap:wrap;align-items:center;gap:6px}.spill{margin-inline-start:auto;font-size:12px;background:var(--accent-soft);border-radius:999px;padding:1px 10px}
+.par2{font-size:12px;color:var(--muted)}
+ul.xchk{list-style:none;margin:8px 0;padding:0}.chh{font-weight:700;font-size:12px;color:var(--muted);text-transform:uppercase;margin-top:8px}
+.ck{display:flex;align-items:flex-start;gap:8px;width:100%;text-align:start;background:transparent;border:0;padding:4px 2px}.ck:disabled{cursor:default}
+.cb{flex:none;width:20px;height:20px;border:2px solid var(--muted);border-radius:5px;display:grid;place-items:center;font-size:14px;line-height:1}.ck.on .cb{background:var(--green);border-color:var(--green);color:#fff}.ck.on .ct{color:var(--muted)}
+.ki{flex:none;color:var(--muted);width:16px}.stgf{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.pbar{height:10px;border-radius:6px;background:var(--line);overflow:hidden;margin:6px 0}.pbar i{display:block;height:100%;background:var(--green)}.pbar.sm{height:6px}
+.pdone{background:var(--green-soft);border:2px solid var(--green);border-radius:10px;padding:10px;font-weight:700;margin:8px 0}
+.xprow{display:flex;gap:12px;align-items:center;padding:10px 12px;margin-bottom:8px;border-inline-start:6px solid var(--rc)}
+.pcat{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:12px}.xpc{padding:12px;border-inline-start:6px solid var(--rc);position:relative}
+.xpc.feat{grid-column:1/-1;border:2px solid var(--rc);border-inline-start-width:8px;background:var(--accent-soft)}.pfeat{position:absolute;inset-block-start:-11px;inset-inline-start:14px;background:var(--rc);color:#fff;border-radius:999px;padding:1px 12px;font-size:12px;font-weight:700}
+a.btn{text-decoration:none;display:inline-block}
 </style>
 </head>
 <body>
@@ -547,13 +577,13 @@ function applyChrome(){
   var rs=$("roleSel");rs.innerHTML="";
   ROLES.forEach(function(r){var b=document.createElement("button");b.textContent=roleName(r);b.setAttribute("aria-pressed",String(r===S.role));b.onclick=function(){S.role=r;S.tab=HOME[r];S.filter="all";S.sel=null;S.lens=0;store("role",r);render()};rs.appendChild(b)});
   var tb=$("tabs");tb.innerHTML="";
-  tabsOf(S.role).map(function(id){return [id,t("tab_"+id)]}).forEach(function(x){var b=document.createElement("button");b.setAttribute("role","tab");b.setAttribute("aria-selected",String(S.tab===x[0]));b.textContent=x[1];b.onclick=function(){S.tab=x[0];render()};tb.appendChild(b)});
+  tabsOf(S.role).map(function(id){return [id,t("tab_"+id)]}).forEach(function(x){var b=document.createElement("button");b.setAttribute("role","tab");b.setAttribute("aria-selected",String(S.tab===x[0]));b.dataset.tab=x[0];b.textContent=x[1]+(x[0]==="proc"?" ("+pMyCount()+")":"");if(x[0]==="proc")b.className="ptab";b.onclick=function(){S.tab=x[0];render()};tb.appendChild(b)});
   $("foot").textContent=t("foot");
 }
 function render(){
   stopCall();TOKEN++;applyChrome();
   if(tabsOf(S.role).indexOf(S.tab)<0)S.tab=HOME[S.role];
-  var V={desk:renderDesk,file:renderFile,mkt:renderMkt,overview:renderOverview,today:renderToday,app:renderApp,inbox:renderInbox,integ:renderInteg,excel:renderExcel,intake:renderIntake,wa:renderWa,call:renderCall,pension:renderPension,clients:renderClients,settings:renderSettings,trust:renderTrust};
+  var V={desk:renderDesk,file:renderFile,mkt:renderMkt,overview:renderOverview,today:renderToday,app:renderApp,inbox:renderInbox,integ:renderInteg,excel:renderExcel,intake:renderIntake,wa:renderWa,call:renderCall,pension:renderPension,clients:renderClients,settings:renderSettings,trust:renderTrust,proc:renderProc};
   (V[S.tab]||renderInbox)();
 }
 
@@ -1314,10 +1344,10 @@ var AGENT={name:"אבי רוזן",lic:"12345-67"};
 var AGENCY={name:"סוכנות ביטוח לדוגמה בע\"מ",addr:"הנגב 7, תל אביב",zip:"6706007"};
 var HOME={agent:"today",back:"desk",mkt:"mkt",mgr:"overview"};
 var TABS_BY={
-  agent:["today","inbox","file","wa","call","pension","app","clients","settings"],
-  back:["desk","inbox","file","intake","pension","wa","excel","integ","clients","settings"],
-  mkt:["mkt","inbox","wa","excel","clients","settings"],
-  mgr:["overview","inbox","desk","mkt","file","app","integ","trust","clients","settings"]
+  agent:["today","proc","inbox","file","wa","call","pension","app","clients","settings"],
+  back:["desk","proc","inbox","file","intake","pension","wa","excel","integ","clients","settings"],
+  mkt:["mkt","proc","inbox","wa","excel","clients","settings"],
+  mgr:["overview","proc","inbox","desk","mkt","file","app","integ","trust","clients","settings"]
 };
 S.prof={};S.cons={};S.desk={sec:"id"};S.tpl={client:NAMES[0],key:"poa_pol",vals:{}};
 S.out={q:[],sel:{},labels:false};S.req={items:[],sel:null,f:"all"};S.tax={sec:"certs",certs:[],coord:[],resid:[],agency:[],sel:null};
@@ -2186,6 +2216,380 @@ function drawPhoneApp(){
   return top(AGENCY.name,0)+'<div class="pbody">'+body+'</div><div class="pnav">'+tabs.map(function(x){return '<button data-a="ptab" data-v="'+x[0]+'" aria-pressed="'+(A.tab===x[0]&&!A.sheet)+'"><span>'+x[2]+'</span>'+esc(t(x[1]))+'</button>'}).join("")+'</div>';
   function top(title){return '<div class="ptop"><b>'+esc(title)+'</b></div>'}
 }
+
+/* ================= EXTENSION 3: processes (stages + checklists) ================= */
+/* check text: "en|he|kind"; kind: f=fill, v=verify, s=send, omitted=do; text starting "#" is a group heading.
+   stage: [id, "en|he", role, deps, checks]; deps omitted = previous stage (locked order), [] = can start at once (parallel) */
+var PROCS=[
+{id:"onb",src:"F1",o:"agent",n:"New client onboarding (KYC/AML)|קליטת לקוח חדש (הכר את לקוחך)",st:[
+ ["id","Identify the client|זיהוי הלקוח","back",[],[
+  "ID card and appendix received (both sides)|התקבלה תעודת זהות וספח (שני צדדים)|v","ID number check digit valid|ספרת ביקורת תקינה בתעודת הזהות|v","Name and date of birth match the ID|שם ותאריך לידה תואמים לתעודה|v","Duplicate search in the database done|בוצע חיפוש כפילות במאגר|v"]],
+ ["kyc","KYC and risk profile|הכר את לקוחך ופרופיל סיכון","agent",[],[
+  "Source of funds and occupation recorded|מקור כספים ותעסוקה נרשמו|f","FATCA/CRS self-certification signed|הצהרת תושבות למס (FATCA/CRS) נחתמה|f","Needs analysis questionnaire completed|שאלון צרכים הושלם|f","Politically exposed person check|בדיקת איש ציבור (PEP)|v"]],
+ ["reg","Register in the database|רישום במאגר","back",["id","kyc"],[
+  "Client record created|נוצרה כרטיסית לקוח|f","Contact details and language preference saved|פרטי קשר והעדפת שפה נשמרו|f","Marketing consent recorded (separately, optional)|הסכמה לשיווק נרשמה (בנפרד, רשות)|f","Welcome message and app invitation sent|הודעת פתיחה והזמנה לאפליקציה נשלחו|s"]],
+ ["fin","Approve and file|אישור וארכוב","mgr",null,[
+  "Risk rating approved|דירוג סיכון אושר|v","Documents archived with 7-year retention|המסמכים אורכבו עם שמירה ל-7 שנים"]]]},
+{id:"sale",src:"F2",o:"agent",n:"Quote, sale and policy issuance|הצעה, מכירה והנפקת פוליסה",st:[
+ ["need","Needs and suitability|צרכים והתאמה","agent",[],[
+  "Client needs recorded|צרכי הלקוח נרשמו|f","At least two alternatives compared|הושוו לפחות שתי חלופות|v","Existing cover checked (duplicate or replacement)|נבדק כיסוי קיים (כפילות או החלפה)|v","Reasoning document drafted|מסמך נימוקים נוסח|f"]],
+ ["quote","Quotes from insurers|הצעות ממבטחים","back",null,[
+  "Proposal form filled for each insurer|הוגשה הצעה בטופס לכל מבטח|f","Quotes received and attached|התקבלו הצעות וצורפו|v","Underwriting questions answered|שאלות חיתום נענו|f"]],
+ ["sign","Client decision and signing|החלטת לקוח וחתימה","agent",null,[
+  "Commission and fees disclosed|גילוי עמלות ודמי ניהול נמסר|v","Proposal and reasoning document signed|הצעה ומסמך נימוקים נחתמו|f","Power of attorney signed|ייפוי כוח נחתם|f"]],
+ ["issue","Issuance and filing|הנפקה וארכוב","back",null,[
+  "Proposal sent to the insurer|ההצעה נשלחה למבטח|s","Policy number received|התקבל מספר פוליסה|v","Policy filed and client notified|הפוליסה תויקה והלקוח עודכן|s","Post-sale contact scheduled (30 + 10 business days)|נקבעה פנייה לאחר המכירה (30 + 10 ימי עסקים)|f"]]]},
+{id:"renew",src:"F3",o:"agent",n:"Renewal and endorsement|חידוש ועדכון פוליסה",st:[
+ ["prep","Prepare the renewal|הכנת החידוש","back",[],[
+  "Renewal notice from the insurer received|התקבלה הודעת חידוש מהמבטח|v","Premium change compared with last year|שינוי הפרמיה מול אשתקד נבדק|v","Market comparison for large changes|נעשתה השוואת שוק לשינוי גדול|f"]],
+ ["adv","Advise the client|ייעוץ ללקוח","agent",null,[
+  "Client contacted (call or message)|נוצר קשר עם הלקוח|s","Changes in life situation asked|נשאל על שינוי במצב החיים|v","Decision recorded: renew, change or cancel|ההחלטה נרשמה: חידוש, שינוי או ביטול|f"]],
+ ["exe","Execute and confirm|ביצוע ואישור","back",null,[
+  "Instruction sent to the insurer|ההוראה נשלחה למבטח|s","Written confirmation received|התקבל אישור בכתב|v","Premium collection checked|גבייה נבדקה|v","Client file updated|תיק הלקוח עודכן|f"]]]},
+{id:"claim",src:"F4",o:"agent",n:"Claim handling|טיפול בתביעה",st:[
+ ["open","Open the claim|פתיחת תביעה","agent",[],[
+  "Event details and date recorded|פרטי האירוע ותאריכו נרשמו|f","Policy cover confirmed|כיסוי הפוליסה אומת|v","Client told which documents to bring|הלקוח קיבל רשימת מסמכים|s"]],
+ ["docs","Collect documents|איסוף מסמכים","back",null,[
+  "Claim form filled|טופס תביעה מולא|f","Supporting documents received (medical, invoices, police)|התקבלו מסמכים תומכים|v","Client signature on the release|חתימת הלקוח על ויתור סודיות|f"]],
+ ["sub","Submit to the insurer|הגשה למבטח","back",null,[
+  "Claim submitted and number received|התביעה הוגשה והתקבל מספר|s","Response deadline set in business days|נקבע מועד תשובה בימי עסקים|f"]],
+ ["foll","Follow up and close|מעקב וסגירה","agent",null,[
+  "Insurer questions answered|שאלות המבטח נענו|f","Decision explained to the client|ההחלטה הוסברה ללקוח|s","Payment confirmed or appeal filed|התשלום אושר או הוגש ערעור|v","Claim closed|התביעה נסגרה"]]]},
+{id:"pen",src:"F5",o:"agent",n:"Pension and savings portfolio review|סקירת תיק פנסיוני וחיסכון",st:[
+ ["auth","Three authorizations|שלושה כתבי הרשאה","back",[],[
+  "Har HaBituach authorization signed|הרשאה להר הביטוח נחתמה|f","Clearing house (Mislaka) authorization signed|הרשאה למסלקה נחתמה|f","Continuing authorization (B1) signed for each insurer|ייפוי כוח מתמשך (נספח ב1) נחתם לכל מבטח|f"]],
+ ["data","Get the data|קבלת נתונים","back",null,[
+  "Har HaBituach report requested|דוח הר הביטוח התבקש|s","Clearing house data requested|נתוני מסלקה התבקשו|s","Data imported and matched to the client|הנתונים יובאו ושויכו ללקוח|v"]],
+ ["ana","Analysis|ניתוח","agent",null,[
+  "Duplicate cover and idle funds found|נמצאו כפילויות וכספים רדומים|v","Management fees compared|דמי ניהול הושוו|v","Gaps listed (disability, death, long-term care)|פערים נרשמו (אובדן כושר, מוות, סיעוד)|f"]],
+ ["rec","Recommendation and signing|המלצה וחתימה","agent",null,[
+  "Recommendation with reasoning written|המלצה עם נימוקים נכתבה|f","Client meeting held|התקיימה פגישה עם הלקוח|v","Advice record signed|רשומת ייעוץ נחתמה|f"]]]},
+{id:"idreg",src:"F11",o:"back",n:"Get the ID and register the client|השגת תעודת זהות ורישום",st:[
+ ["req","Request the ID|בקשת תעודת זהות","back",[],[
+  "Missing-ID case opened from the Inbox|נפתח מקרה של תעודה חסרה|f","Request sent (WhatsApp, email or post)|הבקשה נשלחה (וואטסאפ, אימייל או דואר)|s","Reminder set for 3 business days|נקבעה תזכורת ל-3 ימי עסקים|f"]],
+ ["chk","Validate|אימות","back",null,[
+  "Both sides legible|שני הצדדים קריאים|v","Check digit valid|ספרת ביקורת תקינה|v","Match with the declared name|התאמה לשם שהוצהר|v"]],
+ ["reg","Register|רישום","back",null,[
+  "Record created or updated|רשומה נוצרה או עודכנה|f","Copy filed in the client file|העתק תויק בתיק הלקוח|f","Case closed in the Inbox|המקרה נסגר בתיבה|f"]]]},
+{id:"tpl",src:"F12",o:"back",n:"Fill and sign a template|מילוי תבנית וחתימה",st:[
+ ["pick","Choose the template|בחירת תבנית","back",[],[
+  "Template and client chosen|נבחרו תבנית ולקוח|f","Empty fields highlighted and reviewed|שדות ריקים הודגשו ונסקרו|v"]],
+ ["fill","Fill and review|מילוי ובדיקה","back",null,[
+  "All fields filled from the client file|כל השדות מולאו מתיק הלקוח|f","Second pair of eyes on the amounts and dates|בדיקה שנייה בסכומים ובתאריכים|v"]],
+ ["sig","Signature|חתימה","agent",null,[
+  "Sent to the client for signature|נשלח ללקוח לחתימה|s","Signed copy received|התקבל עותק חתום|v","Signed copy filed|עותק חתום תויק|f"]]]},
+{id:"post",src:"F13",o:"back",n:"Outgoing post and email batch|דואר יוצא ומיילים",st:[
+ ["prep","Prepare the batch|הכנת האצווה","back",[],[
+  "Addresses checked (street, city, postal code)|כתובות נבדקו (רחוב, עיר, מיקוד)|v","Recipients' language and channel preference applied|הועדפו שפה וערוץ של הנמען|v"]],
+ ["lab","Print|הדפסה","back",null,[
+  "Labels printed|מדבקות הודפסו|f","Letters printed and enclosed|מכתבים הודפסו והוכנסו|f"]],
+ ["snd","Send and prove|שליחה והוכחה","back",null,[
+  "Post handed over, receipt kept|הדואר נמסר והקבלה נשמרה|s","Emails sent|מיילים נשלחו|s","Proof of dispatch filed in the client file|הוכחת שליחה תויקה בתיק|f"]]]},
+{id:"insreq",src:"F14",o:"back",n:"Request from another insurance company|בקשה מחברת ביטוח אחרת",st:[
+ ["rcv","Receive and attribute|קבלה ושיוך","back",[],[
+  "Request logged with date and insurer|הבקשה נרשמה עם תאריך ומבטח|f","Client and policy identified|לקוח ופוליסה זוהו|v","Business-day clock started (2, 3, 7 or 10 days by step)|הופעל שעון ימי עסקים (2, 3, 7 או 10 לפי שלב)|f"]],
+ ["auth","Check authority|בדיקת הרשאה","back",null,[
+  "Valid power of attorney exists (B1 within 7-10 years)|קיים ייפוי כוח תקף (ב1 עד 7-10 שנים)|v","Not cancelled by the client|לא בוטל על ידי הלקוח|v","If missing, request signature from the client|אם חסר, התבקשה חתימת לקוח|s"]],
+ ["prp","Prepare the answer|הכנת התשובה","back",null,[
+  "Documents collected|מסמכים נאספו|f","Answer template filled|תבנית תשובה מולאה|f","Reviewed by the agent|נבדק על ידי הסוכן|v"]],
+ ["snd","Reply and close|מענה וסגירה","back",null,[
+  "Reply sent within the deadline|המענה נשלח במועד|s","Confirmation of receipt obtained|התקבל אישור קבלה|v","Exchange logged in the information-exchange register|ההחלפה נרשמה ביומן החלפת מידע|f"]]]},
+{id:"xfer",src:"F5 / F14",o:"agent",n:"Agent transfer (appointment letter)|מעבר סוכן (כתב מינוי)",st:[
+ ["sign","Sign the appointment|חתימה על כתב מינוי","agent",[],[
+  "Continuing authorization (appendix B1) signed|ייפוי כוח מתמשך (נספח ב1) נחתם|f","Client told about the effect on the old agent|הלקוח עודכן על השפעה על הסוכן הקודם|v"]],
+ ["fwd","Forward to the insurers|העברה למבטחים","back",null,[
+  "Sent to each insurer within 10 business days|נשלח לכל מבטח עד 10 ימי עסקים|s","Receipt confirmed by each insurer|התקבל אישור מכל מבטח|v"]],
+ ["eff","Confirm the effect|אישור התוקף","back",null,[
+  "Previous agent's authorization cancelled (about 10 business days)|הרשאת הסוכן הקודם בוטלה (כ-10 ימי עסקים)|v","Commission stream moved|זרם העמלות הועבר|v","Validity end date (7-10 years) in the calendar|מועד סיום תוקף (7-10 שנים) ביומן|f"]]]},
+{id:"repl",src:"F2",o:"agent",n:"Policy replacement advice|ייעוץ להחלפת פוליסה",st:[
+ ["cmp","Compare the old and the new|השוואת ישן וחדש","agent",[],[
+  "Old policy terms and exclusions listed|תנאי הפוליסה הישנה והחרגות נרשמו|f","Waiting periods and pricing compared|תקופות המתנה ותמחור הושוו|v","Loss of accrued rights checked|נבדק אובדן זכויות צבורות|v"]],
+ ["adv","Advice record|רשומת ייעוץ","agent",null,[
+  "Written advice with the reasons|ייעוץ בכתב עם נימוקים|f","Client signed that the risks were explained|הלקוח חתם שהסיכונים הוסברו|f"]],
+ ["can","Cancel the old policy only after the new one is in force|ביטול הפוליסה הישנה רק אחרי שהחדשה בתוקף","back",null,[
+  "New policy confirmed in force|הפוליסה החדשה אושרה בתוקף|v","Cancellation request sent to the old insurer|בקשת ביטול נשלחה למבטח הישן|s","Insurer's cancellation check answered|נענתה בדיקת המבטח לגבי ביטול|v"]]]},
+{id:"sev",src:"F15",o:"back",n:"Severance release and tax forms (160, 161, 161d)|שחרור פיצויים וטפסי מס (160, 161, 161ד)",st:[
+ ["emp","Employer notice (161)|הודעת מעסיק (161)","back",[],[
+  "Form 161 requested from the employer|טופס 161 התבקש מהמעסיק|s","Form 161 received and checked|טופס 161 התקבל ונבדק|v"]],
+ ["fix","Rights fixation (161d)|קיבוע זכויות (161ד)","back",[],[
+  "Form 161d prepared with exemption details|טופס 161ד הוכן עם פרטי פטור|f","Signed by the client|נחתם על ידי הלקוח|f","Sent to the tax authority|נשלח לרשות המסים|s"]],
+ ["rel","Release request to the fund|בקשת שחרור לקרן","back",["emp","fix"],[
+  "Request with Forms 161 and 160 or 161d|בקשה עם טפסים 161 ו-160 או 161ד|f","Without 160 or 161 the fund withholds the maximum: warned|הוזהר כי בלי 160 או 161 המס המרבי ינוכה|v","Sent to the fund|נשלח לקרן|s"]],
+ ["pay","Payment and certificate|תשלום ואישור","back",null,[
+  "Payment received and tax withheld matches|התקבל תשלום וניכוי המס תואם|v","Client informed with the certificate|הלקוח עודכן עם אישור|s","Refund claim checked (up to 6 years back)|נבדקה תביעת החזר (עד 6 שנים אחורה)|f"]]]},
+{id:"tax",src:"F15",o:"mgr",n:"Annual tax cycle (agency)|מחזור מס שנתי (סוכנות)",st:[
+ ["cert","Withholding certificates (857 / 806)|אישורי ניכוי במקור (857 / 806)","back",[],[
+  "Annual certificate received from each insurer (even if no tax was withheld)|התקבל אישור שנתי מכל מבטח (גם אם לא נוכה מס)|v","Amounts match the commission statements|הסכומים תואמים לדוחות העמלות|v"]],
+ ["inv","Invoices and allocation numbers|חשבוניות ומספרי הקצאה","back",[],[
+  "Invoices above the threshold carry an allocation number|חשבוניות מעל הסף נושאות מספר הקצאה|v","Invoices without a number listed and fixed|חשבוניות ללא מספר רוכזו ותוקנו|f"]],
+ ["cli","Client deposit certificates (45A)|אישורי הפקדות ללקוחות (45א)","back",[],[
+  "Annual certificates requested from the insurers|אישורים שנתיים התבקשו מהמבטחים|s","Sent to clients|נשלחו ללקוחות|s"]],
+ ["acc","External accountant|רואה חשבון חיצוני","back",["cert","inv"],[
+  "Package sent to the accountant|חבילה נשלחה לרואה החשבון|s","Accountant's questions answered|שאלות רואה החשבון נענו|f"]],
+ ["apr","Manager approval|אישור מנהל","mgr",["acc","cli"],[
+  "Figures reviewed|הנתונים נבדקו|v","Cycle closed|המחזור נסגר"]]]},
+{id:"comm",src:"F7",o:"mgr",n:"Commission reconciliation (monthly)|התאמת עמלות (חודשי)",st:[
+ ["imp","Import statements|ייבוא דוחות","back",[],[
+  "Statement from each insurer received|התקבל דוח מכל מבטח|v","Statements imported (Excel or file)|הדוחות יובאו (אקסל או קובץ)|f"]],
+ ["mat","Match to policies|התאמה לפוליסות","back",null,[
+  "Policy-level matching done|בוצעה התאמה ברמת פוליסה|v","Differences and missing commissions listed|הפרשים ועמלות חסרות רוכזו|f"]],
+ ["qry","Queries to the insurers|פניות למבטחים","back",null,[
+  "Queries sent with evidence|פניות נשלחו עם ראיות|s","Answers received and booked|תשובות התקבלו ונרשמו|v"]],
+ ["apr","Manager approval|אישור מנהל","mgr",null,[
+  "Final report reviewed|הדוח הסופי נבדק|v","Month closed|החודש נסגר"]]]},
+{id:"compl",src:"F8",o:"mgr",n:"Complaint handling|טיפול בתלונה",st:[
+ ["rcv","Receive and register|קבלה ורישום","back",[],[
+  "Complaint logged with date|התלונה נרשמה עם תאריך|f","First reply to the client within 2 business days|מענה ראשון ללקוח תוך 2 ימי עסקים|s"]],
+ ["inv","Investigate|בירור","agent",null,[
+  "Facts and documents collected|עובדות ומסמכים נאספו|f","Insurer asked for its position (30 days, 21 for seniors)|המבטח התבקש להגיש עמדה (30 ימים, 21 לבני 60 ומעלה)|s"]],
+ ["res","Resolve and answer|פתרון ומענה","mgr",null,[
+  "Resolution approved|הפתרון אושר|v","Written answer sent|תשובה בכתב נשלחה|s","Referral to the Commissioner mentioned if rejected|צוינה פנייה לממונה אם נדחתה|v"]],
+ ["cls","Close and learn|סגירה ולקחים","mgr",null,[
+  "Root cause recorded|שורש הבעיה נרשם|f","Complaint closed|התלונה נסגרה"]]]},
+{id:"camp",src:"F10",o:"mkt",n:"Marketing campaign with consent|קמפיין שיווקי עם הסכמה",st:[
+ ["seg","Segment and consent|פילוח והסכמה","mkt",[],[
+  "Segment defined|נבנה פילוח|f","Only clients with marketing consent included|נכללו רק לקוחות עם הסכמה לשיווק|v","Opt-outs and bounces removed|הסרות וחזרות הוסרו|v"]],
+ ["dr","Draft and translate|ניסוח ותרגום","mkt",null,[
+  "Message drafted|הודעה נוסחה|f","Language of each client applied|שפת כל לקוח הופעלה|v","Unsubscribe link included|נכלל קישור להסרה|v"]],
+ ["apr","Manager approval|אישור מנהל","mgr",null,[
+  "Message and audience approved|הודעה וקהל אושרו|v"]],
+ ["snd","Send and measure|שליחה ומדידה","mkt",null,[
+  "Sent through the chosen channel|נשלח בערוץ שנבחר|s","Replies routed to the agents' Inbox|תגובות הופנו לתיבת הסוכנים|f","Results recorded|תוצאות נרשמו|f"]]]},
+{id:"intake",src:"F6",o:"back",n:"Incoming document intake|קליטת מסמך נכנס",st:[
+ ["dig","Digitize and classify|דיגיטציה וסיווג","back",[],[
+  "Fax, email or WhatsApp captured|פקס, מייל או וואטסאפ נקלטו|f","OCR and type classification done|זיהוי טקסט וסיווג סוג בוצעו|v","Language detected|זוהתה שפה|v"]],
+ ["att","Attribute to the client|שיוך ללקוח","back",null,[
+  "Client matched (ID, name, policy number)|לקוח הותאם (ת.ז., שם, פוליסה)|v","Low confidence sent to review|ביטחון נמוך נשלח לבדיקה|v"]],
+ ["rte","Route and file|ניתוב וארכוב","back",null,[
+  "Filed in the client file|תויק בתיק הלקוח|f","Task created for the right role|נוצרה משימה לתפקיד המתאים|f"]]]},
+{id:"retire",src:"F5 / F15",o:"agent",n:"Exit to retirement planning|תכנון יציאה לפרישה",st:[
+ ["int","Interview and goals|ראיון ויעדים","agent",[],[
+  "#Basics|יסודות","Target retirement date and age set|נקבע מועד וגיל פרישה|f","Monthly income goal in today's money|יעד הכנסה חודשית בערכים של היום|f","Spouse, dependants and health recorded|בן/בת זוג, תלויים ובריאות נרשמו|f","Other assets (home, savings, business) listed|נכסים נוספים (דירה, חיסכון, עסק) נרשמו|f","#Compliance|ציות","KYC valid (less than a year)|הכר את לקוחך בתוקף (פחות משנה)|v","Risk questionnaire completed|שאלון סיכון הושלם|f"]],
+ ["auth","Authorizations and data|הרשאות ונתונים","back",[],[
+  "Har HaBituach, clearing house and B1 authorizations signed|הרשאות הר הביטוח, מסלקה וב1 נחתמו|f","Mislaka report requested|דוח מסלקה התבקש|s","Har HaBituach report requested|דוח הר הביטוח התבקש|s","Data imported and matched, duplicates marked|נתונים יובאו ושויכו, כפילויות סומנו|v"]],
+ ["ana","Gap analysis|ניתוח פערים","agent",["int","auth"],[
+  "Projected monthly annuity per product|קצבה חודשית צפויה לכל מוצר|v","Gap against the income goal calculated|חושב הפער מול יעד ההכנסה|f","Bridge to state old-age pension planned|נבנה גשר עד קצבת זקנה|f","Management fees compared with the market|דמי ניהול הושוו לשוק|v","Insurance needs after retirement (life, long-term care, health)|צרכי ביטוח אחרי פרישה (חיים, סיעוד, בריאות)|v"]],
+ ["rec","Recommendation|המלצה","agent",null,[
+  "#Products to suggest|מוצרים להצעה","Pension annuity with a guaranteed period and spouse's survivor share|קצבת פנסיה עם תקופת הבטחה ושארים לבן/בת זוג|f","Keep the study fund as bridge income, tax-free after the vesting period|השארת קרן השתלמות כגשר הכנסה, פטורה ממס אחרי תקופת הכשרה|f","Provident fund for investment for capital kept after retirement|קופת גמל להשקעה להון שנשאר אחרי פרישה|f","Long-term care cover that continues after retirement|כיסוי סיעודי שממשיך אחרי פרישה|f","Reduce life cover as dependants leave|הקטנת ביטוח חיים כשהתלויים עצמאיים|f","#Tax points|נקודות מס","Annuity versus capital withdrawal: exemption percentage and ceiling [verify]|קצבה מול משיכת הון: אחוז וסף פטור [לאימות]|v","Form 161d to fix exemption rights, and tax coordination if there are two sources|טופס 161ד לקיבוע זכויות ותיאום מס בשני מקורות הכנסה|v","Section 45A credit ends with the deposits|זיכוי לפי סעיף 45א מסתיים עם ההפקדות|v","Surtax on high income and on capital income [verify]|מס יסף על הכנסה גבוהה והכנסה הונית [לאימות]|v","Severance: exempt ceiling and spread of the tax years|פיצויים: תקרת פטור ופריסת שנות מס|v","#Investment strategy changes|שינויים באסטרטגיית ההשקעה","Move from a stock-heavy track to an age-based track about 5 years before retirement|מעבר ממסלול מנייתי למסלול לפי גיל כ-5 שנים לפני פרישה|f","Choose the track for the annuity phase (moderate risk)|בחירת מסלול לשלב הקצבה (סיכון מתון)|f","Keep two years of expenses in low-risk assets|שמירת הוצאות של שנתיים בנכסים בסיכון נמוך|f","#Savings programs|תוכניות חיסכון","Move idle policy savings into an annuity or a provident fund|העברת חיסכון רדום בפוליסה לקצבה או לקופת גמל|f","Voluntary deposits up to the tax-advantaged ceiling until the exit date|הפקדות עצמאיות עד תקרת ההטבה עד מועד היציאה|f","#Record|תיעוד","Reasoning document with alternatives, fees and commissions disclosed|מסמך נימוקים עם חלופות, דמי ניהול ועמלות מגולים|f"]],
+ ["rev","Manager review (four eyes)|בקרת מנהל (שני זוגות עיניים)","mgr",null,[
+  "Suitability of each recommended product|התאמת כל מוצר מומלץ|v","Conflict of interest and commissions reviewed|ניגוד עניינים ועמלות נבדקו|v","Tax statements marked for verification are confirmed|הצהרות מס המסומנות לאימות אושרו|v","Approved or returned with comments|אושר או הוחזר עם הערות"]],
+ ["dec","Client decision and signing|החלטת הלקוח וחתימה","agent",null,[
+  "Recommendation presented, client questions answered|ההמלצה הוצגה ושאלות הלקוח נענו|v","Client choices recorded (accepted, changed, declined)|בחירות הלקוח נרשמו (אושר, שונה, נדחה)|f","Advice record and instructions signed|רשומת ייעוץ והוראות נחתמו|f","Cooling-off and cancellation rights explained [verify]|הוסברו זכויות ביטול והתחרטות [לאימות]|v"]],
+ ["exe","Back-office execution|ביצוע במשרד האחורי","back",null,[
+  "ID copies and signed forms complete|העתקי זהות וטפסים חתומים שלמים|v","Insurer forms filled from templates (payout, track change, transfer)|טפסי מבטחים מולאו מתבניות (תשלום קצבה, שינוי מסלול, ניוד)|f","Labels printed, post and email dispatched|מדבקות הודפסו, דואר ומיילים נשלחו|s","Instructions logged in the database|ההוראות נרשמו במאגר|f"]],
+ ["inq","Inquiries to the insurance companies|פניות לחברות הביטוח","back",["exe"],[
+  "Inquiry sent to each fund and insurer|פנייה נשלחה לכל קרן ומבטח|s","Business-day deadline set for each reply|נקבע מועד תשובה בימי עסקים לכל מענה|f","Replies received and compared with the instructions|תשובות התקבלו והושוו להוראות|v","Follow-up and escalation if the deadline passed|מעקב והסלמה אם המועד חלף|s"]],
+ ["tx","Tax filings|הגשות מס","back",["exe"],[
+  "Form 161d submitted|טופס 161ד הוגש|s","Tax coordination certificate (if needed) obtained|התקבל אישור תיאום מס (אם נדרש)|v","Withholding rate at the payer matches the certificate|שיעור הניכוי אצל המשלם תואם לאישור|v"]],
+ ["cls","Close and follow up|סגירה ומעקב","agent",["inq","tx"],[
+  "Confirmation letter to the client|מכתב אישור ללקוח|s","First annuity payment checked|תשלום הקצבה הראשון נבדק|v","Follow-up contacts scheduled (30 and 40 days)|נקבעו פניות מעקב (30 ו-40 ימים)|f","File closed and archived for 7 years|התיק נסגר וארוכב ל-7 שנים|f"]]]}
+];
+
+reg({
+ tab_proc:["Processes","תהליכים"],
+ pr_title:["Processes: stages and checklists","תהליכים: שלבים ורשימות בדיקה"],
+ pr_intro:["A process is a pipeline of stages. Every stage must pass its checklist and be finalized by the responsible role. A stage is locked until the stages before it are final. Stages with no dependency between them run in parallel. The process is complete only when every stage is final.","תהליך הוא צינור של שלבים. כל שלב חייב לעבור את רשימת הבדיקה שלו ולהיסגר בידי התפקיד האחראי. שלב נעול עד שהשלבים שלפניו סגורים. שלבים שאין ביניהם תלות רצים במקביל. התהליך הושלם רק כשכל השלבים סגורים."],
+ pr_work:["My work","העבודה שלי"],pr_run:["Running","בתהליך"],pr_cat:["Catalog","קטלוג"],
+ pr_start:["Start","התחל"],pr_diagram:["Edit diagram ↗","ערוך תרשים ↗"],pr_copy:["Copy Mermaid","העתק Mermaid"],pr_dl:["Download .mmd","הורד mmd"],
+ pr_copied:["Diagram source copied","קוד התרשים הועתק"],
+ pr_locked:["Locked until: {x}","נעול עד: {x}"],pr_par:["Parallel: can start now","במקביל: אפשר להתחיל"],pr_inprog:["In progress {a}/{b}","בביצוע {a}/{b}"],
+ pr_ready:["Checklist complete, ready to finalize","הרשימה הושלמה, מוכן לסגירה"],pr_final:["Final","סגור"],
+ pr_finalize:["Finalize stage","סגור שלב"],pr_needrole:["Only {r} or a manager can finalize","רק {r} או מנהל יכולים לסגור"],
+ pr_need:["Complete the checklist first","קודם יש להשלים את הרשימה"],
+ pr_complete:["Process complete. Every stage is final.","התהליך הושלם. כל השלבים סגורים."],
+ pr_none:["Nothing waiting for this role.","אין משימות ממתינות לתפקיד זה."],
+ pr_client:["Client","לקוח"],pr_owner:["Owner","אחראי"],pr_stages:["{n} stages","{n} שלבים"],pr_checks:["{n} checks","{n} בדיקות"],
+ pr_details:["Details","פרטים"],pr_hide:["Hide","הסתר"],pr_feat:["Featured","מומלץ להתחלה"],pr_open:["Open","פתח"],
+ pr_legend:["Legend","מקרא"],pr_k_f:["fill","מילוי"],pr_k_v:["verify","אימות"],pr_k_s:["send","שליחה"],pr_k_c:["do","ביצוע"],
+ pr_banner:["Process","תהליך"],pr_gopr:["Open the process","פתח את התהליך"],
+ pr_started:["Process started: {p}","התהליך התחיל: {p}"],pr_stfin:["Stage finalized: {s}","השלב נסגר: {s}"],
+ pr_done:["Complete","הושלם"],pr_pct:["{n}% complete","{n}% הושלם"],pr_back:["← All processes","← כל התהליכים"],
+ pr_srcflow:["Spec flow","זרימה במפרט"],pr_sw:["Switch to {r}","עבור ל{r}"],pr_par2:["parallel","במקביל"],pr_seq:["locked order","סדר נעול"],
+ pr_mix:["Order: stages marked ∥ run in parallel; the others are locked in sequence.","סדר: שלבים המסומנים ∥ רצים במקביל; השאר נעולים ברצף."],
+ pr_by:["by {r}","בידי {r}"],pr_new:["Start a new process","התחלת תהליך חדש"],pr_run_none:["No running processes. Start one from the catalog.","אין תהליכים רצים. התחילו אחד מהקטלוג."]
+});
+I.ar.tab_proc="العمليات";I.ru.tab_proc="Процессы";I.fr.tab_proc="Processus";
+
+S.pr={view:"work",cat:null,sel:null,client:NAMES[0],n:1,list:[],doneLogged:{}};
+var PM={};PROCS.forEach(function(p){PM[p.id]=p});
+var RCOL={agent:"#1f6feb",back:"#2a9d63",mgr:"#b7791f",mkt:"#8250df"};
+function PT(s){var a=s.split("|");return S.lang==="he"?a[1]:a[0]}
+function PTL(s,l){var a=s.split("|");return l==="he"?a[1]:a[0]}
+function pStages(p){return p.st}
+function pDeps(p,i){var d=p.st[i][3];return d==null?(i?[p.st[i-1][0]]:[]):d}
+function pStage(p,id){for(var i=0;i<p.st.length;i++)if(p.st[i][0]===id)return p.st[i]}
+function pChecks(st){var r=[];st[4].forEach(function(c,i){if(c.charAt(0)!=="#")r.push(i)});return r}
+function pLevels(p){var L={};p.st.forEach(function(s,i){var d=pDeps(p,i);L[s[0]]=d.length?1+Math.max.apply(null,d.map(function(x){return L[x]})):0});return L}
+function pCols(p){var L=pLevels(p),cols=[];p.st.forEach(function(s,i){(cols[L[s[0]]]=cols[L[s[0]]]||[]).push(i)});return cols}
+function pCount(p){var n=0;p.st.forEach(function(s){n+=pChecks(s).length});return n}
+function isPar(p,i){var c=pCols(p),L=pLevels(p)[p.st[i][0]];return c[L].length>1||(pDeps(p,i).length===0&&i>0)}
+function iStat(I2,s){
+  var p=PM[I2.p];if(I2.fin[s[0]])return"done";
+  var idx=p.st.indexOf(s),dp=pDeps(p,idx);
+  if(dp.some(function(x){return !I2.fin[x]}))return"locked";
+  return pChecks(s).every(function(k){return I2.done[s[0]+":"+k]})?"ready":"open";
+}
+function iTicks(I2,s){return pChecks(s).filter(function(k){return I2.done[s[0]+":"+k]}).length}
+function iPct(I2){var p=PM[I2.p];return Math.round(100*p.st.filter(function(s){return I2.fin[s[0]]}).length/p.st.length)}
+function iComplete(I2){return PM[I2.p].st.every(function(s){return I2.fin[s[0]]})}
+function pStart(pid,client){
+  var I2={id:S.pr.n++,p:pid,client:client,done:{},fin:{},ts:Date.now()};S.pr.list.push(I2);
+  logAudit(who(),t("pr_started",{p:PT(PM[pid].n)})+" - "+client);return I2;
+}
+function pTick(I2,sid,k){
+  var s=pStage(PM[I2.p],sid);if(iStat(I2,s)==="locked"||I2.fin[sid])return;
+  var key=sid+":"+k;I2.done[key]=!I2.done[key];
+}
+function pCanFin(s){return s[2]===S.role||S.role==="mgr"}
+function pFin(I2,sid){
+  var p=PM[I2.p],s=pStage(p,sid);if(iStat(I2,s)!=="ready"||!pCanFin(s))return false;
+  I2.fin[sid]=true;logAudit(who(),t("pr_stfin",{s:PT(s[1])})+" - "+I2.client+" ("+PT(p.n)+")");
+  if(iComplete(I2)&&!S.pr.doneLogged[I2.id]){S.pr.doneLogged[I2.id]=1;logAudit("System",t("pr_complete")+" "+PT(p.n)+" - "+I2.client)}
+  return true;
+}
+function pSeed(pid,client,spec){
+  var I2=pStart(pid,client),p=PM[pid];S.audit.pop();
+  p.st.forEach(function(s){var v=spec[s[0]];if(v===undefined)return;var ks=pChecks(s);
+    var n=v==="fin"?ks.length:v;ks.slice(0,n).forEach(function(k){I2.done[s[0]+":"+k]=1});if(v==="fin")I2.fin[s[0]]=true});
+  return I2;
+}
+function pMyCount(){var n=0;S.pr.list.forEach(function(I2){if(iComplete(I2))return;PM[I2.p].st.forEach(function(s){if(s[2]===S.role){var q=iStat(I2,s);if(q==="open"||q==="ready")n++}})});return n}
+
+/* ---- diagrams ---- */
+function mq(s){return String(s).replace(/"/g,"#quot;").replace(/[<>]/g,"")}
+function pMermaid(p,lang){
+  var T=function(s){return PTL(s,lang)},o=['%%{init: {"flowchart": {"wrappingWidth": 380}}}%%',"flowchart LR"];
+  o.push("  classDef agent fill:#dbe8fd,stroke:#1f6feb,color:#111");o.push("  classDef back fill:#d9f2e4,stroke:#2a9d63,color:#111");
+  o.push("  classDef mgr fill:#fbefd5,stroke:#b7791f,color:#111");o.push("  classDef mkt fill:#ece1fb,stroke:#8250df,color:#111");
+  o.push("  classDef end1 fill:#fff,stroke:#333,color:#111");
+  o.push('  start(["'+mq(T(p.n))+'"]):::end1');
+  p.st.forEach(function(s,i){
+    var lb="<b>"+(i+1)+". "+mq(T(s[1]))+"</b><br/>"+mq(PTL("Role: |תפקיד: ",lang)+roleNameL(s[2],lang));
+    s[4].forEach(function(c){var a=c.split("|"),tx=mq(T(c));lb+=c.charAt(0)==="#"?"<br/><u>"+tx.slice(1)+"</u>":"<br/>☐ "+tx});
+    o.push('  s_'+s[0]+'["'+lb+'"]:::'+s[2]);
+  });
+  var hasOut={};
+  p.st.forEach(function(s,i){var d=pDeps(p,i);if(!d.length)o.push("  start --> s_"+s[0]);d.forEach(function(x){hasOut[x]=1;o.push("  s_"+x+" --> s_"+s[0])})});
+  o.push('  fin(["'+mq(PTL("Complete: every stage final|הושלם: כל השלבים סגורים",lang))+'"]):::end1');
+  p.st.forEach(function(s){if(!hasOut[s[0]])o.push("  s_"+s[0]+" --> fin")});
+  return o.join("\n");
+}
+function roleNameL(r,l){var m={agent:["Agent","סוכן"],back:["Back-office","משרד אחורי"],mgr:["Manager","מנהל"],mkt:["Marketing","שיווק"]};return m[r][l==="he"?1:0]}
+function b64u(s){return btoa(unescape(encodeURIComponent(s))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"")}
+function pLink(p,lang){return "https://mermaid.live/edit#base64:"+b64u(JSON.stringify({code:pMermaid(p,lang),mermaid:'{"theme":"default"}',autoSync:true,updateDiagram:true}))}
+function pLang(){return S.lang==="he"?"he":"en"}
+
+/* ---- visuals ---- */
+function rtag(r){return '<span class="rtag" style="--rc:'+RCOL[r]+'">'+esc(roleName(r))+'</span>'}
+function pipeHtml(p,I2,mini){
+  var cols=pCols(p),h='<div class="pipe'+(mini?" mini":"")+'">';
+  cols.forEach(function(col,ci){
+    if(ci)h+='<div class="parr" aria-hidden="true">›</div>';
+    h+='<div class="pcol'+(col.length>1?" par":"")+'">'+(col.length>1&&!mini?'<div class="pcl">∥ '+esc(t("pr_par2"))+'</div>':"");
+    col.forEach(function(i){var s=p.st[i],q=I2?iStat(I2,s):"idle",n=pChecks(s).length,k=I2?iTicks(I2,s):0;
+      h+='<button class="pst '+q+'" style="--rc:'+RCOL[s[2]]+'" '+(I2&&!mini?'data-a="pfoc" data-v="'+s[0]+'"':"")+' title="'+esc(PT(s[1]))+'"><span class="xpn">'+(i+1)+'</span>'+(mini?"":'<span class="pnm">'+esc(PT(s[1]))+'</span><span class="pm">'+esc(roleName(s[2]))+" · "+(I2?k+"/"+n:n)+(q==="done"?" ✓":q==="locked"?" 🔒":"")+'</span>')+'</button>'});
+    h+='</div>'});
+  return h+'</div>';
+}
+var KI={f:"✎",v:"✔",s:"✉",c:"☐"};
+function stageCard(p,i,I2){
+  var s=p.st[i],q=I2?iStat(I2,s):"idle",dp=pDeps(p,i),n=pChecks(s).length,k=I2?iTicks(I2,s):0;
+  var pill=q==="done"?t("pr_final"):q==="locked"?t("pr_locked",{x:dp.filter(function(x){return !I2.fin[x]}).map(function(x){return PT(pStage(p,x)[1])}).join(", ")}):q==="ready"?t("pr_ready"):q==="open"?t("pr_inprog",{a:k,b:n}):(dp.length?t("pr_locked",{x:dp.map(function(x){return PT(pStage(p,x)[1])}).join(", ")}):t("pr_par"));
+  var h='<div class="stg '+q+'" id="stg_'+s[0]+'" style="--rc:'+RCOL[s[2]]+'"><div class="stgh"><span class="xpn">'+(i+1)+'</span><b>'+esc(PT(s[1]))+'</b>'+rtag(s[2])+(isPar(p,i)?'<span class="par2">∥ '+esc(t("pr_par2"))+'</span>':"")+'<span class="spill">'+esc(pill)+'</span></div><ul class="xchk">';
+  s[4].forEach(function(c,ix){
+    if(c.charAt(0)==="#"){h+='<li class="chh">'+esc(PT(c.slice(1)))+'</li>';return}
+    var kd=c.split("|")[2]||"c",on=I2&&I2.done[s[0]+":"+ix],dis=!I2||q==="locked"||q==="done";
+    h+='<li><button class="ck'+(on?" on":"")+'" '+(dis?"disabled ":"")+'data-a="ptick" data-v="'+s[0]+":"+ix+'" aria-pressed="'+(!!on)+'"><span class="cb">'+(on?"✓":"")+'</span><span class="ki" title="'+esc(t("pr_k_"+kd))+'">'+KI[kd]+'</span><span class="ct">'+esc(PT(c))+'</span></button></li>'});
+  h+='</ul>';
+  if(I2&&q!=="locked"&&q!=="done"){
+    var can=pCanFin(s),dis2=q!=="ready"||!can;
+    h+='<div class="stgf">'+ab("pfin",t("pr_finalize"),"primary",dis2,s[0])+'<span class="note" style="margin:0">'+esc(q!=="ready"?t("pr_need"):!can?t("pr_needrole",{r:roleName(s[2])}):"")+'</span>'+(q==="ready"&&!can?ab("psw",t("pr_sw",{r:roleName(s[2])}),"",false,s[2]):"")+'</div>'}
+  return h+'</div>';
+}
+function procHead(p){return '<div class="phead"><b>'+esc(PT(p.n))+'</b> '+ptag(p.src)+" "+rtag(p.o)+'<span class="note" style="margin:0 8px">'+esc(t("pr_stages",{n:p.st.length}))+" · "+esc(t("pr_checks",{n:pCount(p)}))+'</span></div>'}
+function diagBtns(p){return '<a class="btn" target="_blank" rel="noopener" href="'+esc(pLink(p,pLang()))+'">'+esc(t("pr_diagram"))+'</a>'+ab("pcopy",t("pr_copy"),"",false,p.id)+ab("pdl",t("pr_dl"),"",false,p.id)}
+
+/* ---- screens ---- */
+function renderProc(){
+  var P=S.pr,h='<div class="pintro"><b>'+esc(t("pr_title"))+'</b><p>'+esc(t("pr_intro"))+'</p><p class="note" style="margin:0">'+esc(t("pr_mix"))+" "+['f','v','s','c'].map(function(k){return KI[k]+" "+t("pr_k_"+k)}).join(" · ")+'</p></div>';
+  var my=pMyCount(),run=P.list.filter(function(x){return !iComplete(x)}).length;
+  h+=chipRow("pview",[["work",t("pr_work"),my],["run",t("pr_run"),P.list.length],["cat",t("pr_cat"),PROCS.length]],P.view);
+  h+='<div id="pbody"></div>';$("main").innerHTML=h;
+  var map={pview:function(v){P.view=v;P.sel=null;renderProc()}};bind($("main"),map);drawProc();
+}
+function drawProc(){
+  var P=S.pr,B=$("pbody"),h="";
+  var map={
+    pview:function(v){P.view=v;P.sel=null;renderProc()},
+    popen:function(v){P.sel=+v;P.view="run";renderProc()},
+    pbk:function(){P.sel=null;renderProc()},
+    pstart:function(v){var I2=pStart(v,P.client);P.sel=I2.id;P.view="run";toast(t("pr_started",{p:PT(PM[v].n)}));renderProc()},
+    pdet:function(v){P.cat=P.cat===v?null:v;drawProc()},
+    ptick:function(v){var a=v.split(":");pTick(cur(),a[0],+a[1]);drawProc()},
+    pfin:function(v){if(pFin(cur(),v))toast(t("pr_stfin",{s:PT(pStage(PM[cur().p],v)[1])}));drawProc();updTab()},
+    psw:function(v){S.role=v;store("role",v);S.tab="proc";render()},
+    pfoc:function(v){var e=$("stg_"+v);if(e&&e.scrollIntoView)e.scrollIntoView({behavior:"smooth",block:"center"})},
+    pcopy:function(v){var c=pMermaid(PM[v],pLang());try{navigator.clipboard.writeText(c)}catch(e){}toast(t("pr_copied"))},
+    pdl:function(v){var a=document.createElement("a");a.href="data:text/plain;charset=utf-8,"+encodeURIComponent(pMermaid(PM[v],pLang()));a.download=v+".mmd";a.click()}
+  };
+  function cur(){return P.list.filter(function(x){return x.id===P.sel})[0]}
+  if(P.view==="run"&&P.sel&&cur()){
+    var I2=cur(),p=PM[I2.p],pc=iPct(I2);
+    h+='<div class="toolbar">'+ab("pbk",t("pr_back"))+diagBtns(p)+'</div>';
+    h+=procHead(p)+'<div class="pbar"><i style="width:'+pc+'%"></i></div><div class="summary">'+esc(nm(I2.client))+' · '+esc(t("pr_pct",{n:pc}))+'</div>';
+    if(iComplete(I2))h+='<div class="pdone">✓ '+esc(t("pr_complete"))+'</div>';
+    h+=pipeHtml(p,I2,false)+'<div class="stgs">'+p.st.map(function(s,i){return stageCard(p,i,I2)}).join("")+'</div>';
+  }else if(P.view==="work"){
+    var rows=[];P.list.forEach(function(I2){if(iComplete(I2))return;PM[I2.p].st.forEach(function(s){if(s[2]===S.role){var q=iStat(I2,s);if(q==="open"||q==="ready")rows.push([I2,s,q])}})});
+    h+='<div class="summary">'+esc(t("pr_work"))+' · '+esc(roleName(S.role))+' ('+rows.length+')</div>';
+    h+=rows.length?rows.map(function(r){var I2=r[0],s=r[1],p=PM[I2.p];return '<div class="card xprow" style="--rc:'+RCOL[s[2]]+'"><div><b>'+esc(PT(s[1]))+'</b> <span class="note" style="margin:0">'+esc(PT(p.n))+' · <span dir="auto">'+esc(nm(I2.client))+'</span></span><div class="pbar sm"><i style="width:'+iPct(I2)+'%"></i></div></div><span class="spill">'+esc(r[2]==="ready"?t("pr_ready"):t("pr_inprog",{a:iTicks(I2,s),b:pChecks(s).length}))+'</span>'+ab("popen",t("pr_open"),"primary",false,I2.id)+'</div>'}).join(""):'<div class="empty">'+esc(t("pr_none"))+'</div>';
+  }else if(P.view==="run"){
+    h+=P.list.length?P.list.map(function(I2){var p=PM[I2.p],pc=iPct(I2);return '<div class="card xprow" style="--rc:'+RCOL[p.o]+'"><div style="flex:1;min-width:0"><b>'+esc(PT(p.n))+'</b> <span dir="auto">'+esc(nm(I2.client))+'</span><div class="pbar sm"><i style="width:'+pc+'%"></i></div>'+pipeHtml(p,I2,true)+'</div><span class="spill">'+(iComplete(I2)?"✓ "+esc(t("pr_done")):pc+"%")+'</span>'+ab("popen",t("pr_open"),"primary",false,I2.id)+'</div>'}).reverse().join(""):'<div class="empty">'+esc(t("pr_run_none"))+'</div>';
+  }else{
+    h+='<div class="toolbar"><span>'+esc(t("pr_client"))+'</span>'+nmSel("pcl",P.client)+'</div><div class="pcat">';
+    var order=PROCS.slice().sort(function(a,b){return(b.id==="retire")-(a.id==="retire")});
+    order.forEach(function(p){
+      h+='<div class="card xpc'+(p.id==="retire"?" feat":"")+'" style="--rc:'+RCOL[p.o]+'">'+(p.id==="retire"?'<span class="pfeat">★ '+esc(t("pr_feat"))+'</span>':"")+procHead(p)+pipeHtml(p,null,true)+'<div class="toolbar" style="margin:8px 0 0">'+ab("pstart",t("pr_start"),"primary",false,p.id)+ab("pdet",P.cat===p.id?t("pr_hide"):t("pr_details"),"",false,p.id)+diagBtns(p)+'</div>'+(P.cat===p.id?pipeHtml(p,null,false)+'<div class="stgs">'+p.st.map(function(s,i){return stageCard(p,i,null)}).join("")+'</div>':"")+'</div>'});
+    h+='</div>';
+  }
+  B.innerHTML=h;bind(B,map);
+  var c=$("pcl");if(c)c.onchange=function(){P.client=this.value};
+}
+function updTab(){var b=document.querySelector('nav.tabs [data-tab="proc"]');if(b)b.textContent=t("tab_proc")+" ("+pMyCount()+")"}
+
+/* ---- process banner on other screens ---- */
+function bannerFor(){
+  var tb=S.tab,m=null;
+  if(tb==="desk")m={id:"idreg",tpl:"tpl",out:"post",req:"insreq",tax:"tax"}[S.desk.sec];
+  else if(tb==="file")m="onb";
+  else if(tb==="pension")m="retire";
+  else if(tb==="intake"||tb==="wa")m="intake";
+  else if(tb==="mkt")m="camp";
+  else if(tb==="clients")m="onb";
+  else if(tb==="excel")m="comm";
+  return m?PM[m]:null;
+}
+function addBanner(){
+  var p=bannerFor(),mn=$("main");if(!p||!mn)return;
+  var d=document.createElement("div");d.className="pbanner";d.style.setProperty("--rc",RCOL[p.o]);
+  d.innerHTML='<span class="pbt">'+esc(t("pr_banner"))+'</span><b>'+esc(PT(p.n))+'</b><span class="pbm">'+pipeHtml(p,null,true)+'</span>'+ab("pbgo",t("pr_gopr"),"primary")+'<a class="btn" target="_blank" rel="noopener" href="'+esc(pLink(p,pLang()))+'">'+esc(t("pr_diagram"))+'</a>';
+  mn.insertBefore(d,mn.firstChild);
+  d.querySelector('[data-a="pbgo"]').onclick=function(){S.pr.view="cat";S.pr.cat=p.id;S.tab="proc";render()};
+}
+(function seed(){
+  var N=NAMES;
+  pSeed("retire",N[0],{int:"fin",auth:"fin",ana:3});
+  pSeed("insreq",N[3],{rcv:"fin",auth:"fin",prp:1});
+  pSeed("sev",N[5],{emp:2,fix:1});
+  pSeed("onb",N[2],{id:"fin",kyc:"fin",reg:"fin"});
+  pSeed("tax",N[7]||N[1],{cert:"fin",inv:1});
+  pSeed("idreg",N[4],{req:"fin",chk:"fin",reg:"fin"});
+  S.pr.doneLogged[S.pr.list[S.pr.list.length-1].id]=1;
+})();
+
+["renderDesk","renderFile","renderPension","renderIntake","renderWa","renderMkt","renderClients","renderExcel"].forEach(function(n){
+  var f=eval(n);eval(n+"=function(){f.apply(this,arguments);addBanner()}");
+});
 
 /* ---------- boot ---------- */
 (function(){

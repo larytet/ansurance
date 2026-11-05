@@ -1,0 +1,32 @@
+%%{init: {"flowchart": {"wrappingWidth": 380}}}%%
+flowchart LR
+  classDef agent fill:#dbe8fd,stroke:#1f6feb,color:#111
+  classDef back fill:#d9f2e4,stroke:#2a9d63,color:#111
+  classDef mgr fill:#fbefd5,stroke:#b7791f,color:#111
+  classDef mkt fill:#ece1fb,stroke:#8250df,color:#111
+  classDef end1 fill:#fff,stroke:#333,color:#111
+  start(["Exit to retirement planning"]):::end1
+  s_int["<b>1. Interview and goals</b><br/>Role: Agent<br/><u>Basics</u><br/>☐ Target retirement date and age set<br/>☐ Monthly income goal in today's money<br/>☐ Spouse, dependants and health recorded<br/>☐ Other assets (home, savings, business) listed<br/><u>Compliance</u><br/>☐ KYC valid (less than a year)<br/>☐ Risk questionnaire completed"]:::agent
+  s_auth["<b>2. Authorizations and data</b><br/>Role: Back-office<br/>☐ Har HaBituach, clearing house and B1 authorizations signed<br/>☐ Mislaka report requested<br/>☐ Har HaBituach report requested<br/>☐ Data imported and matched, duplicates marked"]:::back
+  s_ana["<b>3. Gap analysis</b><br/>Role: Agent<br/>☐ Projected monthly annuity per product<br/>☐ Gap against the income goal calculated<br/>☐ Bridge to state old-age pension planned<br/>☐ Management fees compared with the market<br/>☐ Insurance needs after retirement (life, long-term care, health)"]:::agent
+  s_rec["<b>4. Recommendation</b><br/>Role: Agent<br/><u>Products to suggest</u><br/>☐ Pension annuity with a guaranteed period and spouse's survivor share<br/>☐ Keep the study fund as bridge income, tax-free after the vesting period<br/>☐ Provident fund for investment for capital kept after retirement<br/>☐ Long-term care cover that continues after retirement<br/>☐ Reduce life cover as dependants leave<br/><u>Tax points</u><br/>☐ Annuity versus capital withdrawal: exemption percentage and ceiling [verify]<br/>☐ Form 161d to fix exemption rights, and tax coordination if there are two sources<br/>☐ Section 45A credit ends with the deposits<br/>☐ Surtax on high income and on capital income [verify]<br/>☐ Severance: exempt ceiling and spread of the tax years<br/><u>Investment strategy changes</u><br/>☐ Move from a stock-heavy track to an age-based track about 5 years before retirement<br/>☐ Choose the track for the annuity phase (moderate risk)<br/>☐ Keep two years of expenses in low-risk assets<br/><u>Savings programs</u><br/>☐ Move idle policy savings into an annuity or a provident fund<br/>☐ Voluntary deposits up to the tax-advantaged ceiling until the exit date<br/><u>Record</u><br/>☐ Reasoning document with alternatives, fees and commissions disclosed"]:::agent
+  s_rev["<b>5. Manager review (four eyes)</b><br/>Role: Manager<br/>☐ Suitability of each recommended product<br/>☐ Conflict of interest and commissions reviewed<br/>☐ Tax statements marked for verification are confirmed<br/>☐ Approved or returned with comments"]:::mgr
+  s_dec["<b>6. Client decision and signing</b><br/>Role: Agent<br/>☐ Recommendation presented, client questions answered<br/>☐ Client choices recorded (accepted, changed, declined)<br/>☐ Advice record and instructions signed<br/>☐ Cooling-off and cancellation rights explained [verify]"]:::agent
+  s_exe["<b>7. Back-office execution</b><br/>Role: Back-office<br/>☐ ID copies and signed forms complete<br/>☐ Insurer forms filled from templates (payout, track change, transfer)<br/>☐ Labels printed, post and email dispatched<br/>☐ Instructions logged in the database"]:::back
+  s_inq["<b>8. Inquiries to the insurance companies</b><br/>Role: Back-office<br/>☐ Inquiry sent to each fund and insurer<br/>☐ Business-day deadline set for each reply<br/>☐ Replies received and compared with the instructions<br/>☐ Follow-up and escalation if the deadline passed"]:::back
+  s_tx["<b>9. Tax filings</b><br/>Role: Back-office<br/>☐ Form 161d submitted<br/>☐ Tax coordination certificate (if needed) obtained<br/>☐ Withholding rate at the payer matches the certificate"]:::back
+  s_cls["<b>10. Close and follow up</b><br/>Role: Agent<br/>☐ Confirmation letter to the client<br/>☐ First annuity payment checked<br/>☐ Follow-up contacts scheduled (30 and 40 days)<br/>☐ File closed and archived for 7 years"]:::agent
+  start --> s_int
+  start --> s_auth
+  s_int --> s_ana
+  s_auth --> s_ana
+  s_ana --> s_rec
+  s_rec --> s_rev
+  s_rev --> s_dec
+  s_dec --> s_exe
+  s_exe --> s_inq
+  s_exe --> s_tx
+  s_inq --> s_cls
+  s_tx --> s_cls
+  fin(["Complete: every stage final"]):::end1
+  s_cls --> fin

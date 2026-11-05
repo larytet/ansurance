@@ -1,0 +1,22 @@
+%%{init: {"flowchart": {"wrappingWidth": 380}}}%%
+flowchart LR
+  classDef agent fill:#dbe8fd,stroke:#1f6feb,color:#111
+  classDef back fill:#d9f2e4,stroke:#2a9d63,color:#111
+  classDef mgr fill:#fbefd5,stroke:#b7791f,color:#111
+  classDef mkt fill:#ece1fb,stroke:#8250df,color:#111
+  classDef end1 fill:#fff,stroke:#333,color:#111
+  start(["Annual tax cycle (agency)"]):::end1
+  s_cert["<b>1. Withholding certificates (857 / 806)</b><br/>Role: Back-office<br/>☐ Annual certificate received from each insurer (even if no tax was withheld)<br/>☐ Amounts match the commission statements"]:::back
+  s_inv["<b>2. Invoices and allocation numbers</b><br/>Role: Back-office<br/>☐ Invoices above the threshold carry an allocation number<br/>☐ Invoices without a number listed and fixed"]:::back
+  s_cli["<b>3. Client deposit certificates (45A)</b><br/>Role: Back-office<br/>☐ Annual certificates requested from the insurers<br/>☐ Sent to clients"]:::back
+  s_acc["<b>4. External accountant</b><br/>Role: Back-office<br/>☐ Package sent to the accountant<br/>☐ Accountant's questions answered"]:::back
+  s_apr["<b>5. Manager approval</b><br/>Role: Manager<br/>☐ Figures reviewed<br/>☐ Cycle closed"]:::mgr
+  start --> s_cert
+  start --> s_inv
+  start --> s_cli
+  s_cert --> s_acc
+  s_inv --> s_acc
+  s_acc --> s_apr
+  s_cli --> s_apr
+  fin(["Complete: every stage final"]):::end1
+  s_apr --> fin

@@ -1,0 +1,18 @@
+%%{init: {"flowchart": {"wrappingWidth": 380}}}%%
+flowchart LR
+  classDef agent fill:#dbe8fd,stroke:#1f6feb,color:#111
+  classDef back fill:#d9f2e4,stroke:#2a9d63,color:#111
+  classDef mgr fill:#fbefd5,stroke:#b7791f,color:#111
+  classDef mkt fill:#ece1fb,stroke:#8250df,color:#111
+  classDef end1 fill:#fff,stroke:#333,color:#111
+  start(["בקשה מחברת ביטוח אחרת"]):::end1
+  s_rcv["<b>1. קבלה ושיוך</b><br/>תפקיד: משרד אחורי<br/>☐ הבקשה נרשמה עם תאריך ומבטח<br/>☐ לקוח ופוליסה זוהו<br/>☐ הופעל שעון ימי עסקים (2, 3, 7 או 10 לפי שלב)"]:::back
+  s_auth["<b>2. בדיקת הרשאה</b><br/>תפקיד: משרד אחורי<br/>☐ קיים ייפוי כוח תקף (ב1 עד 7-10 שנים)<br/>☐ לא בוטל על ידי הלקוח<br/>☐ אם חסר, התבקשה חתימת לקוח"]:::back
+  s_prp["<b>3. הכנת התשובה</b><br/>תפקיד: משרד אחורי<br/>☐ מסמכים נאספו<br/>☐ תבנית תשובה מולאה<br/>☐ נבדק על ידי הסוכן"]:::back
+  s_snd["<b>4. מענה וסגירה</b><br/>תפקיד: משרד אחורי<br/>☐ המענה נשלח במועד<br/>☐ התקבל אישור קבלה<br/>☐ ההחלפה נרשמה ביומן החלפת מידע"]:::back
+  start --> s_rcv
+  s_rcv --> s_auth
+  s_auth --> s_prp
+  s_prp --> s_snd
+  fin(["הושלם: כל השלבים סגורים"]):::end1
+  s_snd --> fin

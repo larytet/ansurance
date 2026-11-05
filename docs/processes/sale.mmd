@@ -1,0 +1,18 @@
+%%{init: {"flowchart": {"wrappingWidth": 380}}}%%
+flowchart LR
+  classDef agent fill:#dbe8fd,stroke:#1f6feb,color:#111
+  classDef back fill:#d9f2e4,stroke:#2a9d63,color:#111
+  classDef mgr fill:#fbefd5,stroke:#b7791f,color:#111
+  classDef mkt fill:#ece1fb,stroke:#8250df,color:#111
+  classDef end1 fill:#fff,stroke:#333,color:#111
+  start(["Quote, sale and policy issuance"]):::end1
+  s_need["<b>1. Needs and suitability</b><br/>Role: Agent<br/>☐ Client needs recorded<br/>☐ At least two alternatives compared<br/>☐ Existing cover checked (duplicate or replacement)<br/>☐ Reasoning document drafted"]:::agent
+  s_quote["<b>2. Quotes from insurers</b><br/>Role: Back-office<br/>☐ Proposal form filled for each insurer<br/>☐ Quotes received and attached<br/>☐ Underwriting questions answered"]:::back
+  s_sign["<b>3. Client decision and signing</b><br/>Role: Agent<br/>☐ Commission and fees disclosed<br/>☐ Proposal and reasoning document signed<br/>☐ Power of attorney signed"]:::agent
+  s_issue["<b>4. Issuance and filing</b><br/>Role: Back-office<br/>☐ Proposal sent to the insurer<br/>☐ Policy number received<br/>☐ Policy filed and client notified<br/>☐ Post-sale contact scheduled (30 + 10 business days)"]:::back
+  start --> s_need
+  s_need --> s_quote
+  s_quote --> s_sign
+  s_sign --> s_issue
+  fin(["Complete: every stage final"]):::end1
+  s_issue --> fin

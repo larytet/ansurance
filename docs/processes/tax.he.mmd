@@ -1,0 +1,22 @@
+%%{init: {"flowchart": {"wrappingWidth": 380}}}%%
+flowchart LR
+  classDef agent fill:#dbe8fd,stroke:#1f6feb,color:#111
+  classDef back fill:#d9f2e4,stroke:#2a9d63,color:#111
+  classDef mgr fill:#fbefd5,stroke:#b7791f,color:#111
+  classDef mkt fill:#ece1fb,stroke:#8250df,color:#111
+  classDef end1 fill:#fff,stroke:#333,color:#111
+  start(["מחזור מס שנתי (סוכנות)"]):::end1
+  s_cert["<b>1. אישורי ניכוי במקור (857 / 806)</b><br/>תפקיד: משרד אחורי<br/>☐ התקבל אישור שנתי מכל מבטח (גם אם לא נוכה מס)<br/>☐ הסכומים תואמים לדוחות העמלות"]:::back
+  s_inv["<b>2. חשבוניות ומספרי הקצאה</b><br/>תפקיד: משרד אחורי<br/>☐ חשבוניות מעל הסף נושאות מספר הקצאה<br/>☐ חשבוניות ללא מספר רוכזו ותוקנו"]:::back
+  s_cli["<b>3. אישורי הפקדות ללקוחות (45א)</b><br/>תפקיד: משרד אחורי<br/>☐ אישורים שנתיים התבקשו מהמבטחים<br/>☐ נשלחו ללקוחות"]:::back
+  s_acc["<b>4. רואה חשבון חיצוני</b><br/>תפקיד: משרד אחורי<br/>☐ חבילה נשלחה לרואה החשבון<br/>☐ שאלות רואה החשבון נענו"]:::back
+  s_apr["<b>5. אישור מנהל</b><br/>תפקיד: מנהל<br/>☐ הנתונים נבדקו<br/>☐ המחזור נסגר"]:::mgr
+  start --> s_cert
+  start --> s_inv
+  start --> s_cli
+  s_cert --> s_acc
+  s_inv --> s_acc
+  s_acc --> s_apr
+  s_cli --> s_apr
+  fin(["הושלם: כל השלבים סגורים"]):::end1
+  s_apr --> fin

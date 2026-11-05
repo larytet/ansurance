@@ -1,0 +1,16 @@
+%%{init: {"flowchart": {"wrappingWidth": 380}}}%%
+flowchart LR
+  classDef agent fill:#dbe8fd,stroke:#1f6feb,color:#111
+  classDef back fill:#d9f2e4,stroke:#2a9d63,color:#111
+  classDef mgr fill:#fbefd5,stroke:#b7791f,color:#111
+  classDef mkt fill:#ece1fb,stroke:#8250df,color:#111
+  classDef end1 fill:#fff,stroke:#333,color:#111
+  start(["Policy replacement advice"]):::end1
+  s_cmp["<b>1. Compare the old and the new</b><br/>Role: Agent<br/>☐ Old policy terms and exclusions listed<br/>☐ Waiting periods and pricing compared<br/>☐ Loss of accrued rights checked"]:::agent
+  s_adv["<b>2. Advice record</b><br/>Role: Agent<br/>☐ Written advice with the reasons<br/>☐ Client signed that the risks were explained"]:::agent
+  s_can["<b>3. Cancel the old policy only after the new one is in force</b><br/>Role: Back-office<br/>☐ New policy confirmed in force<br/>☐ Cancellation request sent to the old insurer<br/>☐ Insurer's cancellation check answered"]:::back
+  start --> s_cmp
+  s_cmp --> s_adv
+  s_adv --> s_can
+  fin(["Complete: every stage final"]):::end1
+  s_can --> fin

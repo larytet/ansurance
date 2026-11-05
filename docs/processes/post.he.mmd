@@ -1,0 +1,16 @@
+%%{init: {"flowchart": {"wrappingWidth": 380}}}%%
+flowchart LR
+  classDef agent fill:#dbe8fd,stroke:#1f6feb,color:#111
+  classDef back fill:#d9f2e4,stroke:#2a9d63,color:#111
+  classDef mgr fill:#fbefd5,stroke:#b7791f,color:#111
+  classDef mkt fill:#ece1fb,stroke:#8250df,color:#111
+  classDef end1 fill:#fff,stroke:#333,color:#111
+  start(["דואר יוצא ומיילים"]):::end1
+  s_prep["<b>1. הכנת האצווה</b><br/>תפקיד: משרד אחורי<br/>☐ כתובות נבדקו (רחוב, עיר, מיקוד)<br/>☐ הועדפו שפה וערוץ של הנמען"]:::back
+  s_lab["<b>2. הדפסה</b><br/>תפקיד: משרד אחורי<br/>☐ מדבקות הודפסו<br/>☐ מכתבים הודפסו והוכנסו"]:::back
+  s_snd["<b>3. שליחה והוכחה</b><br/>תפקיד: משרד אחורי<br/>☐ הדואר נמסר והקבלה נשמרה<br/>☐ מיילים נשלחו<br/>☐ הוכחת שליחה תויקה בתיק"]:::back
+  start --> s_prep
+  s_prep --> s_lab
+  s_lab --> s_snd
+  fin(["הושלם: כל השלבים סגורים"]):::end1
+  s_snd --> fin

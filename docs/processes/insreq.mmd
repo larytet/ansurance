@@ -1,0 +1,18 @@
+%%{init: {"flowchart": {"wrappingWidth": 380}}}%%
+flowchart LR
+  classDef agent fill:#dbe8fd,stroke:#1f6feb,color:#111
+  classDef back fill:#d9f2e4,stroke:#2a9d63,color:#111
+  classDef mgr fill:#fbefd5,stroke:#b7791f,color:#111
+  classDef mkt fill:#ece1fb,stroke:#8250df,color:#111
+  classDef end1 fill:#fff,stroke:#333,color:#111
+  start(["Request from another insurance company"]):::end1
+  s_rcv["<b>1. Receive and attribute</b><br/>Role: Back-office<br/>☐ Request logged with date and insurer<br/>☐ Client and policy identified<br/>☐ Business-day clock started (2, 3, 7 or 10 days by step)"]:::back
+  s_auth["<b>2. Check authority</b><br/>Role: Back-office<br/>☐ Valid power of attorney exists (B1 within 7-10 years)<br/>☐ Not cancelled by the client<br/>☐ If missing, request signature from the client"]:::back
+  s_prp["<b>3. Prepare the answer</b><br/>Role: Back-office<br/>☐ Documents collected<br/>☐ Answer template filled<br/>☐ Reviewed by the agent"]:::back
+  s_snd["<b>4. Reply and close</b><br/>Role: Back-office<br/>☐ Reply sent within the deadline<br/>☐ Confirmation of receipt obtained<br/>☐ Exchange logged in the information-exchange register"]:::back
+  start --> s_rcv
+  s_rcv --> s_auth
+  s_auth --> s_prp
+  s_prp --> s_snd
+  fin(["Complete: every stage final"]):::end1
+  s_snd --> fin

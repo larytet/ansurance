@@ -1,0 +1,18 @@
+%%{init: {"flowchart": {"wrappingWidth": 380}}}%%
+flowchart LR
+  classDef agent fill:#dbe8fd,stroke:#1f6feb,color:#111
+  classDef back fill:#d9f2e4,stroke:#2a9d63,color:#111
+  classDef mgr fill:#fbefd5,stroke:#b7791f,color:#111
+  classDef mkt fill:#ece1fb,stroke:#8250df,color:#111
+  classDef end1 fill:#fff,stroke:#333,color:#111
+  start(["Pension and savings portfolio review"]):::end1
+  s_auth["<b>1. Three authorizations</b><br/>Role: Back-office<br/>☐ Har HaBituach authorization signed<br/>☐ Clearing house (Mislaka) authorization signed<br/>☐ Continuing authorization (B1) signed for each insurer"]:::back
+  s_data["<b>2. Get the data</b><br/>Role: Back-office<br/>☐ Har HaBituach report requested<br/>☐ Clearing house data requested<br/>☐ Data imported and matched to the client"]:::back
+  s_ana["<b>3. Analysis</b><br/>Role: Agent<br/>☐ Duplicate cover and idle funds found<br/>☐ Management fees compared<br/>☐ Gaps listed (disability, death, long-term care)"]:::agent
+  s_rec["<b>4. Recommendation and signing</b><br/>Role: Agent<br/>☐ Recommendation with reasoning written<br/>☐ Client meeting held<br/>☐ Advice record signed"]:::agent
+  start --> s_auth
+  s_auth --> s_data
+  s_data --> s_ana
+  s_ana --> s_rec
+  fin(["Complete: every stage final"]):::end1
+  s_rec --> fin

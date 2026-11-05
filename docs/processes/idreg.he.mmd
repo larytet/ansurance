@@ -1,0 +1,16 @@
+%%{init: {"flowchart": {"wrappingWidth": 380}}}%%
+flowchart LR
+  classDef agent fill:#dbe8fd,stroke:#1f6feb,color:#111
+  classDef back fill:#d9f2e4,stroke:#2a9d63,color:#111
+  classDef mgr fill:#fbefd5,stroke:#b7791f,color:#111
+  classDef mkt fill:#ece1fb,stroke:#8250df,color:#111
+  classDef end1 fill:#fff,stroke:#333,color:#111
+  start(["השגת תעודת זהות ורישום"]):::end1
+  s_req["<b>1. בקשת תעודת זהות</b><br/>תפקיד: משרד אחורי<br/>☐ נפתח מקרה של תעודה חסרה<br/>☐ הבקשה נשלחה (וואטסאפ, אימייל או דואר)<br/>☐ נקבעה תזכורת ל-3 ימי עסקים"]:::back
+  s_chk["<b>2. אימות</b><br/>תפקיד: משרד אחורי<br/>☐ שני הצדדים קריאים<br/>☐ ספרת ביקורת תקינה<br/>☐ התאמה לשם שהוצהר"]:::back
+  s_reg["<b>3. רישום</b><br/>תפקיד: משרד אחורי<br/>☐ רשומה נוצרה או עודכנה<br/>☐ העתק תויק בתיק הלקוח<br/>☐ המקרה נסגר בתיבה"]:::back
+  start --> s_req
+  s_req --> s_chk
+  s_chk --> s_reg
+  fin(["הושלם: כל השלבים סגורים"]):::end1
+  s_reg --> fin

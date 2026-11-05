@@ -1,0 +1,19 @@
+%%{init: {"flowchart": {"wrappingWidth": 380}}}%%
+flowchart LR
+  classDef agent fill:#dbe8fd,stroke:#1f6feb,color:#111
+  classDef back fill:#d9f2e4,stroke:#2a9d63,color:#111
+  classDef mgr fill:#fbefd5,stroke:#b7791f,color:#111
+  classDef mkt fill:#ece1fb,stroke:#8250df,color:#111
+  classDef end1 fill:#fff,stroke:#333,color:#111
+  start(["קליטת לקוח חדש (הכר את לקוחך)"]):::end1
+  s_id["<b>1. זיהוי הלקוח</b><br/>תפקיד: משרד אחורי<br/>☐ התקבלה תעודת זהות וספח (שני צדדים)<br/>☐ ספרת ביקורת תקינה בתעודת הזהות<br/>☐ שם ותאריך לידה תואמים לתעודה<br/>☐ בוצע חיפוש כפילות במאגר"]:::back
+  s_kyc["<b>2. הכר את לקוחך ופרופיל סיכון</b><br/>תפקיד: סוכן<br/>☐ מקור כספים ותעסוקה נרשמו<br/>☐ הצהרת תושבות למס (FATCA/CRS) נחתמה<br/>☐ שאלון צרכים הושלם<br/>☐ בדיקת איש ציבור (PEP)"]:::agent
+  s_reg["<b>3. רישום במאגר</b><br/>תפקיד: משרד אחורי<br/>☐ נוצרה כרטיסית לקוח<br/>☐ פרטי קשר והעדפת שפה נשמרו<br/>☐ הסכמה לשיווק נרשמה (בנפרד, רשות)<br/>☐ הודעת פתיחה והזמנה לאפליקציה נשלחו"]:::back
+  s_fin["<b>4. אישור וארכוב</b><br/>תפקיד: מנהל<br/>☐ דירוג סיכון אושר<br/>☐ המסמכים אורכבו עם שמירה ל-7 שנים"]:::mgr
+  start --> s_id
+  start --> s_kyc
+  s_id --> s_reg
+  s_kyc --> s_reg
+  s_reg --> s_fin
+  fin(["הושלם: כל השלבים סגורים"]):::end1
+  s_fin --> fin
