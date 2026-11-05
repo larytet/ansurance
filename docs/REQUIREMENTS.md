@@ -327,6 +327,72 @@ Example scenario (coexistence, ansurance as the front layer, a system such as Su
 
 Adapter contract (the same for any vendor): `list_clients(since)`, `list_policies(since)`, `get_document(id)`, `push_task(client, text)` (optional), plus a health check. A fake adapter with synthetic data is used in tests. Vendor API access, rate limits, authentication and licensing terms must be agreed with the vendor before the build; none of these were verified in research **[verify]**.
 
+### 9.2 Surense product family (integration and competitor reference)
+
+Sources: the vendor pages [products](https://www.surense.co.il/products/), [SurenseOne](https://www.surense.co.il/surense-one/) and [CRM for insurance agents](https://www.surense.co.il/crm-for-insurance-agents/) (read 2026-11-05), and the two Android apps from [Google Play](https://play.google.com/store/apps/details?id=com.surense) (SurenseGo 4.2.0) and [Google Play](https://play.google.com/store/apps/details?id=com.surense.one) (SurenseOne 1.3.0, minSdk 24 for both) as installed on a test phone. These are vendor marketing claims, not verified in use. Vendor images are kept locally only (not committed, they are the vendor's marketing material); file names below refer to that local folder. Numbers shown in the screenshots are demo data.
+
+**Product map.** The vendor sells four things that share one data set. SurenseFire is the central system, SurenseGo extends it to the field, SurenseOne faces the agency's own clients, SurenseFlow (the API) connects other tools.
+
+#### SurenseFire (web CRM, SaaS in the browser, no local install)
+
+For independent agents and large agencies alike. Image: `Frame-2147224618.jpg` (dashboard: policies 1,796, open processes 68, open leads 447, new 32; donut charts of clients by status and by classification; 12-month clients bar chart; "active only" toggles).
+
+| Module | What the vendor says it does |
+|---|---|
+| Smart lead management | Automatic intake from marketing funnels, full closing process |
+| Client file | Flexible view of insurance and savings products of all insurers and investment houses in one place; views arranged by clearing house and Har HaBituach data; choose fields, define custom statuses |
+| Information requests and controls | Generate powers of attorney; pull data and files from the clearing house automatically (the client's signed power of attorney is the trigger); files are filed into the client record |
+| Portfolio analysis | Accumulations and coverages (provident funds, study funds, life and health policies), gap detection, products "not in my care" |
+| Business data | Performance analysis, comparison with previous months, segmentation, sales opportunities |
+| Client reports | Automatic production intake; personal or family report at a chosen frequency (monthly reports mentioned by an agent) |
+| Operations | Tasks by work queue and deadlines inside built-in workflows; separate Activities, Tasks and Processes modules |
+| Direct issuance | Issue selected products from inside the system, including the Phoenix Invest savings policy |
+| Meetings | Dedicated module; two-way sync with Google Calendar and Outlook; branded meeting summary sent to the client with a digital approval saved in the client file (proof the meeting happened and what was advised) |
+| Full documentation | Calls, emails, documents and summaries under the client file |
+| Security | Stated as strict standards, regular security tests, Amendment 13 compliance |
+| Configuration | Roles with custom permissions; process types (sales and operations) with an owner and time limits; automatic client reports in a chosen layout; done by an authorised user, no custom development |
+
+Onboarding detail from the CRM page: with one click the client signs the power-of-attorney appendices (the page names appendices A, B and E), approves the updated terms of use (Amendment 13) and approves marketing mail; a process then opens automatically. Consent management records who may be contacted (Spam Law).
+
+Regulatory features it claims: a 2-yearly service-contact duty tracked through the meetings module (the vendor cites the Capital Market Authority service circular: the agent must initiate a service contact at least every two years and document it), meeting documentation, consent management, Amendment 13 readiness.
+
+Not everything is in the mobile app: complex reports, data cuts and multiple views per module stay in Fire.
+
+#### SurenseGo (agent mobile app, Android `com.surense`, iOS, Hebrew, English, Russian)
+
+Image: `Frame-2147224693.svg` (vector mock-up). Features: instant access to full client files; create clients and leads; order information requests and open new processes; delegate tasks and track status; log every meeting or field action; meetings synced to Google or Outlook calendar; smart alerts and instant reports; activity graph (active clients, open opportunities, client birthdays); call, WhatsApp or email in one tap; send reports and attach documents to clients.
+
+#### SurenseOne (client app, Android `com.surense.one`, iOS, Hebrew, English, Russian)
+
+New product (announced on the site banner, 2026). Images: `Frame-2147224695.jpg`, `Hero-Surense-One1.webp`, `SurenseOne-App-mockup-1.webp` (phone: greeting, total saved to date, year-to-date return with monthly bars, tiles for deposits, projected annuity, loan repayments, premium; bottom tabs: Home, Products, Processes, Documents, Profile; a floating "+" button; a branded envelope logo with the agency name).
+
+- Client sees: insurance and savings information, documents, reports and meeting summaries; status of open processes (set by the agent); agent updates and recommendations with push notifications on each change.
+- Agent configures in 6 steps: choose extra services (self-purchase of travel insurance and a savings policy through a link tied to the agent number); choose what is shown (information types, documents, processes); choose which clients get access; invitation by email and SMS with a download link; contact channels (message, phone, email, and a meeting-booking link).
+- Claimed value for the agency: fewer service calls, more sales opportunities (clients send new requests from the app), a digital service channel that differentiates the agency, better retention.
+- Packaging: Fire and Go are in every plan; SurenseOne and advanced capabilities are in higher plans or a paid add-on.
+
+#### SurenseFlow (API and automations)
+
+Images: `SurenseFlow_v1-scaled.png` (logo strip), `ChatGPT-Image-Aug-11-2026-05_00_59-PM-1024x824.png` (illustration). An API extension for connecting any external system (mailing, marketing, other tools) and building automations such as sending client updates, scheduling reminders and producing reports. Works with Zapier, Make and n8n. Requires buying the API service; scope depends on the plan.
+
+#### Other facts
+
+- Connected to the pension clearing house and Ministry of Finance data sources; calendar sync with Google Calendar and Outlook.
+- Support by chat, WhatsApp and email (Customer Success team) plus a knowledge centre.
+- The vendor states that Fire, Go and One work together as one ecosystem on one data set.
+- Customers quoted: a network of about 100 users (the vendor's first client), a pension agent, a sales manager at a house agency.
+- The vendor's own comparison table (generic CRM vs self-built CRM vs dedicated CRM) lists the buying criteria it expects: clearing house file pull into the client record; accumulation and coverage analysis; service-contact duty; meeting records with digital approval; Amendment 13 updates; information security.
+
+#### What this means for ansurance
+
+- **Feature parity checklist.** The Fire table above is the baseline an agency compares us with. Gaps in ansurance today: process and task queues with deadlines (partly Inbox), direct issuance (F2 covers quotes and sale), portfolio gap analysis (F5), dashboard with status and classification donuts (F8 partly).
+- **What ansurance adds that the vendor pages do not mention:** automatic fax, email and WhatsApp intake with ID-number attribution (F6), live multilingual call (F9), role-based Inboxes, and an audit log on every action.
+- **Client app is a later phase, not v1.** SurenseOne is the reference for F10 and a client view. Reuse its content list: savings summary, products, processes, documents, profile, push on status change, and agent-set visibility per client.
+- **Mobile is expected.** Every Inbox item and client card must work at phone width with one-tap call and WhatsApp; the vendor keeps heavy reporting on the web only, which is a sound split.
+- **Integration surface.** The API is a paid add-on exposed mainly through Zapier, Make and n8n, so the 9.1 adapter should assume REST or webhook access with a licence cost, not a free bulk export. Clearing house files already land in the client record there, which fits the 9.1 step "ansurance receives the resulting files". Still **[verify]** with the vendor.
+- **Consent from self-service leads.** SurenseOne sells travel and savings policies through an agent-number link. Our consent registry (F10) must record the source of any lead that arrives this way.
+- **Two-year service duty.** Add a renewal-style reminder "service contact due" per client to F3 or F8, with a meeting record as proof (branded summary, digital approval saved to the file).
+
 ## 10. Phasing
 
 | Phase | Content |
@@ -373,7 +439,6 @@ Sources:
 - [AssemblyAI: real-time speech recognition APIs 2026](https://www.assemblyai.com/blog/best-api-models-for-real-time-speech-recognition-and-transcription)
 - [Lynxbe: WhatsApp for business in Israel](https://www.lynxbe.co.il/en/lynxbe-platform-whatsapp)
 - [Green Invoice (morning)](https://apps.shopify.com/green-invoice?locale=cs)
-- [Surense: CRM for insurance agents](https://www.surense.co.il/crm-for-insurance-agents/)
 - [Jamm](https://jamm.co.il/)
 - [Atid Software Engineering](https://www.atidsm.co.il/homesite/)
 - [Aloni Software](https://www.aloni.org.il/)
