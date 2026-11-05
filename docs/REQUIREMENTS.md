@@ -393,6 +393,70 @@ Images: `SurenseFlow_v1-scaled.png` (logo strip), `ChatGPT-Image-Aug-11-2026-05_
 - **Consent from self-service leads.** SurenseOne sells travel and savings policies through an agent-number link. Our consent registry (F10) must record the source of any lead that arrives this way.
 - **Two-year service duty.** Add a renewal-style reminder "service contact due" per client to F3 or F8, with a meeting record as proof (branded summary, digital approval saved to the file).
 
+### 9.3 Surense mobile apps: UI structure and flows (static analysis)
+
+Method: both Android apps were decoded with apktool and their Hermes bytecode string tables were read with hermes-dec (React Native / Expo apps, so the UI logic sits in `index.android.bundle`). Nothing was run and no account was used. Screens, flows and fields below are inferred from route files, component names, API resource names and Hebrew UI strings, so treat them as a map, not as verified behaviour **[verify in a demo]**. No credentials or keys from the apps are recorded here.
+
+#### Agent app (SurenseGo): navigation
+
+File-based routes: `customers`, `customer/[id]` (tabs below), `employers`, `employer/[id]`, `leads`, `meetings`, `workflows`, `contacts`, `settings`. Bottom navigation plus a drawer; a home dashboard with cards for customers, open leads, workflows, tasks (today, overdue, next, done, delegated), last customers and birthdays (today, recent, next).
+
+| Customer tab | Content |
+|---|---|
+| Overview | Header with name, phone, email, ID, status, class, source, manager, agency; products summary (insurance, pension, savings, loans, health fund, car, home, business) with a graph; recommendations and notes |
+| Activities | Phone, email and text activities, add, edit, delete; call duration and recordings |
+| Documents | Upload (camera, file, screenshot), share, download, password-protected files |
+| Employments | Employer, role, type (employee, self-employed, both, not employed), reported salary; add, remove |
+| Leads | Leads linked to the customer |
+| Meetings and meeting summaries | Types: in person, phone, online; summary created in-app, opened as a document |
+| Related customers | Spouse, child, parent, sibling, grandchild; add and remove with a relationship type |
+| Reports | Report to the client with a period, preview, send; per-client report settings |
+| Workflows | Open and handled processes |
+
+Employer screen: employees, activities, documents, workflows. Lists everywhere have search, empty states and pull to load more.
+
+#### Agent app: creation flows (bottom sheets)
+
+Create customer, lead (type, interest, status), employer, employment, related customer, activity, task and reminder, meeting, meeting summary, report, workflow (type, handler, description). Each is a sheet with required-field messages (missing first name, last name, ID, subject, type, handler) and a success or error toast.
+
+#### Agent app: information requests and powers of attorney
+
+- "Order information" from the client file or during a meeting, or remotely: the client receives a link, and a link can also be made for the spouse.
+- Three powers of attorney, with legal text on screen: policies from insurers, Har HaBituach (appendix E), pension clearing house (appendix A); a signing date, the ID issue date and the name of the person giving the power. A "continuing power of attorney expires within 6 months" flag and a "re-sign" action. An invitation action to proxies.
+- After the request: a progress flow that ends with "information request finished".
+
+#### Agent app: product views (clearing-house data)
+
+Per product: coverage list with cost, insured salary, waiver of disability cover above 60, survivor pensions (widow, supported parent, orphan), disability pension (full), claims (number, start of payment, disability percent, status date), attachments and liens, exemption notes (Section 190), exclusions, tracks and investment funds, management fees on deposit and on balance, deposits by type (employer, employee, severance, parents, national insurance), projected balance and pension at retirement age, conversion coefficient and guaranteed life-expectancy terms, return since start of year and 36-month average, balance by period, insurance "umbrellas" (collective), notes and recommendations per product, "data as of" month. Product families: pension, provident, study fund, executive insurance, life, health (sick fund tiers), home, car, business, travel, investment portfolio, loans, direct issuance (new) including the Phoenix Invest savings policy.
+
+#### Agent app: system behaviour
+
+Single sign-on with a hosted identity provider; locked-user message with a one-tap "unlock my account" email; biometric lock; forced and optional version update sheets; push notifications and an in-app notification list; Intercom support chat; bug report and feedback modals; ID number check digit validation; Hebrew first, English names for transliteration (first name, last name, address in English).
+
+#### Client app (SurenseOne): navigation
+
+Auth group: welcome, login (phone), verification (one-time code), then an optional biometric prompt ("quick login", expires and returns to login). Protected group with four tabs: Home, Products (list and `products/[id]` detail), Workflows (processes), Documents. Modals: profile, personal information (editable address, postal code, house number, city, family status), communication info (how to reach the agency), notification settings, general settings, terms and privacy (accept before continuing), "what is Surense", an app tour, a bug-report modal, and a blocked screen and a provisioning screen ("your data is being prepared, may take a few moments"). Deep link of the form `link.surense.com/one/...` carries the agent and customer so the invitation opens straight into the right agency.
+
+- **Onboarding by invitation only.** A client without a link sees a message asking them to send the agency a ready-made request ("please activate the app for me and send a personal login link"), shareable by WhatsApp or email. A client can belong to more than one agency and picks one ("choose agency").
+- **Home:** greeting by time of day, birthday banner, total saved to date, return since start of year with monthly bars, tiles (deposits, projected annuity, loan repayments, premium), agent recommendation cards, new-information-on-process cards, quick actions (schedule a meeting, request a quote).
+- **Products:** grouped by type (pension, provident, study fund, life, health, car, home, loans, investment); the detail screen has tabs: general, coverages (with percentage of insured salary, survivors, disability), beneficiaries, deposits, returns, loans, health claims, insurance; per-product contact buttons (inquiry about a policy, about a savings policy, travel insurance).
+- **Workflows:** a card per open process with company, date, document count and a flag for new information; documents attached per process.
+- **Documents:** meeting summaries (portfolio review, pension planning, coverage check, study-fund transfer, beneficiaries update), reports (quarterly, production, financial; life and health), forms (consent to insurance), view, download, share.
+- **Contact:** WhatsApp (asks to install it if missing), phone, email, meeting link; the agency decides which channels show.
+- **Legal text in the app:** the agent is the controller of the database, the software vendor only supplies it; terms of use; a note about use of AI systems for processing personal data in the app; cookies and similar tools.
+
+#### Data entities implied by the API resource names
+
+Customers (with classes, ID types, sources, statuses, mailing statuses, dashboard, birthdays, search, search by employer, related customers, per-customer reports and report settings, product recommendations, proxies and approve-proxy actions for each of the three powers of attorney), employers, employments, leads (with statuses, interests, dashboard, search), activities (with an activity log), tasks (todo, done, delegated), reminders, meetings, meeting summaries, workflows (with types, statuses, dashboard, search), reports. Customer data model fields: first and last name (also in English), ID and ID type, gender, family status, birth date, death date, address, extra phone and email, "email for filing" (a mailbox address for copying emails into the file), smoking status and health details, mailing status (approved or not, removed from mailing), consent required flag.
+
+#### What this adds for ansurance
+
+- **Navigation baseline for the mock.** The customer tab list above is a fair baseline for the client card tabs; the mock already has most of them, missing are "related customers" with relationship types, employments, and per-client report settings.
+- **Fields to consider:** "email for filing" (a per-client address that files copied emails into the record), a mailing status with three values (approved, not approved, removed), ID type, English spelling of names, and a "consent required" flag on first use of the client app.
+- **Information request as a guided flow:** three powers of attorney with legal text, signing date, a warning six months before expiry, and a re-sign action. This should be an explicit sub-flow of F5.
+- **Client app:** invitation-only onboarding with a ready-made message the client can send to the agency, multi-agency membership, quick login with biometrics, "data is being prepared" state, and the data-controller wording (the agency is the controller) are worth copying into the F10 design.
+- **Not copied:** the vendor keeps heavy reporting on the web, so the mobile views are read-oriented; this split also suits ansurance.
+
 ## 10. Phasing
 
 | Phase | Content |
