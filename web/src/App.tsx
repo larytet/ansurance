@@ -3,6 +3,9 @@ import { ApiError } from "./api";
 import { ClientFile } from "./pages/ClientFile";
 import { Clients } from "./pages/Clients";
 import { Campaigns } from "./pages/Campaigns";
+import { ExcelJoin } from "./pages/ExcelJoin";
+import { Integrations } from "./pages/Integrations";
+import { Settings } from "./pages/Settings";
 import { Commissions } from "./pages/Commissions";
 import { Complaints } from "./pages/Complaints";
 import { Desk } from "./pages/Desk";
@@ -13,9 +16,10 @@ import { Overview } from "./pages/Overview";
 import { Tax } from "./pages/Tax";
 import { Today } from "./pages/Today";
 import { Login } from "./pages/Login";
+import { LANGS, LANG_NAMES, type Lang } from "./i18n";
 import { useUi } from "./ui";
 
-type Tab = "today" | "complaints" | "commissions" | "tax" | "overview" | "inbox" | "desk" | "intake" | "mywork" | "clients" | "campaigns";
+type Tab = "excel" | "integrations" | "settings" | "today" | "complaints" | "commissions" | "tax" | "overview" | "inbox" | "desk" | "intake" | "mywork" | "clients" | "campaigns";
 
 export function App() {
   const { api, me, setMe, tr, lang, setLang, theme, setTheme } = useUi();
@@ -49,6 +53,9 @@ export function App() {
     ...(has("complaint.write") ? (["complaints"] as Tab[]) : []),
     ...(has("commission.manage") ? (["commissions"] as Tab[]) : []),
     ...(has("tax.read") ? (["tax"] as Tab[]) : []),
+    ...(has("excel.use") ? (["excel"] as Tab[]) : []),
+    ...(has("import.run") ? (["integrations"] as Tab[]) : []),
+    "settings",
   ];
   const openClient = (id: string) => { setTab("clients"); setOpen(id); };
   return (
@@ -65,9 +72,9 @@ export function App() {
         <span className="who">
           {me.name} · {me.roles.map((r) => tr(`role.${r}` as never)).join(", ")}
         </span>
-        <button onClick={() => setLang(lang === "he" ? "en" : "he")} aria-label={tr("language")}>
-          {lang === "he" ? "EN" : "עב"}
-        </button>
+        <select value={lang} onChange={(e) => setLang(e.target.value as Lang)} aria-label={tr("language")}>
+          {LANGS.map((l) => <option key={l} value={l}>{LANG_NAMES[l]}</option>)}
+        </select>
         <button onClick={() => setTheme(theme === "light" ? "dark" : "light")} aria-label={tr("theme")}>
           {theme === "light" ? tr("dark") : tr("light")}
         </button>
@@ -80,7 +87,7 @@ export function App() {
           {tr("logout")}
         </button>
       </header>
-      {tab === "today" ? <Today onOpenClient={openClient} /> : tab === "complaints" ? <Complaints /> : tab === "commissions" ? <Commissions /> : tab === "tax" ? <Tax /> : tab === "overview" ? <Overview /> : tab === "inbox" ? <Inbox /> : tab === "desk" ? <Desk /> : tab === "intake" ? <IntakeReview /> : tab === "mywork" ? <MyWork onOpenClient={openClient} /> : tab === "campaigns" ? <Campaigns /> : open ? <ClientFile clientId={open} onBack={() => setOpen(null)} /> : <Clients onOpen={setOpen} />}
+      {tab === "excel" ? <ExcelJoin /> : tab === "integrations" ? <Integrations /> : tab === "settings" ? <Settings /> : tab === "today" ? <Today onOpenClient={openClient} /> : tab === "complaints" ? <Complaints /> : tab === "commissions" ? <Commissions /> : tab === "tax" ? <Tax /> : tab === "overview" ? <Overview /> : tab === "inbox" ? <Inbox /> : tab === "desk" ? <Desk /> : tab === "intake" ? <IntakeReview /> : tab === "mywork" ? <MyWork onOpenClient={openClient} /> : tab === "campaigns" ? <Campaigns /> : open ? <ClientFile clientId={open} onBack={() => setOpen(null)} /> : <Clients onOpen={setOpen} />}
     </div>
   );
 }

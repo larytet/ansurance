@@ -83,12 +83,12 @@ export interface ProcessSummary {
   key: string;
   title: string;
   status: string;
-  stages: { id: string; status: string; role: string; name: { en: string; he: string } }[];
+  stages: { id: string; status: string; role: string; name: Record<string, string> }[];
 }
 
 export interface ProcessDef {
   key: string;
-  name: { en: string; he: string };
+  name: Record<string, string>;
 }
 
 export interface Overview {

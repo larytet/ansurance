@@ -89,7 +89,7 @@ describe("shell", () => {
     const user = userEvent.setup();
     await screen.findByText("Renewal due");
     expect(document.documentElement.dir).toBe("rtl");
-    await user.click(screen.getByRole("button", { name: "שפה" }));
+    await user.selectOptions(screen.getByRole("combobox", { name: "שפה" }), "en");
     expect(document.documentElement.dir).toBe("ltr");
     expect(screen.getByRole("button", { name: "Inbox" })).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Theme" }));

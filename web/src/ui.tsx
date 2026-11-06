@@ -1,6 +1,6 @@
 import { type ReactNode, createContext, useContext, useEffect, useState } from "react";
 import { Api, type Me } from "./api";
-import { type Key, type Lang, dirOf, t } from "./i18n";
+import { LANGS, type Key, type Lang, dirOf, t } from "./i18n";
 
 export type Theme = "light" | "dark";
 
@@ -29,7 +29,7 @@ function remembered<T extends string>(key: string, fallback: T, allowed: readonl
 
 export function UiProvider({ api, children }: { api: Api; children: ReactNode }) {
   const [me, setMe] = useState<Me | null>(null);
-  const [lang, setLang] = useState<Lang>(() => remembered("lang", "he", ["he", "en"]));
+  const [lang, setLang] = useState<Lang>(() => remembered("lang", "he", LANGS));
   const [theme, setTheme] = useState<Theme>(() => remembered("theme", "light", ["light", "dark"]));
 
   useEffect(() => {

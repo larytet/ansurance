@@ -22,7 +22,7 @@ test("sign in, see Inbox items, act on them, switch language, sign out", async (
   await page.getByLabel("קוד מאמת או קוד שחזור").fill(totp(secret));
   await page.getByRole("button", { name: "כניסה" }).click();
   await expect(page.getByRole("button", { name: "תיבה" })).toBeVisible();
-  await expect(page.getByText(/מנהל/)).toBeVisible();
+  await expect(page.locator(".who")).toContainText("מנהל");
 
   // two Inbox items created through the API with the browser's own session
   const csrf = await page.evaluate(async () => (await (await fetch("/api/auth/me")).json()).csrf as string);
@@ -59,7 +59,7 @@ test("sign in, see Inbox items, act on them, switch language, sign out", async (
 
   // language and direction
   expect(await page.evaluate(() => document.documentElement.dir)).toBe("rtl");
-  await page.getByRole("button", { name: "שפה" }).click();
+  await page.getByRole("combobox", { name: "שפה" }).selectOption("en");
   expect(await page.evaluate(() => document.documentElement.dir)).toBe("ltr");
   await expect(page.getByRole("button", { name: "Done" }).first().or(page.getByText("Nothing waiting."))).toBeVisible();
 

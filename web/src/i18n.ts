@@ -1,7 +1,12 @@
-export type Lang = "he" | "en";
+import { ar } from "./i18n.ar";
+import { fr } from "./i18n.fr";
+import { ru } from "./i18n.ru";
 
-const dict = {
-  en: {
+export type Lang = "he" | "en" | "ar" | "ru" | "fr";
+export const LANGS: readonly Lang[] = ["he", "en", "ar", "ru", "fr"];
+export const LANG_NAMES: Record<Lang, string> = { he: "עברית", en: "English", ar: "العربية", ru: "Русский", fr: "Français" };
+
+const en = {
     app: "ansurance", email: "E-mail", password: "Password", code: "Authenticator or recovery code",
     login: "Sign in", logout: "Sign out", loginFailed: "Sign-in failed. Check the details and try again.",
     locked: "Too many attempts. Try again later.", loading: "Loading…",
@@ -47,9 +52,21 @@ const dict = {
     taxYear: "Tax year", generate: "Create the list", requestAll: "Request all missing", sendAll: "Send all received", certificates: "Deposit certificates",
     requested: "Requested", received: "Received", sent: "Sent to the client", yes: "Yes", no: "No",
     portalTitle: "Your insurance file", portalInvalid: "This link is not valid or has expired. Ask your agent for a new one.", portalClaims: "Claims", portalRenewal: "Renews",
+    messages: "Messages", sendMessage: "Send a message", purpose: "Purpose", "purpose.service": "Service", "purpose.marketing": "Marketing", "purpose.legal": "Legal notice",
+    msgBlocked: "Blocked", msgQueued: "Queued", msgFromClient: "From the client", msgToClient: "To the client", noMessages: "No messages.",
+    "reason.opted_out": "The client opted out of this channel", "reason.no_consent": "No marketing consent is recorded",
+    pension: "Pension review", authorizations: "Data-lookup authorizations", "auth.lookup_insurers": "Insurers", "auth.lookup_har": "Har HaBituach",
+    "auth.lookup_clearing": "Pension clearing house", "auth.missing": "Not signed", "auth.valid": "Valid", "auth.expiring": "Expires within six months: sign again",
+    requestLookup: "Request the portfolio", lookupRecorded: "The request was recorded",
+    excel: "Excel", excelJoin: "Excel join", agencyFile: "Agency file (full ID and name)", insurerFile: "Insurer file (last 4 digits and name)", clearingFile: "Clearing house file (full ID)",
+    runJoin: "Join the files", joinDone: "The joined workbook was downloaded.", joinSummary: "Rows without a match",
+    integrations: "Integrations", adapterConfigured: "Configured", adapterApproved: "Approved", calls24: "Calls in the last 24 hours", lastError: "Last error",
+    notConfigured: "Not configured", syncs: "Synchronisations", failed: "failed",
+    settings: "Settings", account: "Account", capabilities: "Permissions",
     openClient: "Open the client file", pendingApproval: "Waiting for the manager", noWork: "Nothing is waiting for your role.", stage: "Stage",
-  },
-  he: {
+} as const;
+
+const he = {
     app: "ansurance", email: "דוא״ל", password: "סיסמה", code: "קוד מאמת או קוד שחזור",
     login: "כניסה", logout: "יציאה", loginFailed: "הכניסה נכשלה. בדקו את הפרטים ונסו שוב.",
     locked: "יותר מדי ניסיונות. נסו שוב מאוחר יותר.", loading: "טוען…",
@@ -95,10 +112,21 @@ const dict = {
     taxYear: "שנת מס", generate: "יצירת הרשימה", requestAll: "בקשת כל החסרים", sendAll: "שליחת כל שהתקבלו", certificates: "אישורי הפקדות",
     requested: "התבקש", received: "התקבל", sent: "נשלח ללקוח", yes: "כן", no: "לא",
     portalTitle: "תיק הביטוח שלך", portalInvalid: "הקישור אינו תקף או שפג תוקפו. בקשו מהסוכן קישור חדש.", portalClaims: "תביעות", portalRenewal: "מתחדש",
+    messages: "הודעות", sendMessage: "שליחת הודעה", purpose: "מטרה", "purpose.service": "שירות", "purpose.marketing": "שיווק", "purpose.legal": "הודעה משפטית",
+    msgBlocked: "נחסמה", msgQueued: "בתור", msgFromClient: "מהלקוח", msgToClient: "אל הלקוח", noMessages: "אין הודעות.",
+    "reason.opted_out": "הלקוח הסיר את עצמו מהערוץ הזה", "reason.no_consent": "לא נרשמה הסכמה לשיווק",
+    pension: "סקירת פנסיה", authorizations: "ייפוי כוח לקבלת מידע", "auth.lookup_insurers": "חברות הביטוח", "auth.lookup_har": "הר הביטוח",
+    "auth.lookup_clearing": "המסלקה הפנסיונית", "auth.missing": "לא נחתם", "auth.valid": "בתוקף", "auth.expiring": "פג בתוך חצי שנה: לחתום מחדש",
+    requestLookup: "בקשת התיק הפנסיוני", lookupRecorded: "הבקשה נרשמה",
+    excel: "אקסל", excelJoin: "חיבור קבצי אקסל", agencyFile: "קובץ הסוכנות (זהות מלאה ושם)", insurerFile: "קובץ המבטח (4 ספרות אחרונות ושם)", clearingFile: "קובץ המסלקה (זהות מלאה)",
+    runJoin: "חיבור הקבצים", joinDone: "הקובץ המחובר ירד.", joinSummary: "שורות ללא התאמה",
+    integrations: "אינטגרציות", adapterConfigured: "מוגדר", adapterApproved: "מאושר", calls24: "קריאות ב-24 השעות האחרונות", lastError: "שגיאה אחרונה",
+    notConfigured: "לא מוגדר", syncs: "סנכרונים", failed: "נכשלו",
+    settings: "הגדרות", account: "חשבון", capabilities: "הרשאות",
     openClient: "פתיחת תיק לקוח", pendingApproval: "ממתין למנהל", noWork: "אין עבודה הממתינה לתפקיד שלך.", stage: "שלב",
-  },
 } as const;
 
-export type Key = keyof (typeof dict)["en"];
+export type Key = keyof typeof en;
+const dict: Record<Lang, Record<Key, string>> = { en, he, ar, ru, fr };
 export const t = (lang: Lang, key: Key): string => dict[lang][key];
-export const dirOf = (lang: Lang): "rtl" | "ltr" => (lang === "he" ? "rtl" : "ltr");
+export const dirOf = (lang: Lang): "rtl" | "ltr" => (lang === "he" || lang === "ar" ? "rtl" : "ltr");

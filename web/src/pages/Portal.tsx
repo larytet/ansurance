@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { t, dirOf, type Lang } from "../i18n";
+import { t, dirOf, LANGS, type Lang } from "../i18n";
 
 interface Summary {
   name: string; language: string;
@@ -18,7 +18,7 @@ export function Portal({ fetcher = (...a: Parameters<typeof fetch>) => fetch(...
       .then(async (r) => { if (!r.ok) throw new Error(String(r.status)); setData((await r.json()) as Summary); })
       .catch(() => setBad(true));
   }, [fetcher, token]);
-  const lang: Lang = data?.language === "en" ? "en" : "he";
+  const lang: Lang = LANGS.find((l) => l === data?.language) ?? "he";
   return (
     <main dir={dirOf(lang)} lang={lang}>
       {bad && <p role="alert">{t(lang, "portalInvalid")}</p>}

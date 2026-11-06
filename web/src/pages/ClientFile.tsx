@@ -4,6 +4,8 @@ import {
 } from "../api";
 import { type Key } from "../i18n";
 import { useUi } from "../ui";
+import { Messages } from "./Messages";
+import { Pension } from "./Pension";
 
 const CHANNELS = ["whatsapp", "email", "sms"] as const;
 const DOC_TYPES = [
@@ -165,6 +167,9 @@ export function ClientFile({ clientId, onBack }: { clientId: string; onBack: () 
         </>
       )}
 
+      {can("client.read") && <Pension clientId={clientId} />}
+      {can("client.read") && <Messages clientId={clientId} />}
+
       {procs && (
         <>
           <h3>{tr("processes")}</h3>
@@ -175,7 +180,7 @@ export function ClientFile({ clientId, onBack }: { clientId: string; onBack: () 
                 <strong>{p.title}</strong>
                 <ol className="pipeline">
                   {p.stages.map((s) => (
-                    <li key={s.id} className={`stage ${s.status}`} title={s.status}>{s.name[lang]}</li>
+                    <li key={s.id} className={`stage ${s.status}`} title={s.status}>{s.name[lang] ?? s.name.en}</li>
                   ))}
                 </ol>
               </li>
@@ -184,7 +189,7 @@ export function ClientFile({ clientId, onBack }: { clientId: string; onBack: () 
           {defs.length > 0 && (
             <div>
               <select aria-label={tr("startProcess")} value={startKey} onChange={(e) => setStartKey(e.target.value)}>
-                {defs.map((d) => <option key={d.key} value={d.key}>{d.name[lang]}</option>)}
+                {defs.map((d) => <option key={d.key} value={d.key}>{d.name[lang] ?? d.name.en}</option>)}
               </select>{" "}
               <button onClick={async () => { await api.startProcess(startKey, clientId); setProcs(await api.processesFor(clientId)); }}>
                 {tr("start")}
