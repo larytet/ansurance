@@ -64,4 +64,8 @@ test-slow:
 test-web:
 	cd web && npm test
 
+# Real-browser test of the web app against the running stack (make up first)
+e2e-web:
+	cd web && npx playwright test
+
 ci: lint test-backend test-web

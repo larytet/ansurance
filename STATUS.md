@@ -41,3 +41,7 @@ Updated: 2026-11-06
 | M8..M10 | Not started | | |
 
 Owner decision 2026-11-06: audit of reads is asynchronous and batched; losing unflushed read entries on a crash is accepted (implemented, tested).
+
+## Web front end (decision D7)
+
+Slice 1 done 2026-11-06: sign in, shell (role-based tabs, he/en with RTL, light/dark), Inbox, Clients list; 13 unit tests and a Playwright browser test against the live stack. Screen-by-screen tracker: docs/MOCK-PORT.md. Not started: client file, Today, Desk, intake review, processes, campaigns, manager overview, and everything that needs M8 and later.

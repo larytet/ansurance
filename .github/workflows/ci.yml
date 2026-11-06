@@ -50,5 +50,6 @@ jobs:
       - run: make up
       - run: make smoke
       - run: make conformance
+      - run: cd web && npm ci && npx playwright install --with-deps chromium && npx playwright test
       - if: always()
         run: make logs | head -200 || true

@@ -1,0 +1,16 @@
+:root { --bg:#fff; --fg:#14171c; --muted:#5b6573; --line:#d9dee5; --accent:#1f6feb; --urgent:#c62828; --important:#b7791f; }
+:root[data-theme="dark"] { --bg:#12151a; --fg:#e8ecf1; --muted:#98a2b0; --line:#2a313b; --accent:#5aa2ff; --urgent:#ff6b6b; --important:#e0b050; }
+body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.5 system-ui,sans-serif; }
+button, input, select { font:inherit; color:inherit; background:var(--bg); border:1px solid var(--line); border-radius:6px; padding:.35rem .7rem; }
+button { cursor:pointer; } button[aria-pressed="true"], button[aria-current="page"] { border-color:var(--accent); color:var(--accent); }
+.shell > header { display:flex; gap:.6rem; align-items:center; padding:.6rem 1rem; border-bottom:1px solid var(--line); flex-wrap:wrap; }
+.shell nav { display:flex; gap:.4rem; margin-inline-start:1rem; } .who { margin-inline-start:auto; color:var(--muted); }
+section { max-width:60rem; margin:1rem auto; padding:0 1rem; }
+.counts { display:flex; gap:2rem; margin:0 0 1rem; } .counts dt { color:var(--muted); font-size:.85rem; } .counts dd { margin:0; font-size:1.6rem; }
+.filters { display:flex; gap:.4rem; margin-bottom:1rem; }
+.items { list-style:none; padding:0; margin:0; } .item { border:1px solid var(--line); border-inline-start-width:5px; border-radius:6px; padding:.6rem .9rem; margin-bottom:.6rem; }
+.item.urgent { border-inline-start-color:var(--urgent); } .item.important { border-inline-start-color:var(--important); }
+.item .title { font-weight:600; } .detail { color:var(--muted); } .actions { display:flex; gap:.4rem; margin-top:.5rem; } form.inline { display:flex; gap:.4rem; margin-top:.5rem; flex-wrap:wrap; }
+.login { max-width:22rem; margin:4rem auto; padding:0 1rem; } .login label { display:block; margin:.7rem 0; } .login input { width:100%; box-sizing:border-box; }
+[role="alert"] { color:var(--urgent); } .clients { list-style:none; padding:0; } .clients li { padding:.4rem 0; border-bottom:1px solid var(--line); }
+input[type="search"] { width:100%; box-sizing:border-box; margin-bottom:.6rem; }
