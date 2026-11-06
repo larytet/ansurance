@@ -217,7 +217,7 @@ def marketing_contacts(
         db.execute(
             text(
                 "SELECT id, name, name_translit_he, name_translit_lat, preferred_language,"
-                " phone, email"
+                " phone, email, consent_whatsapp, consent_email, consent_sms"
                 " FROM marketing_contact ORDER BY name LIMIT 500"
             )
         )
@@ -240,3 +240,84 @@ def verify_audit(
         "first_bad_seq": res.first_bad_seq,
         "reason": res.reason,
     }
+
+
+# ---- F11: get the ID and register the client (back-office) ----------------------------
+@router.post("/clients/{client_id}/request-id", status_code=201)
+def request_id(
+    client_id: uuid.UUID,
+    p: Principal = Depends(require("client.write")),
+    db: Db = Depends(get_db),
+) -> dict[str, Any]:
+    """An agent asks the back-office to get the ID document and register the client."""
+    from app.models import InboxItem
+
+    c = get_visible(db, p, client_id)
+    if c.status not in ("lead", "id_pending"):
+        raise HTTPException(409, f"client_is_{c.status}")
+    c.status = "id_pending"
+    item = InboxItem(
+        type="id_missing",
+        role="backoffice",
+        client_id=c.id,
+        urgency="important",
+        title=f"Get the ID from {c.name}",
+        created_by=p.user.id,
+        detail="ID card and addendum needed before registration",
+    )
+    db.add(item)
+    db.flush()
+    chain.append(db, str(p.user.id), "client.request_id", f"client:{c.id}", {"inbox": str(item.id)})
+    return {"inbox_item": str(item.id), "status": c.status}
+
+
+@router.post("/clients/{client_id}/register")
+def register_client(
+    client_id: uuid.UUID,
+    p: Principal = Depends(require("client.write")),
+    db: Db = Depends(get_db),
+) -> dict[str, Any]:
+    """Back-office registers the client once a clean ID card is on file."""
+    from datetime import UTC, datetime
+
+    from app.models import Blob, Document, InboxItem
+
+    if "client.read_all" not in p.capabilities:
+        raise HTTPException(403, "forbidden")  # back-office and manager only
+    c = get_visible(db, p, client_id)
+    if c.status not in ("lead", "id_pending"):
+        raise HTTPException(409, f"client_is_{c.status}")
+    has_id = db.scalar(
+        select(Document.id)
+        .join(Blob, Blob.id == Document.blob_id)
+        .where(
+            Document.client_id == c.id, Document.doc_type == "id_card", Blob.scan_status == "clean"
+        )
+        .limit(1)
+    )
+    if has_id is None:
+        raise HTTPException(422, "clean_id_card_required")
+    c.status = "registered"
+    open_items = db.scalars(
+        select(InboxItem).where(
+            InboxItem.client_id == c.id,
+            InboxItem.status == "open",
+            InboxItem.type.in_(("id_missing", "register_client")),
+        )
+    )
+    for it in open_items:
+        it.status, it.resolved_at, it.resolved_by = "done", datetime.now(UTC), p.user.id
+        it.resolution = "client registered"
+    if c.agent_id:
+        db.add(
+            InboxItem(
+                type="auto_filed",
+                role="agent",
+                assignee_id=c.agent_id,
+                client_id=c.id,
+                title=f"{c.name} is registered",
+                created_by=p.user.id,
+            )
+        )
+    chain.append(db, str(p.user.id), "client.register", f"client:{c.id}", {})
+    return {"status": c.status}

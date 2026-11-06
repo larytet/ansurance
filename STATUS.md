@@ -8,7 +8,7 @@ Updated: 2026-11-06
 | 2. Requirements brief and owner decisions D1..D10 | Done (decisions log below) |
 | 3. Design spec (`docs/DESIGN.md`, v0.1) | Approved by owner 2026-11-06 |
 | 4. Test plan (`docs/TESTPLAN.md`) | Written (v0.1); results table updated per milestone |
-| 5. Milestones M0..M10 | M0, M1, M2 done; M3 next. Rule: commit and push after every completed milestone (owner instruction 2026-11-06) |
+| 5. Milestones M0..M10 | M0, M1, M2, M3 done; M4 next. Rule: commit and push after every completed milestone (owner instruction 2026-11-06) |
 
 ## Decisions log (from the requirements brief)
 
@@ -33,4 +33,5 @@ Updated: 2026-11-06
 | M0 Foundation | Done 2026-11-06 | 16 backend + 2 web + smoke, all pass | `make up` healthy on a clean checkout; MinIO built from source |
 | M1 Identity, core data, audit | Done 2026-11-06 | 106 backend (incl. 12 SSO, 42 clients/authz/audit) + e2e on live stack | Built-in login (argon2id, TOTP, recovery codes, lockout, IP limit, revocable sessions, CSRF), SSO (OIDC + PKCE, no auto-provisioning), roles and capabilities, clients with Luhn ID validation and multi-script search, policies, family links, marketing view, hash-chained audit with DB triggers, CLI to bootstrap the first manager, TLS at the proxy. Web login screen comes with the first ported screens |
 | M2 Documents and blob store | Done 2026-11-06 | 155 backend, e2e on live stack | S3 BlobStore (MinIO built from source, Object Lock, no-delete app user), content-addressed write-once originals, dedupe, ClamAV scan (fail closed, quarantine), content sniffing and size limits, restricted documents, retention and legal hold, audited downloads with integrity check, reconcile command, DB triggers refusing blob delete or rewrite |
-| M3..M10 | Not started | | |
+| M3 Inbox, consent, back-office desk | Done 2026-11-06 | 196 backend, e2e on live stack | Inbox per role (urgency rising with deadlines, reassign needs a note, dismiss needs a reason, history is immutable, manager read-only view, keyset pagination, 10,000 items under 1 s), append-only consent registry with latest-wins state and one-minute opt-out rule (late ones flagged to the manager), the consent gate on the single send path (marketing needs opt-in, opt-out blocks all but legal notices), Desk work areas, F11 request-ID and register, marketing projection with consent |
+| M4..M10 | Not started | | |

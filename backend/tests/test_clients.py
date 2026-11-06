@@ -229,6 +229,9 @@ def test_marketing_projection_exposes_only_contact_fields(api: TestClient, db: S
         "preferred_language",
         "phone",
         "email",
+        "consent_whatsapp",
+        "consent_email",
+        "consent_sms",
     }
     assert "id_number" not in rows[0] and "status" not in rows[0] and "agent_id" not in rows[0]
     assert api.get(f"/api/clients/{cl['id']}").status_code == 403

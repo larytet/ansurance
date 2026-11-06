@@ -277,3 +277,77 @@ class DerivedArtifact(Base):
     kind: Mapped[str] = mapped_column(String(24), nullable=False)
     blob_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("blob.id"), nullable=False)
     created_at: Mapped[datetime] = _now()
+
+
+# ---- inbox, consent, messaging (M3) -------------------------------------------------
+class InboxItem(Base):
+    __tablename__ = "inbox_item"
+    __table_args__ = (
+        Index("ix_inbox_role_status", "role", "status", "created_at"),
+        Index("ix_inbox_assignee", "assignee_id"),
+    )
+    id: Mapped[uuid.UUID] = _pk()
+    type: Mapped[str] = mapped_column(String(32), nullable=False)
+    role: Mapped[str] = mapped_column(ForeignKey("role.name"), nullable=False)
+    assignee_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("user_account.id"))
+    client_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("client.id"))
+    title: Mapped[str] = mapped_column(String(200), nullable=False)
+    detail: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    urgency: Mapped[str] = mapped_column(String(10), nullable=False, default="normal")
+    urgent_from: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    status: Mapped[str] = mapped_column(String(10), nullable=False, default="open")
+    created_by: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
+    created_at: Mapped[datetime] = _now()
+    resolved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    resolved_by: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
+    resolution: Mapped[str | None] = mapped_column(Text)
+
+
+class InboxEvent(Base):
+    """Every change to an item. Nothing leaves the Inbox without a recorded reason."""
+
+    __tablename__ = "inbox_event"
+    id: Mapped[uuid.UUID] = _pk()
+    item_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("inbox_item.id"), nullable=False, index=True
+    )
+    at: Mapped[datetime] = _now()
+    actor: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
+    action: Mapped[str] = mapped_column(String(16), nullable=False)
+    from_role: Mapped[str | None] = mapped_column(String(32))
+    to_role: Mapped[str | None] = mapped_column(String(32))
+    note: Mapped[str] = mapped_column(Text, nullable=False, default="")
+
+
+class ConsentEvent(Base):
+    """Append-only consent registry. The latest event per client and channel wins."""
+
+    __tablename__ = "consent_event"
+    __table_args__ = (Index("ix_consent_client_channel", "client_id", "channel", "recorded_at"),)
+    id: Mapped[uuid.UUID] = _pk()
+    client_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("client.id"), nullable=False)
+    channel: Mapped[str] = mapped_column(String(10), nullable=False)
+    state: Mapped[str] = mapped_column(String(8), nullable=False)
+    source: Mapped[str] = mapped_column(String(120), nullable=False)
+    received_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    recorded_at: Mapped[datetime] = _now()
+    recorded_by: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
+    late: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+
+
+class OutboxMessage(Base):
+    """The single send path. M8 adds the adapters that deliver `queued` messages."""
+
+    __tablename__ = "outbox_message"
+    id: Mapped[uuid.UUID] = _pk()
+    client_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("client.id"), nullable=False, index=True
+    )
+    channel: Mapped[str] = mapped_column(String(10), nullable=False)
+    purpose: Mapped[str] = mapped_column(String(10), nullable=False)
+    language: Mapped[str] = mapped_column(String(2), nullable=False)
+    body: Mapped[str] = mapped_column(Text, nullable=False)
+    status: Mapped[str] = mapped_column(String(10), nullable=False)
+    block_reason: Mapped[str | None] = mapped_column(String(64))
+    created_by: Mapped[uuid.UUID] = mapped_column(ForeignKey("user_account.id"), nullable=False)
+    created_at: Mapped[datetime] = _now()
