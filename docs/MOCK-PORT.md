@@ -12,14 +12,15 @@ mock. States: **not started**, **ported** (works against the API, unit and brows
 | Inbox | all | ported | counts, urgency filter, load more, done, dismiss with reason, reassign with note; the Lens and the "Open in work area" jump still to add |
 | Clients (search with transliteration) | agent, back-office, manager | ported (list) | multi-select, preferences editing, Lens still to add |
 | Client file | agent, back-office, manager | ported | details, policies, documents (upload, download for clean files only, scan status, restricted), consent per channel with source, process pipeline and start; 8 unit tests and a real-browser test (real upload and virus scan) |
-| Today (agent home) | agent | not started | |
+| Today (agent home) | agent | ported (renewals due with stage and urgency, Inbox counts, open the client) | Inbox preview, tasks and claims still to add |
 | Desk (back-office home) | back-office, manager | ported (work areas with counts and urgent marks) | opening an area's items still to add |
 | Intake review (fax, email) | back-office | ported (review and unassigned queues, candidates with evidence, weak-match warning, confirm to a chosen candidate) | wrong-client correction, client picker for items with no candidate, and the metrics view still to add |
 | Processes: pipeline, My work, diagrams | all | ported (My work list) | pipeline per client is on the client file; diagrams and the definition editor still to add |
 | Campaigns | marketing, manager, agent | ported (create, preview with exclusions, approve, start, server reason shown) | translation review, audience snapshot and results screens still to add; consent registry is on the client file |
 | Manager overview, Trust (audit verify) | manager | ported | ten counts with attention marks, chain verification; compliance, complaints and commission screens still to add |
-| Pension, WhatsApp, Live call, Excel join, Integrations, Client app preview, System settings | various | not started | need M8 and later |
+| Complaints, Compliance, Commissions, Tax, Client app (the client's page at `/portal#token`) | manager, back-office, agent, accountant, client | ported | complaint assignment, statement file upload, tax residency and deadlines, translation review still to add |
+| Pension, WhatsApp, Live call, Excel join, Integrations, System settings | various | not started | the APIs exist (M8, M9); no screens yet |
 
-Slices 3 and 4 (Overview, Trust, My work, Campaigns, Desk, Scans) have 14 unit tests with a fake API and no real-browser test yet.
+Slices 3 to 5 (Overview, Trust, Compliance, My work, Campaigns, Desk, Scans, Today, Complaints, Commissions, Tax, the client's page) have 24 unit tests and 2 real-browser tests on the live stack with a fake API and no real-browser test yet.
 
 Tests: `npm test` (unit, fake API) and `make e2e-web` (Playwright against the running stack).

@@ -3,15 +3,19 @@ import { ApiError } from "./api";
 import { ClientFile } from "./pages/ClientFile";
 import { Clients } from "./pages/Clients";
 import { Campaigns } from "./pages/Campaigns";
+import { Commissions } from "./pages/Commissions";
+import { Complaints } from "./pages/Complaints";
 import { Desk } from "./pages/Desk";
 import { Inbox } from "./pages/Inbox";
 import { IntakeReview } from "./pages/IntakeReview";
 import { MyWork } from "./pages/MyWork";
 import { Overview } from "./pages/Overview";
+import { Tax } from "./pages/Tax";
+import { Today } from "./pages/Today";
 import { Login } from "./pages/Login";
 import { useUi } from "./ui";
 
-type Tab = "overview" | "inbox" | "desk" | "intake" | "mywork" | "clients" | "campaigns";
+type Tab = "today" | "complaints" | "commissions" | "tax" | "overview" | "inbox" | "desk" | "intake" | "mywork" | "clients" | "campaigns";
 
 export function App() {
   const { api, me, setMe, tr, lang, setLang, theme, setTheme } = useUi();
@@ -34,6 +38,7 @@ export function App() {
 
   const has = (c: string) => me.capabilities.includes(c);
   const tabs: Tab[] = [
+    ...(me.roles.includes("agent") ? (["today"] as Tab[]) : []),
     ...(has("flow.approve") ? (["overview"] as Tab[]) : []),
     "inbox",
     ...(has("desk.read") ? (["desk"] as Tab[]) : []),
@@ -41,6 +46,9 @@ export function App() {
     ...(has("process.read") ? (["mywork"] as Tab[]) : []),
     ...(has("client.read") ? (["clients"] as Tab[]) : []),
     ...(has("campaign.write") ? (["campaigns"] as Tab[]) : []),
+    ...(has("complaint.write") ? (["complaints"] as Tab[]) : []),
+    ...(has("commission.manage") ? (["commissions"] as Tab[]) : []),
+    ...(has("tax.read") ? (["tax"] as Tab[]) : []),
   ];
   const openClient = (id: string) => { setTab("clients"); setOpen(id); };
   return (
@@ -72,7 +80,7 @@ export function App() {
           {tr("logout")}
         </button>
       </header>
-      {tab === "overview" ? <Overview /> : tab === "inbox" ? <Inbox /> : tab === "desk" ? <Desk /> : tab === "intake" ? <IntakeReview /> : tab === "mywork" ? <MyWork onOpenClient={openClient} /> : tab === "campaigns" ? <Campaigns /> : open ? <ClientFile clientId={open} onBack={() => setOpen(null)} /> : <Clients onOpen={setOpen} />}
+      {tab === "today" ? <Today onOpenClient={openClient} /> : tab === "complaints" ? <Complaints /> : tab === "commissions" ? <Commissions /> : tab === "tax" ? <Tax /> : tab === "overview" ? <Overview /> : tab === "inbox" ? <Inbox /> : tab === "desk" ? <Desk /> : tab === "intake" ? <IntakeReview /> : tab === "mywork" ? <MyWork onOpenClient={openClient} /> : tab === "campaigns" ? <Campaigns /> : open ? <ClientFile clientId={open} onBack={() => setOpen(null)} /> : <Clients onOpen={setOpen} />}
     </div>
   );
 }

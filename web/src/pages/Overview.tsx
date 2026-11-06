@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { type AuditVerify, type Overview as Data } from "../api";
 import { type Key } from "../i18n";
 import { useUi } from "../ui";
+import { Compliance } from "./Compliance";
 
 const CARDS: (keyof Data)[] = [
   "inbox_urgent", "renewals_overdue", "renewals_next_30", "claims_open", "intake_waiting_review",
@@ -41,6 +42,7 @@ export function Overview() {
           ))}
         </ul>
       )}
+      <Compliance />
       {canVerify && (
         <div className="trust">
           <h2>{tr("trust")}</h2>

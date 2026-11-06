@@ -214,6 +214,10 @@ export class Api {
     return (await r.json()) as T;
   }
 
+  get = <T,>(path: string) => this.call<T>("GET", path);
+  post = <T,>(path: string, body?: unknown) => this.call<T>("POST", path, body);
+  put = <T,>(path: string, body?: unknown) => this.call<T>("PUT", path, body);
+
   async login(email: string, password: string, code: string): Promise<Me> {
     const r = await this.call<{ csrf: string }>("POST", "/api/auth/login", { email, password, code });
     this.csrf = r.csrf;
