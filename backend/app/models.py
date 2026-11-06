@@ -351,6 +351,11 @@ class OutboxMessage(Base):
     block_reason: Mapped[str | None] = mapped_column(String(64))
     created_by: Mapped[uuid.UUID] = mapped_column(ForeignKey("user_account.id"), nullable=False)
     created_at: Mapped[datetime] = _now()
+    provider_id: Mapped[str | None] = mapped_column(String(128))
+    sent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    attempts: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    last_error: Mapped[str | None] = mapped_column(Text)
+    delivery: Mapped[str | None] = mapped_column(String(12))  # sent | delivered | read | failed
 
 
 # ---- processes (M4) -----------------------------------------------------------------
@@ -501,3 +506,53 @@ class AuditSeal(Base):
     bucket: Mapped[str] = mapped_column(String(64), nullable=False)
     key: Mapped[str] = mapped_column(String(128), nullable=False)
     sealed_at: Mapped[datetime] = _now()
+
+
+# ---- integrations (M8) --------------------------------------------------------------
+class AdapterCall(Base):
+    """Every call to an outside system is logged (REQUIREMENTS section 9)."""
+
+    __tablename__ = "adapter_call"
+    __table_args__ = (Index("ix_adapter_call_at", "at"),)
+    id: Mapped[uuid.UUID] = _pk()
+    at: Mapped[datetime] = _now()
+    adapter: Mapped[str] = mapped_column(String(32), nullable=False)
+    operation: Mapped[str] = mapped_column(String(48), nullable=False)
+    target: Mapped[str] = mapped_column(String(128), nullable=False, default="")
+    ok: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    duration_ms: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    error: Mapped[str | None] = mapped_column(Text)
+
+
+class InboundMessage(Base):
+    """A message received from a client (WhatsApp now; SMS later)."""
+
+    __tablename__ = "inbound_message"
+    __table_args__ = (UniqueConstraint("channel", "provider_id"),)
+    id: Mapped[uuid.UUID] = _pk()
+    channel: Mapped[str] = mapped_column(String(10), nullable=False)
+    provider_id: Mapped[str] = mapped_column(String(128), nullable=False)
+    from_address: Mapped[str] = mapped_column(String(64), nullable=False)
+    client_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("client.id"), index=True)
+    kind: Mapped[str] = mapped_column(String(10), nullable=False)  # text | media
+    body: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    received_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    created_at: Mapped[datetime] = _now()
+
+
+class SyncState(Base):
+    """Cursor and last result per external system sync."""
+
+    __tablename__ = "sync_state"
+    system: Mapped[str] = mapped_column(String(32), primary_key=True)
+    cursor: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    last_run: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    last_result: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False, default=dict)
+
+
+class MailSeen(Base):
+    """Message-IDs already ingested, so a message is never filed twice."""
+
+    __tablename__ = "mail_seen"
+    message_id: Mapped[str] = mapped_column(String(255), primary_key=True)
+    at: Mapped[datetime] = _now()

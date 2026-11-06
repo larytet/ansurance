@@ -1,5 +1,5 @@
 import uuid
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -7,11 +7,11 @@ from pydantic import BaseModel, Field
 from sqlalchemy import select, text
 from sqlalchemy.orm import Session as Db
 
-from app.audit import chain
 from app.clients.access import get_visible
+from app.consent import service
 from app.deps import Principal, get_db, require
 from app.messaging.gate import CHANNELS
-from app.models import Client, ConsentEvent, InboxItem
+from app.models import Client, ConsentEvent
 
 router = APIRouter(prefix="/api")
 OPT_OUT_DEADLINE = timedelta(seconds=60)
@@ -44,40 +44,9 @@ def record_consent(
     if body.channel not in CHANNELS or body.state not in ("opt_in", "opt_out"):
         raise HTTPException(422, "invalid_channel_or_state")
     client = _client_for_consent(db, p, client_id)
-    now = datetime.now(UTC)
-    received = body.received_at or now
-    late = body.state == "opt_out" and now - received > OPT_OUT_DEADLINE
-    ev = ConsentEvent(
-        client_id=client.id,
-        channel=body.channel,
-        state=body.state,
-        source=body.source,
-        received_at=received,
-        recorded_by=p.user.id,
-        late=late,
+    ev, late = service.record(
+        db, client, body.channel, body.state, body.source, body.received_at, p.user.id
     )
-    db.add(ev)
-    db.flush()
-    chain.append(
-        db,
-        str(p.user.id),
-        "consent.record",
-        f"client:{client.id}",
-        {"channel": body.channel, "state": body.state, "source": body.source, "late": late},
-    )
-    if late:  # the one-minute rule was missed: the manager must know
-        db.add(
-            InboxItem(
-                type="consent_late",
-                role="manager",
-                client_id=client.id,
-                urgency="urgent",
-                title="Opt-out applied after the one-minute limit",
-                detail=f"{body.channel} opt-out received {received.isoformat()}, "
-                f"applied {now.isoformat()}",
-                created_by=p.user.id,
-            )
-        )
     return {"id": str(ev.id), "state": body.state, "channel": body.channel, "late": late}
 
 

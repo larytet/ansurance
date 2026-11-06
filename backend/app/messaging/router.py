@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session as Db
 from app.audit import chain
 from app.clients.access import get_visible
 from app.deps import Principal, get_db, require
+from app.jobs import queue
 from app.messaging import gate
 from app.models import Client, OutboxMessage
 
@@ -66,6 +67,10 @@ def queue_message(
     if not decision.allowed:
         db.commit()  # keep the blocked record and its audit entry
         raise HTTPException(409, decision.reason)
+    if msg.channel == "whatsapp":
+        queue.enqueue(
+            db, "message.deliver", {"message_id": str(msg.id)}, dedupe_key=f"deliver:{msg.id}"
+        )
     return {
         "id": str(msg.id),
         "status": msg.status,

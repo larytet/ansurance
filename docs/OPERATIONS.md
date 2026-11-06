@@ -94,6 +94,20 @@ one reviewed commit and run the full tests:
 Never use `latest`, a branch, or a floating tag. A deployment to AWS names the git SHA of the
 images that CI pushed (`image_tag`); the plan refuses anything else.
 
+## Integrations
+
+Settings are `ANS_*` variables in `.env`; an integration only runs if it is in `ANS_APPROVED_ADAPTERS`.
+Every call to an outside system is recorded in `adapter_call` (no message bodies).
+
+- WhatsApp (Meta Cloud API): set the token, phone number id and app secret. The webhook
+  `/api/webhooks/whatsapp` verifies Meta's signature; it must be reachable from Meta. On-prem
+  behind a VPN that means a published path; on AWS add an exception to the allowed-CIDR rule
+  for that path only.
+- Mailbox (IMAP): polled by the worker; each Message-ID is ingested once.
+- Agency system: `POST /api/import/agency` (dry run first). The existing system wins for policy
+  data; contact data entered in ansurance is kept and only blanks are filled.
+- Excel: `POST /api/excel/join` and `GET /api/export/clients.xlsx` (manager and back-office).
+
 ## Watching it
 
 - Daily, the worker seals finished months of the audit log into Parquet files in the

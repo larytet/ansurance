@@ -78,6 +78,21 @@ class Settings(BaseSettings):
     fax_dir: str = ""  # watched drop folder; empty disables the fax channel
     fax_poll_seconds: int = 30
     render_dpi: int = 200
+    # integrations: an adapter runs only if it is both configured and on the approved list
+    approved_adapters: list[str] = ["whatsapp", "imap", "agency"]
+    whatsapp_phone_id: str = ""
+    whatsapp_token: SecretStr | None = None
+    whatsapp_app_secret: SecretStr | None = None  # verifies webhook signatures
+    whatsapp_verify_token: str = ""
+    whatsapp_api_base: str = "https://graph.facebook.com/v20.0"
+    imap_host: str = ""
+    imap_port: int = 993
+    imap_user: str = ""
+    imap_password: SecretStr | None = None
+    imap_folder: str = "INBOX"
+    mailbox_poll_seconds: int = 60
+    max_delivery_attempts: int = 5
+    default_country_code: str = "972"
     daily_seconds: int = 86_400  # sealing, nightly audit verification, backup-age check
     backup_max_age_hours: int = 26
     second_pass_below: float = 0.80  # re-read with the Latin model when IDs read below this

@@ -31,6 +31,9 @@ CAPABILITIES = [
     "intake.read",
     "intake.write",
     "intake.review",
+    "import.run",
+    "excel.use",
+    "export.run",
 ]
 
 _COMMON = [
@@ -66,9 +69,12 @@ ROLE_CAPABILITIES: dict[str, list[str]] = {
         "intake.read",
         "intake.write",
         "intake.review",
+        "import.run",
+        "excel.use",
+        "export.run",
         *_COMMON,
     ],
-    "marketing": ["client.read_min", *_COMMON],
+    "marketing": ["client.read_min", "excel.use", *_COMMON],
     "manager": list(CAPABILITIES),
 }
 ROLES = list(ROLE_CAPABILITIES)

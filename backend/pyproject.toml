@@ -23,6 +23,7 @@ dependencies = [
   "opencv-python-headless>=5.0.0.93",
   "pyarrow>=26.0.1",
   "prometheus-client>=0.26.0",
+  "openpyxl>=3.1.5",
 ]
 
 [dependency-groups]
@@ -36,6 +37,7 @@ dev = [
   "python-bidi>=0.6.12",
   "pyyaml>=6.0.3",
   "types-pyyaml>=6.0.12.20261103",
+  "types-openpyxl>=3.1.5.20261017",
 ]
 
 [tool.setuptools.packages.find]

@@ -26,6 +26,11 @@ from app.documents.router import router as documents_router
 from app.inbox.router import router as inbox_router
 from app.intake.context import IntakeContext
 from app.intake.router import router as intake_router
+from app.integrations.calls import require_approved
+from app.integrations.mailbox import ImapMailbox, Mailbox
+from app.integrations.router import router as integrations_router
+from app.integrations.webhooks import router as webhooks_router
+from app.integrations.whatsapp import FakeWhatsApp, MetaCloudWhatsApp, WhatsApp
 from app.logging import configure_logging, request_id_var
 from app.messaging.router import router as messaging_router
 from app.processes.router import router as processes_router
@@ -46,6 +51,32 @@ def make_archive_store(settings: Settings) -> BlobStore:
     return S3BlobStore(settings, bucket=settings.s3_bucket_audit_archive)
 
 
+def make_whatsapp(settings: Settings) -> WhatsApp | None:
+    if settings.profile is Profile.DEMO and settings.whatsapp_token is None:
+        return FakeWhatsApp()
+    if settings.whatsapp_token is None or not settings.whatsapp_phone_id:
+        return None  # not configured: messages stay queued and the webhook answers 503
+    require_approved(settings, "whatsapp")
+    return MetaCloudWhatsApp(
+        settings.whatsapp_phone_id,
+        settings.whatsapp_token.get_secret_value(),
+        settings.whatsapp_api_base,
+    )
+
+
+def make_mailbox(settings: Settings) -> Mailbox | None:
+    if not (settings.imap_host and settings.imap_user and settings.imap_password):
+        return None  # not configured
+    require_approved(settings, "imap")
+    return ImapMailbox(
+        settings.imap_host,
+        settings.imap_port,
+        settings.imap_user,
+        settings.imap_password.get_secret_value(),
+        settings.imap_folder,
+    )
+
+
 def make_antivirus(settings: Settings) -> Antivirus:
     if settings.clamd_host:
         return ClamdAntivirus(settings.clamd_host, settings.clamd_port)
@@ -62,6 +93,7 @@ def create_app(
     antivirus: Antivirus | None = None,
     intake: IntakeContext | None = None,
     archive_blobs: BlobStore | None = None,
+    whatsapp: WhatsApp | None = None,
 ) -> FastAPI:
     settings = settings or get_settings()
     configure_logging(settings.log_level)
@@ -89,6 +121,7 @@ def create_app(
     app.include_router(auth_router)
     app.state.blobs = blobs or make_blob_store(settings)
     app.state.archive_blobs = archive_blobs or make_archive_store(settings)
+    app.state.whatsapp = whatsapp if whatsapp is not None else make_whatsapp(settings)
     app.state.antivirus = antivirus or make_antivirus(settings)
     app.state.intake = intake or IntakeContext(settings, app.state.blobs, app.state.antivirus, None)
     app.include_router(clients_router)
@@ -98,6 +131,8 @@ def create_app(
     app.include_router(messaging_router)
     app.include_router(processes_router)
     app.include_router(intake_router)
+    app.include_router(webhooks_router)
+    app.include_router(integrations_router)
 
     @app.middleware("http")
     async def request_id_middleware(
