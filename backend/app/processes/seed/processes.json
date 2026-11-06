@@ -1,0 +1,2920 @@
+[
+ {
+  "id": "onb",
+  "source_flow": "F1",
+  "owner_role": "agent",
+  "name": {
+   "en": "New client onboarding (KYC/AML)",
+   "he": "קליטת לקוח חדש (הכר את לקוחך)"
+  },
+  "stages": [
+   {
+    "id": "id",
+    "name": {
+     "en": "Identify the client",
+     "he": "זיהוי הלקוח"
+    },
+    "role": "backoffice",
+    "depends_on": [],
+    "checks": [
+     {
+      "text": {
+       "en": "ID card and appendix received (both sides)",
+       "he": "התקבלה תעודת זהות וספח (שני צדדים)"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "ID number check digit valid",
+       "he": "ספרת ביקורת תקינה בתעודת הזהות"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Name and date of birth match the ID",
+       "he": "שם ותאריך לידה תואמים לתעודה"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Duplicate search in the database done",
+       "he": "בוצע חיפוש כפילות במאגר"
+      },
+      "kind": "verify",
+      "verify_note": false
+     }
+    ]
+   },
+   {
+    "id": "kyc",
+    "name": {
+     "en": "KYC and risk profile",
+     "he": "הכר את לקוחך ופרופיל סיכון"
+    },
+    "role": "agent",
+    "depends_on": [],
+    "checks": [
+     {
+      "text": {
+       "en": "Source of funds and occupation recorded",
+       "he": "מקור כספים ותעסוקה נרשמו"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "FATCA/CRS self-certification signed",
+       "he": "הצהרת תושבות למס (FATCA/CRS) נחתמה"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Needs analysis questionnaire completed",
+       "he": "שאלון צרכים הושלם"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Politically exposed person check",
+       "he": "בדיקת איש ציבור (PEP)"
+      },
+      "kind": "verify",
+      "verify_note": false
+     }
+    ]
+   },
+   {
+    "id": "reg",
+    "name": {
+     "en": "Register in the database",
+     "he": "רישום במאגר"
+    },
+    "role": "backoffice",
+    "depends_on": [
+     "id",
+     "kyc"
+    ],
+    "checks": [
+     {
+      "text": {
+       "en": "Client record created",
+       "he": "נוצרה כרטיסית לקוח"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Contact details and language preference saved",
+       "he": "פרטי קשר והעדפת שפה נשמרו"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Marketing consent recorded (separately, optional)",
+       "he": "הסכמה לשיווק נרשמה (בנפרד, רשות)"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Welcome message and app invitation sent",
+       "he": "הודעת פתיחה והזמנה לאפליקציה נשלחו"
+      },
+      "kind": "send",
+      "verify_note": false
+     }
+    ]
+   },
+   {
+    "id": "fin",
+    "name": {
+     "en": "Approve and file",
+     "he": "אישור וארכוב"
+    },
+    "role": "manager",
+    "depends_on": [
+     "reg"
+    ],
+    "checks": [
+     {
+      "text": {
+       "en": "Risk rating approved",
+       "he": "דירוג סיכון אושר"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Documents archived with 7-year retention",
+       "he": "המסמכים אורכבו עם שמירה ל-7 שנים"
+      },
+      "kind": "do",
+      "verify_note": false
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "sale",
+  "source_flow": "F2",
+  "owner_role": "agent",
+  "name": {
+   "en": "Quote, sale and policy issuance",
+   "he": "הצעה, מכירה והנפקת פוליסה"
+  },
+  "stages": [
+   {
+    "id": "need",
+    "name": {
+     "en": "Needs and suitability",
+     "he": "צרכים והתאמה"
+    },
+    "role": "agent",
+    "depends_on": [],
+    "checks": [
+     {
+      "text": {
+       "en": "Client needs recorded",
+       "he": "צרכי הלקוח נרשמו"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "At least two alternatives compared",
+       "he": "הושוו לפחות שתי חלופות"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Existing cover checked (duplicate or replacement)",
+       "he": "נבדק כיסוי קיים (כפילות או החלפה)"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Reasoning document drafted",
+       "he": "מסמך נימוקים נוסח"
+      },
+      "kind": "fill",
+      "verify_note": false
+     }
+    ]
+   },
+   {
+    "id": "quote",
+    "name": {
+     "en": "Quotes from insurers",
+     "he": "הצעות ממבטחים"
+    },
+    "role": "backoffice",
+    "depends_on": [
+     "need"
+    ],
+    "checks": [
+     {
+      "text": {
+       "en": "Proposal form filled for each insurer",
+       "he": "הוגשה הצעה בטופס לכל מבטח"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Quotes received and attached",
+       "he": "התקבלו הצעות וצורפו"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Underwriting questions answered",
+       "he": "שאלות חיתום נענו"
+      },
+      "kind": "fill",
+      "verify_note": false
+     }
+    ]
+   },
+   {
+    "id": "sign",
+    "name": {
+     "en": "Client decision and signing",
+     "he": "החלטת לקוח וחתימה"
+    },
+    "role": "agent",
+    "depends_on": [
+     "quote"
+    ],
+    "checks": [
+     {
+      "text": {
+       "en": "Commission and fees disclosed",
+       "he": "גילוי עמלות ודמי ניהול נמסר"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Proposal and reasoning document signed",
+       "he": "הצעה ומסמך נימוקים נחתמו"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Power of attorney signed",
+       "he": "ייפוי כוח נחתם"
+      },
+      "kind": "fill",
+      "verify_note": false
+     }
+    ]
+   },
+   {
+    "id": "issue",
+    "name": {
+     "en": "Issuance and filing",
+     "he": "הנפקה וארכוב"
+    },
+    "role": "backoffice",
+    "depends_on": [
+     "sign"
+    ],
+    "checks": [
+     {
+      "text": {
+       "en": "Proposal sent to the insurer",
+       "he": "ההצעה נשלחה למבטח"
+      },
+      "kind": "send",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Policy number received",
+       "he": "התקבל מספר פוליסה"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Policy filed and client notified",
+       "he": "הפוליסה תויקה והלקוח עודכן"
+      },
+      "kind": "send",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Post-sale contact scheduled (30 + 10 business days)",
+       "he": "נקבעה פנייה לאחר המכירה (30 + 10 ימי עסקים)"
+      },
+      "kind": "fill",
+      "verify_note": false
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "renew",
+  "source_flow": "F3",
+  "owner_role": "agent",
+  "name": {
+   "en": "Renewal and endorsement",
+   "he": "חידוש ועדכון פוליסה"
+  },
+  "stages": [
+   {
+    "id": "prep",
+    "name": {
+     "en": "Prepare the renewal",
+     "he": "הכנת החידוש"
+    },
+    "role": "backoffice",
+    "depends_on": [],
+    "checks": [
+     {
+      "text": {
+       "en": "Renewal notice from the insurer received",
+       "he": "התקבלה הודעת חידוש מהמבטח"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Premium change compared with last year",
+       "he": "שינוי הפרמיה מול אשתקד נבדק"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Market comparison for large changes",
+       "he": "נעשתה השוואת שוק לשינוי גדול"
+      },
+      "kind": "fill",
+      "verify_note": false
+     }
+    ]
+   },
+   {
+    "id": "adv",
+    "name": {
+     "en": "Advise the client",
+     "he": "ייעוץ ללקוח"
+    },
+    "role": "agent",
+    "depends_on": [
+     "prep"
+    ],
+    "checks": [
+     {
+      "text": {
+       "en": "Client contacted (call or message)",
+       "he": "נוצר קשר עם הלקוח"
+      },
+      "kind": "send",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Changes in life situation asked",
+       "he": "נשאל על שינוי במצב החיים"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Decision recorded: renew, change or cancel",
+       "he": "ההחלטה נרשמה: חידוש, שינוי או ביטול"
+      },
+      "kind": "fill",
+      "verify_note": false
+     }
+    ]
+   },
+   {
+    "id": "exe",
+    "name": {
+     "en": "Execute and confirm",
+     "he": "ביצוע ואישור"
+    },
+    "role": "backoffice",
+    "depends_on": [
+     "adv"
+    ],
+    "checks": [
+     {
+      "text": {
+       "en": "Instruction sent to the insurer",
+       "he": "ההוראה נשלחה למבטח"
+      },
+      "kind": "send",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Written confirmation received",
+       "he": "התקבל אישור בכתב"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Premium collection checked",
+       "he": "גבייה נבדקה"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Client file updated",
+       "he": "תיק הלקוח עודכן"
+      },
+      "kind": "fill",
+      "verify_note": false
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "claim",
+  "source_flow": "F4",
+  "owner_role": "agent",
+  "name": {
+   "en": "Claim handling",
+   "he": "טיפול בתביעה"
+  },
+  "stages": [
+   {
+    "id": "open",
+    "name": {
+     "en": "Open the claim",
+     "he": "פתיחת תביעה"
+    },
+    "role": "agent",
+    "depends_on": [],
+    "checks": [
+     {
+      "text": {
+       "en": "Event details and date recorded",
+       "he": "פרטי האירוע ותאריכו נרשמו"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Policy cover confirmed",
+       "he": "כיסוי הפוליסה אומת"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Client told which documents to bring",
+       "he": "הלקוח קיבל רשימת מסמכים"
+      },
+      "kind": "send",
+      "verify_note": false
+     }
+    ]
+   },
+   {
+    "id": "docs",
+    "name": {
+     "en": "Collect documents",
+     "he": "איסוף מסמכים"
+    },
+    "role": "backoffice",
+    "depends_on": [
+     "open"
+    ],
+    "checks": [
+     {
+      "text": {
+       "en": "Claim form filled",
+       "he": "טופס תביעה מולא"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Supporting documents received (medical, invoices, police)",
+       "he": "התקבלו מסמכים תומכים"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Client signature on the release",
+       "he": "חתימת הלקוח על ויתור סודיות"
+      },
+      "kind": "fill",
+      "verify_note": false
+     }
+    ]
+   },
+   {
+    "id": "sub",
+    "name": {
+     "en": "Submit to the insurer",
+     "he": "הגשה למבטח"
+    },
+    "role": "backoffice",
+    "depends_on": [
+     "docs"
+    ],
+    "checks": [
+     {
+      "text": {
+       "en": "Claim submitted and number received",
+       "he": "התביעה הוגשה והתקבל מספר"
+      },
+      "kind": "send",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Response deadline set in business days",
+       "he": "נקבע מועד תשובה בימי עסקים"
+      },
+      "kind": "fill",
+      "verify_note": false
+     }
+    ]
+   },
+   {
+    "id": "foll",
+    "name": {
+     "en": "Follow up and close",
+     "he": "מעקב וסגירה"
+    },
+    "role": "agent",
+    "depends_on": [
+     "sub"
+    ],
+    "checks": [
+     {
+      "text": {
+       "en": "Insurer questions answered",
+       "he": "שאלות המבטח נענו"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Decision explained to the client",
+       "he": "ההחלטה הוסברה ללקוח"
+      },
+      "kind": "send",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Payment confirmed or appeal filed",
+       "he": "התשלום אושר או הוגש ערעור"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Claim closed",
+       "he": "התביעה נסגרה"
+      },
+      "kind": "do",
+      "verify_note": false
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "pen",
+  "source_flow": "F5",
+  "owner_role": "agent",
+  "name": {
+   "en": "Pension and savings portfolio review",
+   "he": "סקירת תיק פנסיוני וחיסכון"
+  },
+  "stages": [
+   {
+    "id": "auth",
+    "name": {
+     "en": "Three authorizations",
+     "he": "שלושה כתבי הרשאה"
+    },
+    "role": "backoffice",
+    "depends_on": [],
+    "checks": [
+     {
+      "text": {
+       "en": "Har HaBituach authorization signed",
+       "he": "הרשאה להר הביטוח נחתמה"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Clearing house (Mislaka) authorization signed",
+       "he": "הרשאה למסלקה נחתמה"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Continuing authorization (B1) signed for each insurer",
+       "he": "ייפוי כוח מתמשך (נספח ב1) נחתם לכל מבטח"
+      },
+      "kind": "fill",
+      "verify_note": false
+     }
+    ]
+   },
+   {
+    "id": "data",
+    "name": {
+     "en": "Get the data",
+     "he": "קבלת נתונים"
+    },
+    "role": "backoffice",
+    "depends_on": [
+     "auth"
+    ],
+    "checks": [
+     {
+      "text": {
+       "en": "Har HaBituach report requested",
+       "he": "דוח הר הביטוח התבקש"
+      },
+      "kind": "send",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Clearing house data requested",
+       "he": "נתוני מסלקה התבקשו"
+      },
+      "kind": "send",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Data imported and matched to the client",
+       "he": "הנתונים יובאו ושויכו ללקוח"
+      },
+      "kind": "verify",
+      "verify_note": false
+     }
+    ]
+   },
+   {
+    "id": "ana",
+    "name": {
+     "en": "Analysis",
+     "he": "ניתוח"
+    },
+    "role": "agent",
+    "depends_on": [
+     "data"
+    ],
+    "checks": [
+     {
+      "text": {
+       "en": "Duplicate cover and idle funds found",
+       "he": "נמצאו כפילויות וכספים רדומים"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Management fees compared",
+       "he": "דמי ניהול הושוו"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Gaps listed (disability, death, long-term care)",
+       "he": "פערים נרשמו (אובדן כושר, מוות, סיעוד)"
+      },
+      "kind": "fill",
+      "verify_note": false
+     }
+    ]
+   },
+   {
+    "id": "rec",
+    "name": {
+     "en": "Recommendation and signing",
+     "he": "המלצה וחתימה"
+    },
+    "role": "agent",
+    "depends_on": [
+     "ana"
+    ],
+    "checks": [
+     {
+      "text": {
+       "en": "Recommendation with reasoning written",
+       "he": "המלצה עם נימוקים נכתבה"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Client meeting held",
+       "he": "התקיימה פגישה עם הלקוח"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Advice record signed",
+       "he": "רשומת ייעוץ נחתמה"
+      },
+      "kind": "fill",
+      "verify_note": false
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "idreg",
+  "source_flow": "F11",
+  "owner_role": "backoffice",
+  "name": {
+   "en": "Get the ID and register the client",
+   "he": "השגת תעודת זהות ורישום"
+  },
+  "stages": [
+   {
+    "id": "req",
+    "name": {
+     "en": "Request the ID",
+     "he": "בקשת תעודת זהות"
+    },
+    "role": "backoffice",
+    "depends_on": [],
+    "checks": [
+     {
+      "text": {
+       "en": "Missing-ID case opened from the Inbox",
+       "he": "נפתח מקרה של תעודה חסרה"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Request sent (WhatsApp, email or post)",
+       "he": "הבקשה נשלחה (וואטסאפ, אימייל או דואר)"
+      },
+      "kind": "send",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Reminder set for 3 business days",
+       "he": "נקבעה תזכורת ל-3 ימי עסקים"
+      },
+      "kind": "fill",
+      "verify_note": false
+     }
+    ]
+   },
+   {
+    "id": "chk",
+    "name": {
+     "en": "Validate",
+     "he": "אימות"
+    },
+    "role": "backoffice",
+    "depends_on": [
+     "req"
+    ],
+    "checks": [
+     {
+      "text": {
+       "en": "Both sides legible",
+       "he": "שני הצדדים קריאים"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Check digit valid",
+       "he": "ספרת ביקורת תקינה"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Match with the declared name",
+       "he": "התאמה לשם שהוצהר"
+      },
+      "kind": "verify",
+      "verify_note": false
+     }
+    ]
+   },
+   {
+    "id": "reg",
+    "name": {
+     "en": "Register",
+     "he": "רישום"
+    },
+    "role": "backoffice",
+    "depends_on": [
+     "chk"
+    ],
+    "checks": [
+     {
+      "text": {
+       "en": "Record created or updated",
+       "he": "רשומה נוצרה או עודכנה"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Copy filed in the client file",
+       "he": "העתק תויק בתיק הלקוח"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Case closed in the Inbox",
+       "he": "המקרה נסגר בתיבה"
+      },
+      "kind": "fill",
+      "verify_note": false
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "tpl",
+  "source_flow": "F12",
+  "owner_role": "backoffice",
+  "name": {
+   "en": "Fill and sign a template",
+   "he": "מילוי תבנית וחתימה"
+  },
+  "stages": [
+   {
+    "id": "pick",
+    "name": {
+     "en": "Choose the template",
+     "he": "בחירת תבנית"
+    },
+    "role": "backoffice",
+    "depends_on": [],
+    "checks": [
+     {
+      "text": {
+       "en": "Template and client chosen",
+       "he": "נבחרו תבנית ולקוח"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Empty fields highlighted and reviewed",
+       "he": "שדות ריקים הודגשו ונסקרו"
+      },
+      "kind": "verify",
+      "verify_note": false
+     }
+    ]
+   },
+   {
+    "id": "fill",
+    "name": {
+     "en": "Fill and review",
+     "he": "מילוי ובדיקה"
+    },
+    "role": "backoffice",
+    "depends_on": [
+     "pick"
+    ],
+    "checks": [
+     {
+      "text": {
+       "en": "All fields filled from the client file",
+       "he": "כל השדות מולאו מתיק הלקוח"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Second pair of eyes on the amounts and dates",
+       "he": "בדיקה שנייה בסכומים ובתאריכים"
+      },
+      "kind": "verify",
+      "verify_note": false
+     }
+    ]
+   },
+   {
+    "id": "sig",
+    "name": {
+     "en": "Signature",
+     "he": "חתימה"
+    },
+    "role": "agent",
+    "depends_on": [
+     "fill"
+    ],
+    "checks": [
+     {
+      "text": {
+       "en": "Sent to the client for signature",
+       "he": "נשלח ללקוח לחתימה"
+      },
+      "kind": "send",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Signed copy received",
+       "he": "התקבל עותק חתום"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Signed copy filed",
+       "he": "עותק חתום תויק"
+      },
+      "kind": "fill",
+      "verify_note": false
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "post",
+  "source_flow": "F13",
+  "owner_role": "backoffice",
+  "name": {
+   "en": "Outgoing post and email batch",
+   "he": "דואר יוצא ומיילים"
+  },
+  "stages": [
+   {
+    "id": "prep",
+    "name": {
+     "en": "Prepare the batch",
+     "he": "הכנת האצווה"
+    },
+    "role": "backoffice",
+    "depends_on": [],
+    "checks": [
+     {
+      "text": {
+       "en": "Addresses checked (street, city, postal code)",
+       "he": "כתובות נבדקו (רחוב, עיר, מיקוד)"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Recipients' language and channel preference applied",
+       "he": "הועדפו שפה וערוץ של הנמען"
+      },
+      "kind": "verify",
+      "verify_note": false
+     }
+    ]
+   },
+   {
+    "id": "lab",
+    "name": {
+     "en": "Print",
+     "he": "הדפסה"
+    },
+    "role": "backoffice",
+    "depends_on": [
+     "prep"
+    ],
+    "checks": [
+     {
+      "text": {
+       "en": "Labels printed",
+       "he": "מדבקות הודפסו"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Letters printed and enclosed",
+       "he": "מכתבים הודפסו והוכנסו"
+      },
+      "kind": "fill",
+      "verify_note": false
+     }
+    ]
+   },
+   {
+    "id": "snd",
+    "name": {
+     "en": "Send and prove",
+     "he": "שליחה והוכחה"
+    },
+    "role": "backoffice",
+    "depends_on": [
+     "lab"
+    ],
+    "checks": [
+     {
+      "text": {
+       "en": "Post handed over, receipt kept",
+       "he": "הדואר נמסר והקבלה נשמרה"
+      },
+      "kind": "send",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Emails sent",
+       "he": "מיילים נשלחו"
+      },
+      "kind": "send",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Proof of dispatch filed in the client file",
+       "he": "הוכחת שליחה תויקה בתיק"
+      },
+      "kind": "fill",
+      "verify_note": false
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "insreq",
+  "source_flow": "F14",
+  "owner_role": "backoffice",
+  "name": {
+   "en": "Request from another insurance company",
+   "he": "בקשה מחברת ביטוח אחרת"
+  },
+  "stages": [
+   {
+    "id": "rcv",
+    "name": {
+     "en": "Receive and attribute",
+     "he": "קבלה ושיוך"
+    },
+    "role": "backoffice",
+    "depends_on": [],
+    "checks": [
+     {
+      "text": {
+       "en": "Request logged with date and insurer",
+       "he": "הבקשה נרשמה עם תאריך ומבטח"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Client and policy identified",
+       "he": "לקוח ופוליסה זוהו"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Business-day clock started (2, 3, 7 or 10 days by step)",
+       "he": "הופעל שעון ימי עסקים (2, 3, 7 או 10 לפי שלב)"
+      },
+      "kind": "fill",
+      "verify_note": false
+     }
+    ]
+   },
+   {
+    "id": "auth",
+    "name": {
+     "en": "Check authority",
+     "he": "בדיקת הרשאה"
+    },
+    "role": "backoffice",
+    "depends_on": [
+     "rcv"
+    ],
+    "checks": [
+     {
+      "text": {
+       "en": "Valid power of attorney exists (B1 within 7-10 years)",
+       "he": "קיים ייפוי כוח תקף (ב1 עד 7-10 שנים)"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Not cancelled by the client",
+       "he": "לא בוטל על ידי הלקוח"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "If missing, request signature from the client",
+       "he": "אם חסר, התבקשה חתימת לקוח"
+      },
+      "kind": "send",
+      "verify_note": false
+     }
+    ]
+   },
+   {
+    "id": "prp",
+    "name": {
+     "en": "Prepare the answer",
+     "he": "הכנת התשובה"
+    },
+    "role": "backoffice",
+    "depends_on": [
+     "auth"
+    ],
+    "checks": [
+     {
+      "text": {
+       "en": "Documents collected",
+       "he": "מסמכים נאספו"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Answer template filled",
+       "he": "תבנית תשובה מולאה"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Reviewed by the agent",
+       "he": "נבדק על ידי הסוכן"
+      },
+      "kind": "verify",
+      "verify_note": false
+     }
+    ]
+   },
+   {
+    "id": "snd",
+    "name": {
+     "en": "Reply and close",
+     "he": "מענה וסגירה"
+    },
+    "role": "backoffice",
+    "depends_on": [
+     "prp"
+    ],
+    "checks": [
+     {
+      "text": {
+       "en": "Reply sent within the deadline",
+       "he": "המענה נשלח במועד"
+      },
+      "kind": "send",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Confirmation of receipt obtained",
+       "he": "התקבל אישור קבלה"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Exchange logged in the information-exchange register",
+       "he": "ההחלפה נרשמה ביומן החלפת מידע"
+      },
+      "kind": "fill",
+      "verify_note": false
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "xfer",
+  "source_flow": "F5 / F14",
+  "owner_role": "agent",
+  "name": {
+   "en": "Agent transfer (appointment letter)",
+   "he": "מעבר סוכן (כתב מינוי)"
+  },
+  "stages": [
+   {
+    "id": "sign",
+    "name": {
+     "en": "Sign the appointment",
+     "he": "חתימה על כתב מינוי"
+    },
+    "role": "agent",
+    "depends_on": [],
+    "checks": [
+     {
+      "text": {
+       "en": "Continuing authorization (appendix B1) signed",
+       "he": "ייפוי כוח מתמשך (נספח ב1) נחתם"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Client told about the effect on the old agent",
+       "he": "הלקוח עודכן על השפעה על הסוכן הקודם"
+      },
+      "kind": "verify",
+      "verify_note": false
+     }
+    ]
+   },
+   {
+    "id": "fwd",
+    "name": {
+     "en": "Forward to the insurers",
+     "he": "העברה למבטחים"
+    },
+    "role": "backoffice",
+    "depends_on": [
+     "sign"
+    ],
+    "checks": [
+     {
+      "text": {
+       "en": "Sent to each insurer within 10 business days",
+       "he": "נשלח לכל מבטח עד 10 ימי עסקים"
+      },
+      "kind": "send",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Receipt confirmed by each insurer",
+       "he": "התקבל אישור מכל מבטח"
+      },
+      "kind": "verify",
+      "verify_note": false
+     }
+    ]
+   },
+   {
+    "id": "eff",
+    "name": {
+     "en": "Confirm the effect",
+     "he": "אישור התוקף"
+    },
+    "role": "backoffice",
+    "depends_on": [
+     "fwd"
+    ],
+    "checks": [
+     {
+      "text": {
+       "en": "Previous agent's authorization cancelled (about 10 business days)",
+       "he": "הרשאת הסוכן הקודם בוטלה (כ-10 ימי עסקים)"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Commission stream moved",
+       "he": "זרם העמלות הועבר"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Validity end date (7-10 years) in the calendar",
+       "he": "מועד סיום תוקף (7-10 שנים) ביומן"
+      },
+      "kind": "fill",
+      "verify_note": false
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "repl",
+  "source_flow": "F2",
+  "owner_role": "agent",
+  "name": {
+   "en": "Policy replacement advice",
+   "he": "ייעוץ להחלפת פוליסה"
+  },
+  "stages": [
+   {
+    "id": "cmp",
+    "name": {
+     "en": "Compare the old and the new",
+     "he": "השוואת ישן וחדש"
+    },
+    "role": "agent",
+    "depends_on": [],
+    "checks": [
+     {
+      "text": {
+       "en": "Old policy terms and exclusions listed",
+       "he": "תנאי הפוליסה הישנה והחרגות נרשמו"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Waiting periods and pricing compared",
+       "he": "תקופות המתנה ותמחור הושוו"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Loss of accrued rights checked",
+       "he": "נבדק אובדן זכויות צבורות"
+      },
+      "kind": "verify",
+      "verify_note": false
+     }
+    ]
+   },
+   {
+    "id": "adv",
+    "name": {
+     "en": "Advice record",
+     "he": "רשומת ייעוץ"
+    },
+    "role": "agent",
+    "depends_on": [
+     "cmp"
+    ],
+    "checks": [
+     {
+      "text": {
+       "en": "Written advice with the reasons",
+       "he": "ייעוץ בכתב עם נימוקים"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Client signed that the risks were explained",
+       "he": "הלקוח חתם שהסיכונים הוסברו"
+      },
+      "kind": "fill",
+      "verify_note": false
+     }
+    ]
+   },
+   {
+    "id": "can",
+    "name": {
+     "en": "Cancel the old policy only after the new one is in force",
+     "he": "ביטול הפוליסה הישנה רק אחרי שהחדשה בתוקף"
+    },
+    "role": "backoffice",
+    "depends_on": [
+     "adv"
+    ],
+    "checks": [
+     {
+      "text": {
+       "en": "New policy confirmed in force",
+       "he": "הפוליסה החדשה אושרה בתוקף"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Cancellation request sent to the old insurer",
+       "he": "בקשת ביטול נשלחה למבטח הישן"
+      },
+      "kind": "send",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Insurer's cancellation check answered",
+       "he": "נענתה בדיקת המבטח לגבי ביטול"
+      },
+      "kind": "verify",
+      "verify_note": false
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "sev",
+  "source_flow": "F15",
+  "owner_role": "backoffice",
+  "name": {
+   "en": "Severance release and tax forms (160, 161, 161d)",
+   "he": "שחרור פיצויים וטפסי מס (160, 161, 161ד)"
+  },
+  "stages": [
+   {
+    "id": "emp",
+    "name": {
+     "en": "Employer notice (161)",
+     "he": "הודעת מעסיק (161)"
+    },
+    "role": "backoffice",
+    "depends_on": [],
+    "checks": [
+     {
+      "text": {
+       "en": "Form 161 requested from the employer",
+       "he": "טופס 161 התבקש מהמעסיק"
+      },
+      "kind": "send",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Form 161 received and checked",
+       "he": "טופס 161 התקבל ונבדק"
+      },
+      "kind": "verify",
+      "verify_note": false
+     }
+    ]
+   },
+   {
+    "id": "fix",
+    "name": {
+     "en": "Rights fixation (161d)",
+     "he": "קיבוע זכויות (161ד)"
+    },
+    "role": "backoffice",
+    "depends_on": [],
+    "checks": [
+     {
+      "text": {
+       "en": "Form 161d prepared with exemption details",
+       "he": "טופס 161ד הוכן עם פרטי פטור"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Signed by the client",
+       "he": "נחתם על ידי הלקוח"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Sent to the tax authority",
+       "he": "נשלח לרשות המסים"
+      },
+      "kind": "send",
+      "verify_note": false
+     }
+    ]
+   },
+   {
+    "id": "rel",
+    "name": {
+     "en": "Release request to the fund",
+     "he": "בקשת שחרור לקרן"
+    },
+    "role": "backoffice",
+    "depends_on": [
+     "emp",
+     "fix"
+    ],
+    "checks": [
+     {
+      "text": {
+       "en": "Request with Forms 161 and 160 or 161d",
+       "he": "בקשה עם טפסים 161 ו-160 או 161ד"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Without 160 or 161 the fund withholds the maximum: warned",
+       "he": "הוזהר כי בלי 160 או 161 המס המרבי ינוכה"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Sent to the fund",
+       "he": "נשלח לקרן"
+      },
+      "kind": "send",
+      "verify_note": false
+     }
+    ]
+   },
+   {
+    "id": "pay",
+    "name": {
+     "en": "Payment and certificate",
+     "he": "תשלום ואישור"
+    },
+    "role": "backoffice",
+    "depends_on": [
+     "rel"
+    ],
+    "checks": [
+     {
+      "text": {
+       "en": "Payment received and tax withheld matches",
+       "he": "התקבל תשלום וניכוי המס תואם"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Client informed with the certificate",
+       "he": "הלקוח עודכן עם אישור"
+      },
+      "kind": "send",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Refund claim checked (up to 6 years back)",
+       "he": "נבדקה תביעת החזר (עד 6 שנים אחורה)"
+      },
+      "kind": "fill",
+      "verify_note": false
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "tax",
+  "source_flow": "F15",
+  "owner_role": "manager",
+  "name": {
+   "en": "Annual tax cycle (agency)",
+   "he": "מחזור מס שנתי (סוכנות)"
+  },
+  "stages": [
+   {
+    "id": "cert",
+    "name": {
+     "en": "Withholding certificates (857 / 806)",
+     "he": "אישורי ניכוי במקור (857 / 806)"
+    },
+    "role": "backoffice",
+    "depends_on": [],
+    "checks": [
+     {
+      "text": {
+       "en": "Annual certificate received from each insurer (even if no tax was withheld)",
+       "he": "התקבל אישור שנתי מכל מבטח (גם אם לא נוכה מס)"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Amounts match the commission statements",
+       "he": "הסכומים תואמים לדוחות העמלות"
+      },
+      "kind": "verify",
+      "verify_note": false
+     }
+    ]
+   },
+   {
+    "id": "inv",
+    "name": {
+     "en": "Invoices and allocation numbers",
+     "he": "חשבוניות ומספרי הקצאה"
+    },
+    "role": "backoffice",
+    "depends_on": [],
+    "checks": [
+     {
+      "text": {
+       "en": "Invoices above the threshold carry an allocation number",
+       "he": "חשבוניות מעל הסף נושאות מספר הקצאה"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Invoices without a number listed and fixed",
+       "he": "חשבוניות ללא מספר רוכזו ותוקנו"
+      },
+      "kind": "fill",
+      "verify_note": false
+     }
+    ]
+   },
+   {
+    "id": "cli",
+    "name": {
+     "en": "Client deposit certificates (45A)",
+     "he": "אישורי הפקדות ללקוחות (45א)"
+    },
+    "role": "backoffice",
+    "depends_on": [],
+    "checks": [
+     {
+      "text": {
+       "en": "Annual certificates requested from the insurers",
+       "he": "אישורים שנתיים התבקשו מהמבטחים"
+      },
+      "kind": "send",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Sent to clients",
+       "he": "נשלחו ללקוחות"
+      },
+      "kind": "send",
+      "verify_note": false
+     }
+    ]
+   },
+   {
+    "id": "acc",
+    "name": {
+     "en": "External accountant",
+     "he": "רואה חשבון חיצוני"
+    },
+    "role": "backoffice",
+    "depends_on": [
+     "cert",
+     "inv"
+    ],
+    "checks": [
+     {
+      "text": {
+       "en": "Package sent to the accountant",
+       "he": "חבילה נשלחה לרואה החשבון"
+      },
+      "kind": "send",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Accountant's questions answered",
+       "he": "שאלות רואה החשבון נענו"
+      },
+      "kind": "fill",
+      "verify_note": false
+     }
+    ]
+   },
+   {
+    "id": "apr",
+    "name": {
+     "en": "Manager approval",
+     "he": "אישור מנהל"
+    },
+    "role": "manager",
+    "depends_on": [
+     "acc",
+     "cli"
+    ],
+    "checks": [
+     {
+      "text": {
+       "en": "Figures reviewed",
+       "he": "הנתונים נבדקו"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Cycle closed",
+       "he": "המחזור נסגר"
+      },
+      "kind": "do",
+      "verify_note": false
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "comm",
+  "source_flow": "F7",
+  "owner_role": "manager",
+  "name": {
+   "en": "Commission reconciliation (monthly)",
+   "he": "התאמת עמלות (חודשי)"
+  },
+  "stages": [
+   {
+    "id": "imp",
+    "name": {
+     "en": "Import statements",
+     "he": "ייבוא דוחות"
+    },
+    "role": "backoffice",
+    "depends_on": [],
+    "checks": [
+     {
+      "text": {
+       "en": "Statement from each insurer received",
+       "he": "התקבל דוח מכל מבטח"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Statements imported (Excel or file)",
+       "he": "הדוחות יובאו (אקסל או קובץ)"
+      },
+      "kind": "fill",
+      "verify_note": false
+     }
+    ]
+   },
+   {
+    "id": "mat",
+    "name": {
+     "en": "Match to policies",
+     "he": "התאמה לפוליסות"
+    },
+    "role": "backoffice",
+    "depends_on": [
+     "imp"
+    ],
+    "checks": [
+     {
+      "text": {
+       "en": "Policy-level matching done",
+       "he": "בוצעה התאמה ברמת פוליסה"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Differences and missing commissions listed",
+       "he": "הפרשים ועמלות חסרות רוכזו"
+      },
+      "kind": "fill",
+      "verify_note": false
+     }
+    ]
+   },
+   {
+    "id": "qry",
+    "name": {
+     "en": "Queries to the insurers",
+     "he": "פניות למבטחים"
+    },
+    "role": "backoffice",
+    "depends_on": [
+     "mat"
+    ],
+    "checks": [
+     {
+      "text": {
+       "en": "Queries sent with evidence",
+       "he": "פניות נשלחו עם ראיות"
+      },
+      "kind": "send",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Answers received and booked",
+       "he": "תשובות התקבלו ונרשמו"
+      },
+      "kind": "verify",
+      "verify_note": false
+     }
+    ]
+   },
+   {
+    "id": "apr",
+    "name": {
+     "en": "Manager approval",
+     "he": "אישור מנהל"
+    },
+    "role": "manager",
+    "depends_on": [
+     "qry"
+    ],
+    "checks": [
+     {
+      "text": {
+       "en": "Final report reviewed",
+       "he": "הדוח הסופי נבדק"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Month closed",
+       "he": "החודש נסגר"
+      },
+      "kind": "do",
+      "verify_note": false
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "compl",
+  "source_flow": "F8",
+  "owner_role": "manager",
+  "name": {
+   "en": "Complaint handling",
+   "he": "טיפול בתלונה"
+  },
+  "stages": [
+   {
+    "id": "rcv",
+    "name": {
+     "en": "Receive and register",
+     "he": "קבלה ורישום"
+    },
+    "role": "backoffice",
+    "depends_on": [],
+    "checks": [
+     {
+      "text": {
+       "en": "Complaint logged with date",
+       "he": "התלונה נרשמה עם תאריך"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "First reply to the client within 2 business days",
+       "he": "מענה ראשון ללקוח תוך 2 ימי עסקים"
+      },
+      "kind": "send",
+      "verify_note": false
+     }
+    ]
+   },
+   {
+    "id": "inv",
+    "name": {
+     "en": "Investigate",
+     "he": "בירור"
+    },
+    "role": "agent",
+    "depends_on": [
+     "rcv"
+    ],
+    "checks": [
+     {
+      "text": {
+       "en": "Facts and documents collected",
+       "he": "עובדות ומסמכים נאספו"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Insurer asked for its position (30 days, 21 for seniors)",
+       "he": "המבטח התבקש להגיש עמדה (30 ימים, 21 לבני 60 ומעלה)"
+      },
+      "kind": "send",
+      "verify_note": false
+     }
+    ]
+   },
+   {
+    "id": "res",
+    "name": {
+     "en": "Resolve and answer",
+     "he": "פתרון ומענה"
+    },
+    "role": "manager",
+    "depends_on": [
+     "inv"
+    ],
+    "checks": [
+     {
+      "text": {
+       "en": "Resolution approved",
+       "he": "הפתרון אושר"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Written answer sent",
+       "he": "תשובה בכתב נשלחה"
+      },
+      "kind": "send",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Referral to the Commissioner mentioned if rejected",
+       "he": "צוינה פנייה לממונה אם נדחתה"
+      },
+      "kind": "verify",
+      "verify_note": false
+     }
+    ]
+   },
+   {
+    "id": "cls",
+    "name": {
+     "en": "Close and learn",
+     "he": "סגירה ולקחים"
+    },
+    "role": "manager",
+    "depends_on": [
+     "res"
+    ],
+    "checks": [
+     {
+      "text": {
+       "en": "Root cause recorded",
+       "he": "שורש הבעיה נרשם"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Complaint closed",
+       "he": "התלונה נסגרה"
+      },
+      "kind": "do",
+      "verify_note": false
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "camp",
+  "source_flow": "F10",
+  "owner_role": "marketing",
+  "name": {
+   "en": "Marketing campaign with consent",
+   "he": "קמפיין שיווקי עם הסכמה"
+  },
+  "stages": [
+   {
+    "id": "seg",
+    "name": {
+     "en": "Segment and consent",
+     "he": "פילוח והסכמה"
+    },
+    "role": "marketing",
+    "depends_on": [],
+    "checks": [
+     {
+      "text": {
+       "en": "Segment defined",
+       "he": "נבנה פילוח"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Only clients with marketing consent included",
+       "he": "נכללו רק לקוחות עם הסכמה לשיווק"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Opt-outs and bounces removed",
+       "he": "הסרות וחזרות הוסרו"
+      },
+      "kind": "verify",
+      "verify_note": false
+     }
+    ]
+   },
+   {
+    "id": "dr",
+    "name": {
+     "en": "Draft and translate",
+     "he": "ניסוח ותרגום"
+    },
+    "role": "marketing",
+    "depends_on": [
+     "seg"
+    ],
+    "checks": [
+     {
+      "text": {
+       "en": "Message drafted",
+       "he": "הודעה נוסחה"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Language of each client applied",
+       "he": "שפת כל לקוח הופעלה"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Unsubscribe link included",
+       "he": "נכלל קישור להסרה"
+      },
+      "kind": "verify",
+      "verify_note": false
+     }
+    ]
+   },
+   {
+    "id": "apr",
+    "name": {
+     "en": "Manager approval",
+     "he": "אישור מנהל"
+    },
+    "role": "manager",
+    "depends_on": [
+     "dr"
+    ],
+    "checks": [
+     {
+      "text": {
+       "en": "Message and audience approved",
+       "he": "הודעה וקהל אושרו"
+      },
+      "kind": "verify",
+      "verify_note": false
+     }
+    ]
+   },
+   {
+    "id": "snd",
+    "name": {
+     "en": "Send and measure",
+     "he": "שליחה ומדידה"
+    },
+    "role": "marketing",
+    "depends_on": [
+     "apr"
+    ],
+    "checks": [
+     {
+      "text": {
+       "en": "Sent through the chosen channel",
+       "he": "נשלח בערוץ שנבחר"
+      },
+      "kind": "send",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Replies routed to the agents' Inbox",
+       "he": "תגובות הופנו לתיבת הסוכנים"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Results recorded",
+       "he": "תוצאות נרשמו"
+      },
+      "kind": "fill",
+      "verify_note": false
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "intake",
+  "source_flow": "F6",
+  "owner_role": "backoffice",
+  "name": {
+   "en": "Incoming document intake",
+   "he": "קליטת מסמך נכנס"
+  },
+  "stages": [
+   {
+    "id": "dig",
+    "name": {
+     "en": "Digitize and classify",
+     "he": "דיגיטציה וסיווג"
+    },
+    "role": "backoffice",
+    "depends_on": [],
+    "checks": [
+     {
+      "text": {
+       "en": "Fax, email or WhatsApp captured",
+       "he": "פקס, מייל או וואטסאפ נקלטו"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "OCR and type classification done",
+       "he": "זיהוי טקסט וסיווג סוג בוצעו"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Language detected",
+       "he": "זוהתה שפה"
+      },
+      "kind": "verify",
+      "verify_note": false
+     }
+    ]
+   },
+   {
+    "id": "att",
+    "name": {
+     "en": "Attribute to the client",
+     "he": "שיוך ללקוח"
+    },
+    "role": "backoffice",
+    "depends_on": [
+     "dig"
+    ],
+    "checks": [
+     {
+      "text": {
+       "en": "Client matched (ID, name, policy number)",
+       "he": "לקוח הותאם (ת.ז., שם, פוליסה)"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Low confidence sent to review",
+       "he": "ביטחון נמוך נשלח לבדיקה"
+      },
+      "kind": "verify",
+      "verify_note": false
+     }
+    ]
+   },
+   {
+    "id": "rte",
+    "name": {
+     "en": "Route and file",
+     "he": "ניתוב וארכוב"
+    },
+    "role": "backoffice",
+    "depends_on": [
+     "att"
+    ],
+    "checks": [
+     {
+      "text": {
+       "en": "Filed in the client file",
+       "he": "תויק בתיק הלקוח"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Task created for the right role",
+       "he": "נוצרה משימה לתפקיד המתאים"
+      },
+      "kind": "fill",
+      "verify_note": false
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "retire",
+  "source_flow": "F5 / F15",
+  "owner_role": "agent",
+  "name": {
+   "en": "Exit to retirement planning",
+   "he": "תכנון יציאה לפרישה"
+  },
+  "stages": [
+   {
+    "id": "int",
+    "name": {
+     "en": "Interview and goals",
+     "he": "ראיון ויעדים"
+    },
+    "role": "agent",
+    "depends_on": [],
+    "checks": [
+     {
+      "text": {
+       "en": "Basics",
+       "he": "יסודות"
+      },
+      "kind": "heading",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Target retirement date and age set",
+       "he": "נקבע מועד וגיל פרישה"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Monthly income goal in today's money",
+       "he": "יעד הכנסה חודשית בערכים של היום"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Spouse, dependants and health recorded",
+       "he": "בן/בת זוג, תלויים ובריאות נרשמו"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Other assets (home, savings, business) listed",
+       "he": "נכסים נוספים (דירה, חיסכון, עסק) נרשמו"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Compliance",
+       "he": "ציות"
+      },
+      "kind": "heading",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "KYC valid (less than a year)",
+       "he": "הכר את לקוחך בתוקף (פחות משנה)"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Risk questionnaire completed",
+       "he": "שאלון סיכון הושלם"
+      },
+      "kind": "fill",
+      "verify_note": false
+     }
+    ]
+   },
+   {
+    "id": "auth",
+    "name": {
+     "en": "Authorizations and data",
+     "he": "הרשאות ונתונים"
+    },
+    "role": "backoffice",
+    "depends_on": [],
+    "checks": [
+     {
+      "text": {
+       "en": "Har HaBituach, clearing house and B1 authorizations signed",
+       "he": "הרשאות הר הביטוח, מסלקה וב1 נחתמו"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Mislaka report requested",
+       "he": "דוח מסלקה התבקש"
+      },
+      "kind": "send",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Har HaBituach report requested",
+       "he": "דוח הר הביטוח התבקש"
+      },
+      "kind": "send",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Data imported and matched, duplicates marked",
+       "he": "נתונים יובאו ושויכו, כפילויות סומנו"
+      },
+      "kind": "verify",
+      "verify_note": false
+     }
+    ]
+   },
+   {
+    "id": "ana",
+    "name": {
+     "en": "Gap analysis",
+     "he": "ניתוח פערים"
+    },
+    "role": "agent",
+    "depends_on": [
+     "int",
+     "auth"
+    ],
+    "checks": [
+     {
+      "text": {
+       "en": "Projected monthly annuity per product",
+       "he": "קצבה חודשית צפויה לכל מוצר"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Gap against the income goal calculated",
+       "he": "חושב הפער מול יעד ההכנסה"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Bridge to state old-age pension planned",
+       "he": "נבנה גשר עד קצבת זקנה"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Management fees compared with the market",
+       "he": "דמי ניהול הושוו לשוק"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Insurance needs after retirement (life, long-term care, health)",
+       "he": "צרכי ביטוח אחרי פרישה (חיים, סיעוד, בריאות)"
+      },
+      "kind": "verify",
+      "verify_note": false
+     }
+    ]
+   },
+   {
+    "id": "rec",
+    "name": {
+     "en": "Recommendation",
+     "he": "המלצה"
+    },
+    "role": "agent",
+    "depends_on": [
+     "ana"
+    ],
+    "checks": [
+     {
+      "text": {
+       "en": "Products to suggest",
+       "he": "מוצרים להצעה"
+      },
+      "kind": "heading",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Pension annuity with a guaranteed period and spouse's survivor share",
+       "he": "קצבת פנסיה עם תקופת הבטחה ושארים לבן/בת זוג"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Keep the study fund as bridge income, tax-free after the vesting period",
+       "he": "השארת קרן השתלמות כגשר הכנסה, פטורה ממס אחרי תקופת הכשרה"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Provident fund for investment for capital kept after retirement",
+       "he": "קופת גמל להשקעה להון שנשאר אחרי פרישה"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Long-term care cover that continues after retirement",
+       "he": "כיסוי סיעודי שממשיך אחרי פרישה"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Reduce life cover as dependants leave",
+       "he": "הקטנת ביטוח חיים כשהתלויים עצמאיים"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Tax points",
+       "he": "נקודות מס"
+      },
+      "kind": "heading",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Annuity versus capital withdrawal: exemption percentage and ceiling [verify]",
+       "he": "קצבה מול משיכת הון: אחוז וסף פטור [לאימות]"
+      },
+      "kind": "verify",
+      "verify_note": true
+     },
+     {
+      "text": {
+       "en": "Form 161d to fix exemption rights, and tax coordination if there are two sources",
+       "he": "טופס 161ד לקיבוע זכויות ותיאום מס בשני מקורות הכנסה"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Section 45A credit ends with the deposits",
+       "he": "זיכוי לפי סעיף 45א מסתיים עם ההפקדות"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Surtax on high income and on capital income [verify]",
+       "he": "מס יסף על הכנסה גבוהה והכנסה הונית [לאימות]"
+      },
+      "kind": "verify",
+      "verify_note": true
+     },
+     {
+      "text": {
+       "en": "Severance: exempt ceiling and spread of the tax years",
+       "he": "פיצויים: תקרת פטור ופריסת שנות מס"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Investment strategy changes",
+       "he": "שינויים באסטרטגיית ההשקעה"
+      },
+      "kind": "heading",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Move from a stock-heavy track to an age-based track about 5 years before retirement",
+       "he": "מעבר ממסלול מנייתי למסלול לפי גיל כ-5 שנים לפני פרישה"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Choose the track for the annuity phase (moderate risk)",
+       "he": "בחירת מסלול לשלב הקצבה (סיכון מתון)"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Keep two years of expenses in low-risk assets",
+       "he": "שמירת הוצאות של שנתיים בנכסים בסיכון נמוך"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Savings programs",
+       "he": "תוכניות חיסכון"
+      },
+      "kind": "heading",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Move idle policy savings into an annuity or a provident fund",
+       "he": "העברת חיסכון רדום בפוליסה לקצבה או לקופת גמל"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Voluntary deposits up to the tax-advantaged ceiling until the exit date",
+       "he": "הפקדות עצמאיות עד תקרת ההטבה עד מועד היציאה"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Record",
+       "he": "תיעוד"
+      },
+      "kind": "heading",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Reasoning document with alternatives, fees and commissions disclosed",
+       "he": "מסמך נימוקים עם חלופות, דמי ניהול ועמלות מגולים"
+      },
+      "kind": "fill",
+      "verify_note": false
+     }
+    ]
+   },
+   {
+    "id": "rev",
+    "name": {
+     "en": "Manager review (four eyes)",
+     "he": "בקרת מנהל (שני זוגות עיניים)"
+    },
+    "role": "manager",
+    "depends_on": [
+     "rec"
+    ],
+    "checks": [
+     {
+      "text": {
+       "en": "Suitability of each recommended product",
+       "he": "התאמת כל מוצר מומלץ"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Conflict of interest and commissions reviewed",
+       "he": "ניגוד עניינים ועמלות נבדקו"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Tax statements marked for verification are confirmed",
+       "he": "הצהרות מס המסומנות לאימות אושרו"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Approved or returned with comments",
+       "he": "אושר או הוחזר עם הערות"
+      },
+      "kind": "do",
+      "verify_note": false
+     }
+    ]
+   },
+   {
+    "id": "dec",
+    "name": {
+     "en": "Client decision and signing",
+     "he": "החלטת הלקוח וחתימה"
+    },
+    "role": "agent",
+    "depends_on": [
+     "rev"
+    ],
+    "checks": [
+     {
+      "text": {
+       "en": "Recommendation presented, client questions answered",
+       "he": "ההמלצה הוצגה ושאלות הלקוח נענו"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Client choices recorded (accepted, changed, declined)",
+       "he": "בחירות הלקוח נרשמו (אושר, שונה, נדחה)"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Advice record and instructions signed",
+       "he": "רשומת ייעוץ והוראות נחתמו"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Cooling-off and cancellation rights explained [verify]",
+       "he": "הוסברו זכויות ביטול והתחרטות [לאימות]"
+      },
+      "kind": "verify",
+      "verify_note": true
+     }
+    ]
+   },
+   {
+    "id": "exe",
+    "name": {
+     "en": "Back-office execution",
+     "he": "ביצוע במשרד האחורי"
+    },
+    "role": "backoffice",
+    "depends_on": [
+     "dec"
+    ],
+    "checks": [
+     {
+      "text": {
+       "en": "ID copies and signed forms complete",
+       "he": "העתקי זהות וטפסים חתומים שלמים"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Insurer forms filled from templates (payout, track change, transfer)",
+       "he": "טפסי מבטחים מולאו מתבניות (תשלום קצבה, שינוי מסלול, ניוד)"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Labels printed, post and email dispatched",
+       "he": "מדבקות הודפסו, דואר ומיילים נשלחו"
+      },
+      "kind": "send",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Instructions logged in the database",
+       "he": "ההוראות נרשמו במאגר"
+      },
+      "kind": "fill",
+      "verify_note": false
+     }
+    ]
+   },
+   {
+    "id": "inq",
+    "name": {
+     "en": "Inquiries to the insurance companies",
+     "he": "פניות לחברות הביטוח"
+    },
+    "role": "backoffice",
+    "depends_on": [
+     "exe"
+    ],
+    "checks": [
+     {
+      "text": {
+       "en": "Inquiry sent to each fund and insurer",
+       "he": "פנייה נשלחה לכל קרן ומבטח"
+      },
+      "kind": "send",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Business-day deadline set for each reply",
+       "he": "נקבע מועד תשובה בימי עסקים לכל מענה"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Replies received and compared with the instructions",
+       "he": "תשובות התקבלו והושוו להוראות"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Follow-up and escalation if the deadline passed",
+       "he": "מעקב והסלמה אם המועד חלף"
+      },
+      "kind": "send",
+      "verify_note": false
+     }
+    ]
+   },
+   {
+    "id": "tx",
+    "name": {
+     "en": "Tax filings",
+     "he": "הגשות מס"
+    },
+    "role": "backoffice",
+    "depends_on": [
+     "exe"
+    ],
+    "checks": [
+     {
+      "text": {
+       "en": "Form 161d submitted",
+       "he": "טופס 161ד הוגש"
+      },
+      "kind": "send",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Tax coordination certificate (if needed) obtained",
+       "he": "התקבל אישור תיאום מס (אם נדרש)"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Withholding rate at the payer matches the certificate",
+       "he": "שיעור הניכוי אצל המשלם תואם לאישור"
+      },
+      "kind": "verify",
+      "verify_note": false
+     }
+    ]
+   },
+   {
+    "id": "cls",
+    "name": {
+     "en": "Close and follow up",
+     "he": "סגירה ומעקב"
+    },
+    "role": "agent",
+    "depends_on": [
+     "inq",
+     "tx"
+    ],
+    "checks": [
+     {
+      "text": {
+       "en": "Confirmation letter to the client",
+       "he": "מכתב אישור ללקוח"
+      },
+      "kind": "send",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "First annuity payment checked",
+       "he": "תשלום הקצבה הראשון נבדק"
+      },
+      "kind": "verify",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "Follow-up contacts scheduled (30 and 40 days)",
+       "he": "נקבעו פניות מעקב (30 ו-40 ימים)"
+      },
+      "kind": "fill",
+      "verify_note": false
+     },
+     {
+      "text": {
+       "en": "File closed and archived for 7 years",
+       "he": "התיק נסגר וארוכב ל-7 שנים"
+      },
+      "kind": "fill",
+      "verify_note": false
+     }
+    ]
+   }
+  ]
+ }
+]

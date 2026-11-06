@@ -351,3 +351,65 @@ class OutboxMessage(Base):
     block_reason: Mapped[str | None] = mapped_column(String(64))
     created_by: Mapped[uuid.UUID] = mapped_column(ForeignKey("user_account.id"), nullable=False)
     created_at: Mapped[datetime] = _now()
+
+
+# ---- processes (M4) -----------------------------------------------------------------
+class ProcessDef(Base):
+    """A versioned process definition (stages, roles, dependencies, checks) as data."""
+
+    __tablename__ = "process_def"
+    __table_args__ = (UniqueConstraint("key", "version"),)
+    id: Mapped[uuid.UUID] = _pk()
+    key: Mapped[str] = mapped_column(String(32), nullable=False, index=True)
+    version: Mapped[int] = mapped_column(Integer, nullable=False)
+    definition: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False)
+    created_by: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
+    created_at: Mapped[datetime] = _now()
+
+
+class ProcessInstance(Base):
+    __tablename__ = "process_instance"
+    id: Mapped[uuid.UUID] = _pk()
+    def_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("process_def.id"), nullable=False)
+    key: Mapped[str] = mapped_column(String(32), nullable=False, index=True)
+    version: Mapped[int] = mapped_column(Integer, nullable=False)
+    client_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("client.id"), index=True)
+    title: Mapped[str] = mapped_column(String(200), nullable=False)
+    status: Mapped[str] = mapped_column(String(10), nullable=False, default="running")
+    started_by: Mapped[uuid.UUID] = mapped_column(ForeignKey("user_account.id"), nullable=False)
+    started_at: Mapped[datetime] = _now()
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    cancel_reason: Mapped[str | None] = mapped_column(Text)
+
+
+class StageInstance(Base):
+    __tablename__ = "stage_instance"
+    __table_args__ = (
+        UniqueConstraint("instance_id", "stage_key"),
+        Index("ix_stage_role_status", "role", "status"),
+    )
+    id: Mapped[uuid.UUID] = _pk()
+    instance_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("process_instance.id"), nullable=False, index=True
+    )
+    stage_key: Mapped[str] = mapped_column(String(32), nullable=False)
+    position: Mapped[int] = mapped_column(Integer, nullable=False)
+    role: Mapped[str] = mapped_column(String(32), nullable=False)
+    status: Mapped[str] = mapped_column(String(12), nullable=False)
+    started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    started_by: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
+    finalized_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    finalized_by: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
+
+
+class CheckInstance(Base):
+    __tablename__ = "check_instance"
+    __table_args__ = (UniqueConstraint("stage_id", "idx"),)
+    id: Mapped[uuid.UUID] = _pk()
+    stage_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("stage_instance.id"), nullable=False, index=True
+    )
+    idx: Mapped[int] = mapped_column(Integer, nullable=False)
+    done: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    done_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    done_by: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))

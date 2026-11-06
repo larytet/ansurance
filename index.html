@@ -2465,7 +2465,7 @@ function pMermaid(p,lang){
   o.push('  start(["'+mq(T(p.n))+'"]):::end1');
   p.st.forEach(function(s,i){
     var lb="<b>"+(i+1)+". "+mq(T(s[1]))+"</b><br/>"+mq(PTL("Role: |תפקיד: ",lang)+roleNameL(s[2],lang));
-    s[4].forEach(function(c){var a=c.split("|"),tx=mq(T(c));lb+=c.charAt(0)==="#"?"<br/><u>"+tx.slice(1)+"</u>":"<br/>☐ "+tx});
+    s[4].forEach(function(c){var a=c.split("|"),tx=mq(T(c));lb+=c.charAt(0)==="#"?"<br/><u>"+tx.replace(/^#/,"")+"</u>":"<br/>☐ "+tx});
     o.push('  s_'+s[0]+'["'+lb+'"]:::'+s[2]);
   });
   var hasOut={};

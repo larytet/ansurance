@@ -24,9 +24,21 @@ CAPABILITIES = [
     "consent.write",
     "message.send",
     "desk.read",
+    "process.read",
+    "process.start",
+    "process.define",
+    "process.cancel",
 ]
 
-_COMMON = ["inbox.read", "inbox.create", "consent.read", "consent.write", "message.send"]
+_COMMON = [
+    "inbox.read",
+    "inbox.create",
+    "consent.read",
+    "consent.write",
+    "message.send",
+    "process.read",
+    "process.start",
+]
 
 ROLE_CAPABILITIES: dict[str, list[str]] = {
     "agent": [

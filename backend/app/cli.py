@@ -65,13 +65,27 @@ def reconcile_blobs() -> int:
     return 0 if not rep.missing else 1
 
 
+def seed_processes() -> int:
+    """Load the process definitions that are not in the database yet (idempotent)."""
+    from app.processes.service import seed_definitions
+
+    maker = sessionmaker(make_engine(get_settings()))
+    with maker() as db:
+        added = seed_definitions(db)
+        db.commit()
+    print(f"process definitions added: {added}")
+    return 0
+
+
 def main() -> int:
     cmd = sys.argv[1] if len(sys.argv) > 1 else ""
     if cmd == "create-user":
         return create_user(sys.argv[2:])
     if cmd == "reconcile":
         return reconcile_blobs()
-    print("usage: python -m app.cli create-user|reconcile ...", file=sys.stderr)
+    if cmd == "seed-processes":
+        return seed_processes()
+    print("usage: python -m app.cli create-user|reconcile|seed-processes ...", file=sys.stderr)
     return 1
 
 

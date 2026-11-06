@@ -24,6 +24,7 @@ from app.documents.router import router as documents_router
 from app.inbox.router import router as inbox_router
 from app.logging import configure_logging, request_id_var
 from app.messaging.router import router as messaging_router
+from app.processes.router import router as processes_router
 
 log = logging.getLogger("ansurance")
 
@@ -71,6 +72,7 @@ def create_app(
     app.include_router(inbox_router)
     app.include_router(consent_router)
     app.include_router(messaging_router)
+    app.include_router(processes_router)
 
     @app.middleware("http")
     async def request_id_middleware(
