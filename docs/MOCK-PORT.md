@@ -13,13 +13,13 @@ mock. States: **not started**, **ported** (works against the API, unit and brows
 | Clients (search with transliteration) | agent, back-office, manager | ported (list) | multi-select, preferences editing, Lens still to add |
 | Client file | agent, back-office, manager | ported | details, policies, documents (upload, download for clean files only, scan status, restricted), consent per channel with source, process pipeline and start; 8 unit tests and a real-browser test (real upload and virus scan) |
 | Today (agent home) | agent | not started | |
-| Desk (back-office home) | back-office, manager | not started | API: `/api/desk` |
-| Intake review (fax, email) | back-office | not started | API: `/api/intake` |
+| Desk (back-office home) | back-office, manager | ported (work areas with counts and urgent marks) | opening an area's items still to add |
+| Intake review (fax, email) | back-office | ported (review and unassigned queues, candidates with evidence, weak-match warning, confirm to a chosen candidate) | wrong-client correction, client picker for items with no candidate, and the metrics view still to add |
 | Processes: pipeline, My work, diagrams | all | ported (My work list) | pipeline per client is on the client file; diagrams and the definition editor still to add |
 | Campaigns | marketing, manager, agent | ported (create, preview with exclusions, approve, start, server reason shown) | translation review, audience snapshot and results screens still to add; consent registry is on the client file |
 | Manager overview, Trust (audit verify) | manager | ported | ten counts with attention marks, chain verification; compliance, complaints and commission screens still to add |
 | Pension, WhatsApp, Live call, Excel join, Integrations, Client app preview, System settings | various | not started | need M8 and later |
 
-Slice 3 (Overview, Trust, My work, Campaigns) has 9 unit tests with a fake API and no real-browser test yet.
+Slices 3 and 4 (Overview, Trust, My work, Campaigns, Desk, Scans) have 14 unit tests with a fake API and no real-browser test yet.
 
 Tests: `npm test` (unit, fake API) and `make e2e-web` (Playwright against the running stack).

@@ -3,13 +3,15 @@ import { ApiError } from "./api";
 import { ClientFile } from "./pages/ClientFile";
 import { Clients } from "./pages/Clients";
 import { Campaigns } from "./pages/Campaigns";
+import { Desk } from "./pages/Desk";
 import { Inbox } from "./pages/Inbox";
+import { IntakeReview } from "./pages/IntakeReview";
 import { MyWork } from "./pages/MyWork";
 import { Overview } from "./pages/Overview";
 import { Login } from "./pages/Login";
 import { useUi } from "./ui";
 
-type Tab = "overview" | "inbox" | "mywork" | "clients" | "campaigns";
+type Tab = "overview" | "inbox" | "desk" | "intake" | "mywork" | "clients" | "campaigns";
 
 export function App() {
   const { api, me, setMe, tr, lang, setLang, theme, setTheme } = useUi();
@@ -34,6 +36,8 @@ export function App() {
   const tabs: Tab[] = [
     ...(has("flow.approve") ? (["overview"] as Tab[]) : []),
     "inbox",
+    ...(has("desk.read") ? (["desk"] as Tab[]) : []),
+    ...(has("intake.review") ? (["intake"] as Tab[]) : []),
     ...(has("process.read") ? (["mywork"] as Tab[]) : []),
     ...(has("client.read") ? (["clients"] as Tab[]) : []),
     ...(has("campaign.write") ? (["campaigns"] as Tab[]) : []),
@@ -68,7 +72,7 @@ export function App() {
           {tr("logout")}
         </button>
       </header>
-      {tab === "overview" ? <Overview /> : tab === "inbox" ? <Inbox /> : tab === "mywork" ? <MyWork onOpenClient={openClient} /> : tab === "campaigns" ? <Campaigns /> : open ? <ClientFile clientId={open} onBack={() => setOpen(null)} /> : <Clients onOpen={setOpen} />}
+      {tab === "overview" ? <Overview /> : tab === "inbox" ? <Inbox /> : tab === "desk" ? <Desk /> : tab === "intake" ? <IntakeReview /> : tab === "mywork" ? <MyWork onOpenClient={openClient} /> : tab === "campaigns" ? <Campaigns /> : open ? <ClientFile clientId={open} onBack={() => setOpen(null)} /> : <Clients onOpen={setOpen} />}
     </div>
   );
 }

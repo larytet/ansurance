@@ -33,6 +33,9 @@ const dict = {
     baseLanguage: "Language of the text", hasProduct: "Clients who have the product", create: "Create", preview: "Preview the audience",
     approve: "Approve", send: "Start sending", matching: "Matching", selected: "Will receive", excluded: "Excluded", noCampaigns: "No campaigns yet.",
     "type.regulatory": "Regulatory notice", "type.renewal": "Renewal notice", "type.offer": "Product offer", "type.gap": "Protection gap", "type.life_event": "Life event",
+    desk: "Desk", intake: "Scans", totalOpen: "Open", "area.id_registration": "ID and registration", "area.templates": "Templates", "area.post_email": "Post and e-mail",
+    "area.insurer_requests": "Insurer requests", "area.tax": "Tax", "area.intake": "Incoming scans", reviewQueue: "Needs a person", unassignedQueue: "No owner found",
+    confirmTo: "File to this client", evidence: "Evidence", weakMatch: "Weak match: a suggestion only", noScans: "No scans are waiting.", unknownClient: "Client",
     openClient: "Open the client file", pendingApproval: "Waiting for the manager", noWork: "Nothing is waiting for your role.", stage: "Stage",
   },
   he: {
@@ -67,6 +70,9 @@ const dict = {
     baseLanguage: "שפת הנוסח", hasProduct: "לקוחות שיש להם את המוצר", create: "יצירה", preview: "תצוגה מקדימה של הקהל",
     approve: "אישור", send: "התחלת שליחה", matching: "מתאימים", selected: "יקבלו", excluded: "הוחרגו", noCampaigns: "אין קמפיינים עדיין.",
     "type.regulatory": "הודעת רגולציה", "type.renewal": "הודעת חידוש", "type.offer": "הצעת מוצר", "type.gap": "פער כיסוי", "type.life_event": "אירוע חיים",
+    desk: "שולחן עבודה", intake: "סריקות", totalOpen: "פתוחים", "area.id_registration": "זהות ורישום", "area.templates": "תבניות", "area.post_email": "דואר ודוא״ל",
+    "area.insurer_requests": "בקשות למבטחים", "area.tax": "מס", "area.intake": "סריקות נכנסות", reviewQueue: "דורש אדם", unassignedQueue: "לא נמצא בעלים",
+    confirmTo: "תייק ללקוח זה", evidence: "ראיות", weakMatch: "התאמה חלשה: הצעה בלבד", noScans: "אין סריקות ממתינות.", unknownClient: "לקוח",
     openClient: "פתיחת תיק לקוח", pendingApproval: "ממתין למנהל", noWork: "אין עבודה הממתינה לתפקיד שלך.", stage: "שלב",
   },
 } as const;

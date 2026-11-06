@@ -152,6 +152,28 @@ export interface WorkItem {
   client_id: string | null;
 }
 
+export interface Desk {
+  areas: { area: string; open: number; urgent: number }[];
+  total_open: number;
+  total_urgent: number;
+}
+
+export interface IntakeRow {
+  id: string;
+  state: string;
+  channel: string;
+  sender: string;
+  filename: string;
+  doc_type: string;
+  type_conf: number;
+  type_reason: string;
+  route: string | null;
+  route_reason: string;
+  client_id: string | null;
+  candidates: { client_id: string; score: number; evidence: string[]; sender_match: boolean; weak: boolean }[];
+  received_at: string;
+}
+
 export class ApiError extends Error {
   constructor(
     public status: number,
@@ -250,6 +272,10 @@ export class Api {
     return (await r.json()) as DocumentRow;
   }
   clients = (q: string) => this.call<ClientRow[]>("GET", `/api/clients?q=${encodeURIComponent(q)}`);
+  desk = () => this.call<Desk>("GET", "/api/desk");
+  intake = (state: string) => this.call<IntakeRow[]>("GET", `/api/intake?state=${state}`);
+  confirmIntake = (id: string, clientId: string) =>
+    this.call<IntakeRow>("POST", `/api/intake/${id}/confirm`, { client_id: clientId });
   overview = () => this.call<Overview>("GET", "/api/overview");
   verifyAudit = () => this.call<AuditVerify>("GET", "/api/audit/verify");
   campaigns = () => this.call<Campaign[]>("GET", "/api/campaigns");
