@@ -6,6 +6,10 @@ x-api-env: &api-env
   ANS_DATABASE_URL: postgresql+psycopg://ansurance:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}@postgres:5432/ansurance
   ANS_S3_ENDPOINT: http://objectstore:9000
   ANS_S3_BUCKET_ORIGINALS: originals
+  ANS_S3_ACCESS_KEY: ${OBJECTSTORE_APP_USER:-ansurance-app}
+  ANS_S3_SECRET_KEY: ${OBJECTSTORE_APP_PASSWORD:?set OBJECTSTORE_APP_PASSWORD in .env}
+  ANS_S3_REGION: us-east-1
+  ANS_CLAMD_HOST: clamav
   ANS_LOG_LEVEL: ${ANS_LOG_LEVEL:-INFO}
 
 services:
@@ -38,6 +42,8 @@ services:
              uvicorn app.main:create_app --factory --host 0.0.0.0 --port 8000"
     depends_on:
       postgres: { condition: service_healthy }
+      objectstore-init: { condition: service_completed_successfully }
+      clamav: { condition: service_healthy }
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/api/ready').status==200 else 1)"]
       interval: 5s
@@ -77,7 +83,36 @@ services:
       timeout: 3s
       retries: 20
 
+  objectstore-init:
+    # One-shot: buckets (originals with Object Lock), and the application user that can
+    # read and write but never delete.
+    build: ../objectstore
+    restart: "no"
+    entrypoint: ["/opt/objectstore/init.sh"]
+    environment:
+      ENDPOINT: http://objectstore:9000
+      MINIO_ROOT_USER: ${OBJECTSTORE_USER:-ansurance}
+      MINIO_ROOT_PASSWORD: ${OBJECTSTORE_PASSWORD:?set OBJECTSTORE_PASSWORD in .env}
+      APP_USER: ${OBJECTSTORE_APP_USER:-ansurance-app}
+      APP_PASSWORD: ${OBJECTSTORE_APP_PASSWORD:?set OBJECTSTORE_APP_PASSWORD in .env}
+      LOCK_DAYS: ${ORIGINALS_LOCK_DAYS:-2555}
+    depends_on:
+      objectstore: { condition: service_healthy }
+
+  clamav:
+    image: clamav/clamav:stable
+    restart: unless-stopped
+    volumes:
+      - clamdata:/var/lib/clamav
+    healthcheck:
+      test: ["CMD", "clamdcheck.sh"]
+      interval: 15s
+      timeout: 10s
+      retries: 40
+      start_period: 60s
+
 volumes:
+  clamdata:
   caddy_data:
   pgdata:
   objdata:

@@ -4,7 +4,7 @@ import hashlib
 
 import pytest
 
-from app.blob.base import BlobStore, key_for
+from app.blob.base import BlobStore, IntegrityError, key_for
 from app.blob.fake import FakeBlobStore
 
 
@@ -39,5 +39,5 @@ def test_integrity_check_on_read() -> None:
     store = FakeBlobStore()
     ref = store.put(b"good")
     store._objects[ref.key] = b"tampered"  # noqa: SLF001
-    with pytest.raises(ValueError):
+    with pytest.raises(IntegrityError):
         store.get(ref)

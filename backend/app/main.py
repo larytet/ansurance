@@ -11,19 +11,40 @@ from sqlalchemy import Engine
 from sqlalchemy.orm import sessionmaker
 
 from app import __version__
+from app.adapters.antivirus import Antivirus, ClamdAntivirus, FakeAntivirus
 from app.auth.router import router as auth_router
+from app.blob.base import BlobStore
+from app.blob.fake import FakeBlobStore
+from app.blob.s3 import S3BlobStore
 from app.clients.router import router as clients_router
-from app.config import Settings, get_settings
+from app.config import Profile, Settings, get_settings
 from app.db import database_ready, make_engine
+from app.documents.router import router as documents_router
 from app.logging import configure_logging, request_id_var
 
 log = logging.getLogger("ansurance")
+
+
+def make_blob_store(settings: Settings) -> BlobStore:
+    if settings.profile is Profile.DEMO and not settings.s3_endpoint:
+        return FakeBlobStore(settings.s3_bucket_originals)
+    return S3BlobStore(settings)
+
+
+def make_antivirus(settings: Settings) -> Antivirus:
+    if settings.clamd_host:
+        return ClamdAntivirus(settings.clamd_host, settings.clamd_port)
+    if settings.profile is Profile.DEMO:
+        return FakeAntivirus()
+    raise RuntimeError("ANS_CLAMD_HOST is required outside the demo profile")
 
 
 def create_app(
     settings: Settings | None = None,
     engine: Engine | None = None,
     http: httpx.Client | None = None,
+    blobs: BlobStore | None = None,
+    antivirus: Antivirus | None = None,
 ) -> FastAPI:
     settings = settings or get_settings()
     configure_logging(settings.log_level)
@@ -40,7 +61,10 @@ def create_app(
     app.state.sessionmaker = sessionmaker(engine, expire_on_commit=False)
     app.state.http = http or httpx.Client(timeout=10)
     app.include_router(auth_router)
+    app.state.blobs = blobs or make_blob_store(settings)
+    app.state.antivirus = antivirus or make_antivirus(settings)
     app.include_router(clients_router)
+    app.include_router(documents_router)
 
     @app.middleware("http")
     async def request_id_middleware(

@@ -1,5 +1,6 @@
 import os
 from collections.abc import Iterator
+from dataclasses import dataclass
 from pathlib import Path
 
 import pyotp
@@ -51,10 +52,81 @@ def migrate(url: str) -> None:
     command.upgrade(cfg, "head")
 
 
+@dataclass(frozen=True)
+class MinioInfo:
+    endpoint: str
+    root_user: str
+    root_password: str
+    app_user: str
+    app_password: str
+
+
+@pytest.fixture(scope="session")
+def minio() -> Iterator[MinioInfo]:
+    """The real object store (MinIO built from source), initialised like production."""
+    import time
+    import urllib.request
+
+    import docker
+    from docker.errors import ImageNotFound
+    from testcontainers.core.container import DockerContainer
+
+    image = "ansurance-objectstore"
+    dc = docker.from_env()
+    try:
+        dc.images.get(image)
+    except ImageNotFound:
+        dc.images.build(path=str(BACKEND.parent / "deploy" / "objectstore"), tag=image)
+    info = MinioInfo("", "root-user", "root-secret-123", "app-user", "app-secret-1234")
+    c = (
+        DockerContainer(image)
+        .with_command("server /data")
+        .with_env("MINIO_ROOT_USER", info.root_user)
+        .with_env("MINIO_ROOT_PASSWORD", info.root_password)
+        .with_exposed_ports(9000)
+    )
+    with c:
+        endpoint = f"http://{c.get_container_host_ip()}:{c.get_exposed_port(9000)}"
+        for _ in range(60):
+            try:
+                urllib.request.urlopen(endpoint + "/minio/health/live", timeout=2)  # noqa: S310
+                break
+            except OSError:
+                time.sleep(1)
+        code, out = c.exec(
+            [
+                "env",
+                "ENDPOINT=http://127.0.0.1:9000",
+                f"MINIO_ROOT_USER={info.root_user}",
+                f"MINIO_ROOT_PASSWORD={info.root_password}",
+                f"APP_USER={info.app_user}",
+                f"APP_PASSWORD={info.app_password}",
+                "/opt/objectstore/init.sh",
+            ]
+        )
+        assert code == 0, out.decode()
+        yield MinioInfo(
+            endpoint, info.root_user, info.root_password, info.app_user, info.app_password
+        )
+
+
+@pytest.fixture
+def s3_settings(settings: Settings, minio: MinioInfo) -> Settings:
+    return settings.model_copy(
+        update={
+            "s3_endpoint": minio.endpoint,
+            "s3_access_key": minio.app_user,
+            "s3_secret_key": SecretStr(minio.app_password),
+            "s3_region": "us-east-1",
+        }
+    )
+
+
 _migrated: set[str] = set()
 _DATA_TABLES = (
     "audit_entry, login_event, sso_state, sso_identity, session, recovery_code, "
-    "family_link, external_id, policy, insurer, client, user_role, user_account"
+    "derived_artifact, document, blob, family_link, external_id, policy, insurer, client, "
+    "user_role, user_account"
 )
 
 

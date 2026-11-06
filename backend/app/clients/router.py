@@ -8,6 +8,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session as Db
 
 from app.audit import chain
+from app.clients.access import get_visible, visible
 from app.deps import Principal, get_db, require
 from app.ids import is_valid_israeli_id, normalize_id_number
 from app.models import Client, FamilyLink, Insurer, Policy
@@ -39,13 +40,6 @@ class FamilyIn(BaseModel):
     relation: str
 
 
-def _visible(p: Principal) -> Any:
-    """Agents see their own clients; roles with client.read_all see every client."""
-    if "client.read_all" in p.capabilities:
-        return True
-    return Client.agent_id == p.user.id
-
-
 def _client_dict(c: Client) -> dict[str, Any]:
     return {
         "id": str(c.id),
@@ -59,13 +53,6 @@ def _client_dict(c: Client) -> dict[str, Any]:
         "agent_id": str(c.agent_id) if c.agent_id else None,
         "status": c.status,
     }
-
-
-def _get_visible(db: Db, p: Principal, client_id: uuid.UUID) -> Client:
-    c = db.scalar(select(Client).where(Client.id == client_id, _visible(p)))
-    if c is None:  # not found and not allowed look the same
-        raise HTTPException(404, "not_found")
-    return c
 
 
 @router.post("/clients", status_code=201)
@@ -105,7 +92,7 @@ def create_client(
 def search_clients(
     q: str = "", p: Principal = Depends(require("client.read")), db: Db = Depends(get_db)
 ) -> list[dict[str, Any]]:
-    stmt = select(Client).where(_visible(p))
+    stmt = select(Client).where(visible(p))
     for tok in normalize(q).split():
         conds = [Client.search_text.ilike(f"%{tok}%")]
         sk = skeleton(tok)
@@ -123,7 +110,7 @@ def get_client(
     p: Principal = Depends(require("client.read")),
     db: Db = Depends(get_db),
 ) -> dict[str, Any]:
-    c = _get_visible(db, p, client_id)
+    c = get_visible(db, p, client_id)
     chain.append(db, str(p.user.id), "client.read", f"client:{c.id}", {})
     fam = db.scalars(
         select(FamilyLink).where(
@@ -150,8 +137,8 @@ def link_family(
     p: Principal = Depends(require("client.write")),
     db: Db = Depends(get_db),
 ) -> dict[str, str]:
-    head = _get_visible(db, p, client_id)
-    member = _get_visible(db, p, body.member_id)
+    head = get_visible(db, p, client_id)
+    member = get_visible(db, p, body.member_id)
     if head.id == member.id:
         raise HTTPException(422, "self_link")
     db.add(FamilyLink(head_client_id=head.id, member_client_id=member.id, relation=body.relation))
@@ -171,7 +158,7 @@ def add_policy(
     p: Principal = Depends(require("policy.write")),
     db: Db = Depends(get_db),
 ) -> dict[str, Any]:
-    c = _get_visible(db, p, client_id)
+    c = get_visible(db, p, client_id)
     ins = db.scalar(select(Insurer).where(Insurer.name == body.insurer))
     if ins is None:
         ins = Insurer(name=body.insurer)
@@ -203,7 +190,7 @@ def list_policies(
     p: Principal = Depends(require("policy.read")),
     db: Db = Depends(get_db),
 ) -> list[dict[str, Any]]:
-    c = _get_visible(db, p, client_id)
+    c = get_visible(db, p, client_id)
     rows = db.execute(
         select(Policy, Insurer.name).join(Insurer).where(Policy.client_id == c.id)
     ).all()

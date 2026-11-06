@@ -12,7 +12,14 @@ CAPABILITIES = [
 ]
 
 ROLE_CAPABILITIES: dict[str, list[str]] = {
-    "agent": ["client.read", "client.write", "policy.read", "policy.write"],
+    "agent": [
+        "client.read",
+        "client.write",
+        "policy.read",
+        "policy.write",
+        "document.read",
+        "document.write",
+    ],
     "backoffice": ["client.read", "client.read_all", "client.write", "policy.read", "policy.write"],
     "marketing": ["client.read_min"],
     "manager": CAPABILITIES,

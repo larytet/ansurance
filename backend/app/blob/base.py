@@ -4,6 +4,7 @@ Originals are write-once and content-addressed. There is deliberately no delete
 and no overwrite on this interface.
 """
 
+from collections.abc import Iterator
 from dataclasses import dataclass
 from typing import Protocol
 
@@ -27,6 +28,14 @@ class BlobStore(Protocol):
 
     def exists(self, sha256: str) -> bool: ...
 
+    def iter_keys(self) -> Iterator[str]:
+        """Every object key in the bucket (read-only, for reconciliation)."""
+        ...
+
 
 def key_for(sha256: str) -> str:
     return f"sha256/{sha256[:2]}/{sha256}"
+
+
+class IntegrityError(Exception):
+    """Stored bytes do not match their SHA-256."""

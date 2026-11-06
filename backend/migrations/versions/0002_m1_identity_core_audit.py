@@ -181,7 +181,17 @@ def upgrade() -> None:
     # ### end Alembic commands ###
 
     # seed roles and capabilities
-    from app.capabilities import CAPABILITIES, ROLE_CAPABILITIES
+    CAPABILITIES = [
+        "client.read", "client.read_all", "client.read_min", "client.write",
+        "policy.read", "policy.write", "audit.read", "user.manage",
+    ]
+    ROLE_CAPABILITIES = {
+        "agent": ["client.read", "client.write", "policy.read", "policy.write"],
+        "backoffice": ["client.read", "client.read_all", "client.write", "policy.read",
+                       "policy.write"],
+        "marketing": ["client.read_min"],
+        "manager": CAPABILITIES,
+    }
 
     for r in ROLE_CAPABILITIES:
         op.execute(f"INSERT INTO role (name) VALUES ('{r}')")

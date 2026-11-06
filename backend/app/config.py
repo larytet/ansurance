@@ -34,6 +34,8 @@ class Settings(BaseSettings):
     database_url: SecretStr
     # S3 API endpoint. Empty means real AWS S3 (cloud profile).
     s3_endpoint: str = ""
+    s3_access_key: str = ""
+    s3_secret_key: SecretStr | None = None
     s3_region: str = "il-central-1"
     s3_bucket_originals: str = "originals"
     log_level: str = "INFO"
@@ -46,6 +48,12 @@ class Settings(BaseSettings):
     ip_failure_limit: int = 20
     ip_failure_window_minutes: int = 15
     sso_providers: list[SsoProvider] = []
+    # documents
+    max_upload_bytes: int = 100 * 1024 * 1024
+    retention_years_default: int = 7
+    retention_years_by_type: dict[str, int] = {}
+    clamd_host: str = ""  # empty: fake scanner in the demo profile
+    clamd_port: int = 3310
 
 
 @lru_cache

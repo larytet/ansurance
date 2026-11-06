@@ -6,6 +6,7 @@ deploy/compose/.env:
 	@echo "Creating deploy/compose/.env with random secrets (edit BIND_ADDR for your VPN)"
 	@sed -e "s/^POSTGRES_PASSWORD=.*/POSTGRES_PASSWORD=$$(openssl rand -hex 16)/" \
 	     -e "s/^OBJECTSTORE_PASSWORD=.*/OBJECTSTORE_PASSWORD=$$(openssl rand -hex 16)/" \
+	     -e "s/^OBJECTSTORE_APP_PASSWORD=.*/OBJECTSTORE_APP_PASSWORD=$$(openssl rand -hex 16)/" \
 	     deploy/compose/.env.example > $@
 
 up: deploy/compose/.env

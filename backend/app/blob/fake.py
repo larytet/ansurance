@@ -1,8 +1,9 @@
 """In-memory BlobStore used by tests and the demo profile."""
 
 import hashlib
+from collections.abc import Iterator
 
-from app.blob.base import BlobRef, key_for
+from app.blob.base import BlobRef, IntegrityError, key_for
 
 
 class FakeBlobStore:
@@ -20,7 +21,7 @@ class FakeBlobStore:
     def get(self, ref: BlobRef) -> bytes:
         data = self._objects[ref.key]
         if hashlib.sha256(data).hexdigest() != ref.sha256:
-            raise ValueError("blob integrity check failed")
+            raise IntegrityError("blob integrity check failed")
         return data
 
     def head(self, ref: BlobRef) -> int | None:
@@ -29,3 +30,6 @@ class FakeBlobStore:
 
     def exists(self, sha256: str) -> bool:
         return key_for(sha256) in self._objects
+
+    def iter_keys(self) -> Iterator[str]:
+        yield from sorted(self._objects)

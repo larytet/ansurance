@@ -231,3 +231,49 @@ class AuditEntry(Base):
     detail: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False, default=dict)
     prev_hash: Mapped[str] = mapped_column(String(64), nullable=False)
     hash: Mapped[str] = mapped_column(String(64), nullable=False)
+
+
+# ---- documents ----------------------------------------------------------------------
+class Blob(Base):
+    """One stored object. Content-addressed and write-once (database trigger)."""
+
+    __tablename__ = "blob"
+    id: Mapped[uuid.UUID] = _pk()
+    sha256: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
+    size: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    media_type: Mapped[str] = mapped_column(String(64), nullable=False)
+    bucket: Mapped[str] = mapped_column(String(64), nullable=False)
+    key: Mapped[str] = mapped_column(String(128), nullable=False)
+    scan_status: Mapped[str] = mapped_column(String(12), nullable=False, default="pending")
+    scan_detail: Mapped[str | None] = mapped_column(String(128))
+    created_at: Mapped[datetime] = _now()
+
+
+class Document(Base):
+    __tablename__ = "document"
+    id: Mapped[uuid.UUID] = _pk()
+    client_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("client.id"), nullable=False, index=True
+    )
+    blob_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("blob.id"), nullable=False)
+    doc_type: Mapped[str] = mapped_column(String(32), nullable=False)
+    original_filename: Mapped[str] = mapped_column(String(200), nullable=False)
+    restricted: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    source_channel: Mapped[str] = mapped_column(String(16), nullable=False, default="upload")
+    uploaded_by: Mapped[uuid.UUID] = mapped_column(ForeignKey("user_account.id"), nullable=False)
+    received_at: Mapped[datetime] = _now()
+    retention_until: Mapped[date] = mapped_column(Date, nullable=False)
+    legal_hold: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+
+
+class DerivedArtifact(Base):
+    """OCR text, page images, thumbnails: rebuildable from the original (M5 fills these)."""
+
+    __tablename__ = "derived_artifact"
+    id: Mapped[uuid.UUID] = _pk()
+    document_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("document.id"), nullable=False, index=True
+    )
+    kind: Mapped[str] = mapped_column(String(24), nullable=False)
+    blob_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("blob.id"), nullable=False)
+    created_at: Mapped[datetime] = _now()

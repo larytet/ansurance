@@ -49,14 +49,30 @@ def create_user(argv: list[str]) -> int:
     return 0
 
 
+def reconcile_blobs() -> int:
+    """Report objects without rows and rows without objects. Never deletes anything."""
+    from app.documents.reconcile import reconcile
+    from app.main import make_blob_store
+
+    settings = get_settings()
+    maker = sessionmaker(make_engine(settings))
+    with maker() as db:
+        rep = reconcile(db, make_blob_store(settings), settings.s3_bucket_originals)
+    print(f"orphans (object, no row): {len(rep.orphans)}")
+    print(*rep.orphans, sep="\n  ")
+    print(f"missing (row, no object): {len(rep.missing)}")
+    print(*rep.missing, sep="\n  ")
+    return 0 if not rep.missing else 1
+
+
 def main() -> int:
-    if len(sys.argv) < 2 or sys.argv[1] != "create-user":
-        print(
-            "usage: python -m app.cli create-user --email ... --name ... --role ...",
-            file=sys.stderr,
-        )
-        return 1
-    return create_user(sys.argv[2:])
+    cmd = sys.argv[1] if len(sys.argv) > 1 else ""
+    if cmd == "create-user":
+        return create_user(sys.argv[2:])
+    if cmd == "reconcile":
+        return reconcile_blobs()
+    print("usage: python -m app.cli create-user|reconcile ...", file=sys.stderr)
+    return 1
 
 
 if __name__ == "__main__":

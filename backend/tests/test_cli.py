@@ -55,3 +55,37 @@ def test_cli_rejects_weak_password(
         )
         == 2
     )
+
+
+def test_reconcile_command_reports_and_signals_missing_objects(
+    fresh_db: Engine,
+    pg_url: str,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    from app.blob.fake import FakeBlobStore
+
+    monkeypatch.setenv("ANS_PROFILE", "demo")
+    monkeypatch.setenv("ANS_DATABASE_URL", pg_url)
+    from app.config import get_settings
+
+    get_settings.cache_clear()
+    store = FakeBlobStore()
+    monkeypatch.setattr("app.main.make_blob_store", lambda s: store)
+    assert cli.reconcile_blobs() == 0  # empty database, empty store
+
+    orphan = store.put(b"object with no row")
+    assert cli.reconcile_blobs() == 0  # orphans are reported, not fatal
+    out = capsys.readouterr().out
+    assert "orphans (object, no row): 1" in out and orphan.key in out
+
+    with fresh_db.begin() as c:
+        c.execute(
+            text(
+                "INSERT INTO blob (id, sha256, size, media_type, bucket, key, scan_status) "
+                "VALUES (gen_random_uuid(), repeat('a', 64), 1, 'application/pdf', 'originals', "
+                "'sha256/aa/missing', 'clean')"
+            )
+        )
+    assert cli.reconcile_blobs() == 1  # a row whose object is gone is data loss: exit 1
+    assert "sha256/aa/missing" in capsys.readouterr().out
