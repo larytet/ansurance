@@ -1,6 +1,10 @@
 FROM python:3.12-slim AS base
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 UV_COMPILE_BYTECODE=1
-RUN pip install --no-cache-dir uv==0.5.* \
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      tesseract-ocr tesseract-ocr-heb tesseract-ocr-ara tesseract-ocr-rus tesseract-ocr-fra \
+      tesseract-ocr-eng libglib2.0-0 \
+ && rm -rf /var/lib/apt/lists/* \
+ && pip install --no-cache-dir uv==0.5.* \
  && useradd --system --uid 10001 --create-home app
 WORKDIR /srv
 COPY pyproject.toml uv.lock ./

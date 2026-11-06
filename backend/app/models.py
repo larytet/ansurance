@@ -413,3 +413,74 @@ class CheckInstance(Base):
     done: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     done_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     done_by: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
+
+
+# ---- jobs and intake (M5) -----------------------------------------------------------
+class Job(Base):
+    """Background work. A Postgres table claimed with FOR UPDATE SKIP LOCKED (no broker)."""
+
+    __tablename__ = "job"
+    __table_args__ = (Index("ix_job_claim", "status", "run_at"),)
+    id: Mapped[uuid.UUID] = _pk()
+    kind: Mapped[str] = mapped_column(String(32), nullable=False)
+    payload: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False, default=dict)
+    status: Mapped[str] = mapped_column(String(8), nullable=False, default="queued")
+    attempts: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    max_attempts: Mapped[int] = mapped_column(Integer, nullable=False, default=5)
+    run_at: Mapped[datetime] = _now()
+    locked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    locked_by: Mapped[str | None] = mapped_column(String(64))
+    last_error: Mapped[str | None] = mapped_column(Text)
+    dedupe_key: Mapped[str | None] = mapped_column(String(128), unique=True)
+    created_at: Mapped[datetime] = _now()
+    finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class IntakeItem(Base):
+    """One incoming item (a file, or a page range of a file) travelling the pipeline."""
+
+    __tablename__ = "intake_item"
+    __table_args__ = (Index("ix_intake_state", "state", "received_at"),)
+    id: Mapped[uuid.UUID] = _pk()
+    blob_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("blob.id"), nullable=False)
+    parent_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("intake_item.id"))
+    page_from: Mapped[int | None] = mapped_column(Integer)
+    page_to: Mapped[int | None] = mapped_column(Integer)
+    channel: Mapped[str] = mapped_column(String(16), nullable=False)
+    sender: Mapped[str] = mapped_column(String(254), nullable=False, default="")
+    filename: Mapped[str] = mapped_column(String(200), nullable=False, default="")
+    received_at: Mapped[datetime] = _now()
+    submitted_by: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("user_account.id"))
+    state: Mapped[str] = mapped_column(String(12), nullable=False, default="received")
+    ocr_text: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    ocr_conf: Mapped[float] = mapped_column(Numeric(5, 4), nullable=False, default=0)
+    doc_type: Mapped[str] = mapped_column(String(32), nullable=False, default="other")
+    type_conf: Mapped[float] = mapped_column(Numeric(5, 4), nullable=False, default=0)
+    type_reason: Mapped[str] = mapped_column(String(200), nullable=False, default="")
+    entities: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False, default=dict)
+    candidates: Mapped[list[Any]] = mapped_column(JSONB, nullable=False, default=list)
+    chosen_client_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("client.id"))
+    attribution_conf: Mapped[float] = mapped_column(Numeric(5, 4), nullable=False, default=0)
+    route: Mapped[str | None] = mapped_column(String(12))
+    route_reason: Mapped[str] = mapped_column(String(200), nullable=False, default="")
+    document_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("document.id"), unique=True)
+    inbox_item_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
+    error: Mapped[str | None] = mapped_column(Text)
+    updated_at: Mapped[datetime] = _now()
+
+
+class IntakeFeedback(Base):
+    """Every human correction. Stored to improve the rules and, later, a model."""
+
+    __tablename__ = "intake_feedback"
+    id: Mapped[uuid.UUID] = _pk()
+    item_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("intake_item.id"), nullable=False, index=True
+    )
+    at: Mapped[datetime] = _now()
+    actor: Mapped[uuid.UUID] = mapped_column(ForeignKey("user_account.id"), nullable=False)
+    kind: Mapped[str] = mapped_column(String(16), nullable=False)
+    from_client_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
+    to_client_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
+    suggested_client_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
+    note: Mapped[str] = mapped_column(Text, nullable=False, default="")

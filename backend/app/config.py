@@ -54,6 +54,14 @@ class Settings(BaseSettings):
     retention_years_by_type: dict[str, int] = {}
     clamd_host: str = ""  # empty: fake scanner in the demo profile
     clamd_port: int = 3310
+    # intake
+    ocr_langs: str = "heb+ara+rus+fra+eng"
+    ocr_engine: str = "tesseract"  # "tesseract" or "fake" (tests, demo)
+    intake_auto_threshold: float = 0.95
+    fax_dir: str = ""  # watched drop folder; empty disables the fax channel
+    fax_poll_seconds: int = 30
+    render_dpi: int = 200
+    second_pass_below: float = 0.80  # re-read with the Latin model when IDs read below this
 
 
 @lru_cache

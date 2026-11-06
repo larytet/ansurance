@@ -8,7 +8,7 @@ Updated: 2026-11-06
 | 2. Requirements brief and owner decisions D1..D10 | Done (decisions log below) |
 | 3. Design spec (`docs/DESIGN.md`, v0.1) | Approved by owner 2026-11-06 |
 | 4. Test plan (`docs/TESTPLAN.md`) | Written (v0.1); results table updated per milestone |
-| 5. Milestones M0..M10 | M0..M4 done; M5 next. Rule: commit and push after every completed milestone (owner instruction 2026-11-06) |
+| 5. Milestones M0..M10 | M0..M5 done; M6 next. Rule: commit and push after every completed milestone (owner instruction 2026-11-06) |
 
 ## Decisions log (from the requirements brief)
 
@@ -35,4 +35,5 @@ Updated: 2026-11-06
 | M2 Documents and blob store | Done 2026-11-06 | 155 backend, e2e on live stack | S3 BlobStore (MinIO built from source, Object Lock, no-delete app user), content-addressed write-once originals, dedupe, ClamAV scan (fail closed, quarantine), content sniffing and size limits, restricted documents, retention and legal hold, audited downloads with integrity check, reconcile command, DB triggers refusing blob delete or rewrite |
 | M3 Inbox, consent, back-office desk | Done 2026-11-06 | 196 backend, e2e on live stack | Inbox per role (urgency rising with deadlines, reassign needs a note, dismiss needs a reason, history is immutable, manager read-only view, keyset pagination, 10,000 items under 1 s), append-only consent registry with latest-wins state and one-minute opt-out rule (late ones flagged to the manager), the consent gate on the single send path (marketing needs opt-in, opt-out blocks all but legal notices), Desk work areas, F11 request-ID and register, marketing projection with consent |
 | M4 Process engine | Done 2026-11-06 | 225 backend, e2e on live stack | Definitions as validated, versioned data (acyclic, roles, four-eyes option), the 18 processes seeded from the mock (72 stages, 221 checks), locked and parallel stages, checks, role-restricted finalize, immutable final stages (DB trigger), instances pinned to their version, My work, banner data per client, cancel, Mermaid diagrams generated and identical to the stored files; mock bug in Hebrew headings fixed |
-| M5..M10 | Not started | | |
+| M5 Intake pipeline | Done 2026-11-06 | 314 backend, e2e on live stack | Postgres job queue and worker container, fax drop folder, .eml ingest, virus scan (fail closed), page rendering, de-skew, crop, de-noise, split on blank pages, real Tesseract with a second Latin pass, rules classifier, ID and policy extraction, evidence-based attribution (never name-only, sender only breaks ties), routing to filed, review (back-office Inbox) or unassigned, wrong-client correction with misfile metric, feedback records. Synthetic accuracy 96.7% auto-filed, 0 misfiled; real scans still to be measured |
+| M6..M10 | Not started | | |

@@ -28,6 +28,9 @@ CAPABILITIES = [
     "process.start",
     "process.define",
     "process.cancel",
+    "intake.read",
+    "intake.write",
+    "intake.review",
 ]
 
 _COMMON = [
@@ -48,6 +51,7 @@ ROLE_CAPABILITIES: dict[str, list[str]] = {
         "policy.write",
         "document.read",
         "document.write",
+        "intake.write",
         *_COMMON,
     ],
     "backoffice": [
@@ -59,6 +63,9 @@ ROLE_CAPABILITIES: dict[str, list[str]] = {
         "document.read",
         "document.write",
         "desk.read",
+        "intake.read",
+        "intake.write",
+        "intake.review",
         *_COMMON,
     ],
     "marketing": ["client.read_min", *_COMMON],

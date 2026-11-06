@@ -1,0 +1,24 @@
+{
+ "items": 72,
+ "positives": 60,
+ "auto_filed_correct": 58,
+ "auto_file_rate": 0.9667,
+ "misfiled": 0,
+ "misfile_rate": 0.0,
+ "auto_rate_by_type": {
+  "bank_form": 1.0,
+  "claim_form": 1.0,
+  "id_card": 1.0,
+  "insurer_letter": 0.88,
+  "invoice": 1.0,
+  "medical_report": 0.89,
+  "policy": 1.0
+ },
+ "problems": [
+  [
+   "medical_report-10",
+   "review",
+   "single client, confidence 0.91 below 0.95"
+  ]
+ ]
+}

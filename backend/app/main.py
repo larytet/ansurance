@@ -22,6 +22,8 @@ from app.consent.router import router as consent_router
 from app.db import database_ready, make_engine
 from app.documents.router import router as documents_router
 from app.inbox.router import router as inbox_router
+from app.intake.context import IntakeContext
+from app.intake.router import router as intake_router
 from app.logging import configure_logging, request_id_var
 from app.messaging.router import router as messaging_router
 from app.processes.router import router as processes_router
@@ -49,6 +51,7 @@ def create_app(
     http: httpx.Client | None = None,
     blobs: BlobStore | None = None,
     antivirus: Antivirus | None = None,
+    intake: IntakeContext | None = None,
 ) -> FastAPI:
     settings = settings or get_settings()
     configure_logging(settings.log_level)
@@ -67,12 +70,14 @@ def create_app(
     app.include_router(auth_router)
     app.state.blobs = blobs or make_blob_store(settings)
     app.state.antivirus = antivirus or make_antivirus(settings)
+    app.state.intake = intake or IntakeContext(settings, app.state.blobs, app.state.antivirus, None)
     app.include_router(clients_router)
     app.include_router(documents_router)
     app.include_router(inbox_router)
     app.include_router(consent_router)
     app.include_router(messaging_router)
     app.include_router(processes_router)
+    app.include_router(intake_router)
 
     @app.middleware("http")
     async def request_id_middleware(

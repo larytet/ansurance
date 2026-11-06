@@ -52,6 +52,21 @@ services:
       retries: 20
       start_period: 5s
 
+  worker:
+    # Same image as the API. Runs the job queue: the intake pipeline (virus scan, OCR,
+    # classify, attribute, file) and the fax drop-folder poller.
+    build: ../../backend
+    restart: unless-stopped
+    environment:
+      <<: *api-env
+      ANS_FAX_DIR: /fax
+      ANS_OCR_LANGS: ${ANS_OCR_LANGS:-heb+ara+rus+fra+eng}
+    command: ["python", "-m", "app.jobs.worker"]
+    volumes:
+      - faxdrop:/fax
+    depends_on:
+      api: { condition: service_healthy }
+
   postgres:
     image: postgres:16-alpine
     restart: unless-stopped
@@ -113,6 +128,7 @@ services:
       start_period: 60s
 
 volumes:
+  faxdrop:
   clamdata:
   caddy_data:
   pgdata:
