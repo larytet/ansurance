@@ -1,0 +1,78 @@
+# ansurance, on-prem profile. Run from the repo root:  make up
+name: ansurance
+
+x-api-env: &api-env
+  ANS_PROFILE: ${ANS_PROFILE:-onprem}
+  ANS_DATABASE_URL: postgresql+psycopg://ansurance:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}@postgres:5432/ansurance
+  ANS_S3_ENDPOINT: http://objectstore:9000
+  ANS_S3_BUCKET_ORIGINALS: originals
+  ANS_LOG_LEVEL: ${ANS_LOG_LEVEL:-INFO}
+
+services:
+  proxy:
+    image: caddy:2.8-alpine
+    restart: unless-stopped
+    ports:
+      # Bind to the VPN-facing address only (set BIND_ADDR in .env). Default: loopback.
+      - "${BIND_ADDR:-127.0.0.1}:${HTTP_PORT:-8080}:80"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+    depends_on:
+      api: { condition: service_healthy }
+      web: { condition: service_started }
+
+  web:
+    build: ../../web
+    restart: unless-stopped
+
+  api:
+    build: ../../backend
+    restart: unless-stopped
+    environment: *api-env
+    command: >
+      sh -c "alembic upgrade head &&
+             uvicorn app.main:create_app --factory --host 0.0.0.0 --port 8000"
+    depends_on:
+      postgres: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/api/ready').status==200 else 1)"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
+
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ansurance
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ansurance
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ansurance -d ansurance"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  objectstore:
+    # MinIO built from source (deploy/objectstore/Dockerfile). The M2 spike confirms the
+    # choice behind the BlobStore interface (DESIGN section 7).
+    build: ../objectstore
+    restart: unless-stopped
+    command: server /data
+    environment:
+      MINIO_ROOT_USER: ${OBJECTSTORE_USER:-ansurance}
+      MINIO_ROOT_PASSWORD: ${OBJECTSTORE_PASSWORD:?set OBJECTSTORE_PASSWORD in .env}
+    volumes:
+      - objdata:/data
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:9000/minio/health/live"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  pgdata:
+  objdata:
