@@ -1,7 +1,7 @@
 import uuid
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
 from sqlalchemy import or_, select, text
 from sqlalchemy.exc import IntegrityError
@@ -90,7 +90,10 @@ def create_client(
 
 @router.get("/clients")
 def search_clients(
-    q: str = "", p: Principal = Depends(require("client.read")), db: Db = Depends(get_db)
+    request: Request,
+    q: str = "",
+    p: Principal = Depends(require("client.read")),
+    db: Db = Depends(get_db),
 ) -> list[dict[str, Any]]:
     stmt = select(Client).where(visible(p))
     for tok in normalize(q).split():
@@ -100,18 +103,21 @@ def search_clients(
             conds.append(Client.search_skel.ilike(f"%{sk}%"))
         stmt = stmt.where(or_(*conds))
     rows = db.scalars(stmt.order_by(Client.name).limit(50)).all()
-    chain.append(db, str(p.user.id), "client.search", "clients", {"results": len(rows)})
+    request.app.state.read_audit.record(
+        str(p.user.id), "client.search", "clients", {"results": len(rows)}
+    )
     return [_client_dict(c) for c in rows]
 
 
 @router.get("/clients/{client_id}")
 def get_client(
+    request: Request,
     client_id: uuid.UUID,
     p: Principal = Depends(require("client.read")),
     db: Db = Depends(get_db),
 ) -> dict[str, Any]:
     c = get_visible(db, p, client_id)
-    chain.append(db, str(p.user.id), "client.read", f"client:{c.id}", {})
+    request.app.state.read_audit.record(str(p.user.id), "client.read", f"client:{c.id}")
     fam = db.scalars(
         select(FamilyLink).where(
             or_(FamilyLink.head_client_id == c.id, FamilyLink.member_client_id == c.id)
@@ -186,6 +192,7 @@ def add_policy(
 
 @router.get("/clients/{client_id}/policies")
 def list_policies(
+    request: Request,
     client_id: uuid.UUID,
     p: Principal = Depends(require("policy.read")),
     db: Db = Depends(get_db),
@@ -194,7 +201,7 @@ def list_policies(
     rows = db.execute(
         select(Policy, Insurer.name).join(Insurer).where(Policy.client_id == c.id)
     ).all()
-    chain.append(db, str(p.user.id), "policy.read", f"client:{c.id}", {})
+    request.app.state.read_audit.record(str(p.user.id), "policy.read", f"client:{c.id}")
     return [
         {
             "id": str(pol.id),
@@ -210,7 +217,9 @@ def list_policies(
 
 @router.get("/marketing/contacts")
 def marketing_contacts(
-    p: Principal = Depends(require("client.read_min")), db: Db = Depends(get_db)
+    request: Request,
+    p: Principal = Depends(require("client.read_min")),
+    db: Db = Depends(get_db),
 ) -> list[dict[str, Any]]:
     """The only client data marketing can read: the marketing_contact view."""
     rows = (
@@ -224,7 +233,9 @@ def marketing_contacts(
         .mappings()
         .all()
     )
-    chain.append(db, str(p.user.id), "marketing.read", "marketing_contact", {"rows": len(rows)})
+    request.app.state.read_audit.record(
+        str(p.user.id), "marketing.read", "marketing_contact", {"rows": len(rows)}
+    )
     return [{**r, "id": str(r["id"])} for r in rows]
 
 

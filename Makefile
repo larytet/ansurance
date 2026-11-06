@@ -1,6 +1,6 @@
 COMPOSE = docker compose -f deploy/compose/docker-compose.yml --env-file deploy/compose/.env
 
-.PHONY: e2e-m1 up down logs ps smoke ci test-backend test-web lint
+.PHONY: conformance test-fast test-slow e2e-m1 up down logs ps smoke ci test-backend test-web lint
 
 deploy/compose/.env:
 	@echo "Creating deploy/compose/.env with random secrets (edit BIND_ADDR for your VPN)"
@@ -27,12 +27,23 @@ smoke:
 e2e-m1:
 	uv run --project backend python scripts/e2e_m1.py
 
+# Profile parity: the same black-box checks CI runs against the AWS dev deployment.
+conformance:
+	./scripts/conformance_compose.sh
+
 lint:
 	cd backend && uv run ruff check . && uv run ruff format --check . && uv run mypy app
 	cd web && npm run lint && npm run typecheck
 
 test-backend:
 	cd backend && uv run pytest -q
+
+# everything except the slow container-based tests (real OCR run, Terraform plans, ClamAV)
+test-fast:
+	cd backend && uv run pytest -q -m "not slow"
+
+test-slow:
+	cd backend && uv run pytest -q -m slow
 
 test-web:
 	cd web && npm test

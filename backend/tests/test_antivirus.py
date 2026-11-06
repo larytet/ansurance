@@ -7,6 +7,8 @@ import pytest
 
 from app.adapters.antivirus import EICAR, ClamdAntivirus, ScannerUnavailable
 
+pytestmark = pytest.mark.slow
+
 
 @pytest.fixture(scope="module")
 def clamd() -> Iterator[ClamdAntivirus]:

@@ -218,13 +218,22 @@ def test_downloads_listing_and_uploads_are_audited(env: Env, db: Session) -> Non
     doc = upload(c, hdr, cid).json()
     c.get(f"/api/clients/{cid}/documents")
     c.get(f"/api/documents/{doc['id']}/content")
+    # upload and download are written in the request; the listing is a read, audited later
+    sync = [
+        r[0]
+        for r in db.execute(
+            text("SELECT action FROM audit_entry WHERE action LIKE 'document.%' ORDER BY seq")
+        )
+    ]
+    assert sync == ["document.upload", "document.download"]
+    env.api.app.state.read_audit.flush()
     rows = db.execute(
         text(
             "SELECT actor, action, object FROM audit_entry WHERE action LIKE "
             "'document.%' ORDER BY seq"
         )
     ).all()
-    assert [r[1] for r in rows] == ["document.upload", "document.list", "document.download"]
+    assert [r[1] for r in rows] == ["document.upload", "document.download", "document.list"]
     assert all(r[0] == a.id for r in rows)
 
 

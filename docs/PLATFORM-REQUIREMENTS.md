@@ -21,7 +21,7 @@ Non-goals for the platform v1: multi-tenant SaaS, Kubernetes, active-active mult
 1. **One codebase, two profiles.** Differences live in configuration and in thin adapters (blob store, secrets, mail, identity, backup), never in business code.
 2. **Postgres is the system of record** for everything structured. Binary files never go in Postgres.
 3. **Originals are immutable.** Every scan, PDF, fax, email and WhatsApp media is stored once, content-addressed by SHA-256, never overwritten or deleted by application code (REQUIREMENTS 4.3).
-4. **Everything is audited** through the append-only hash-chained log (REQUIREMENTS section 7); an action without an audit entry is a defect.
+4. **Everything is audited** through the append-only hash-chained log (REQUIREMENTS section 7); an action without an audit entry is a defect. Exception by decision (2026-11-06): audit entries for plain reads are written asynchronously in batches, and losing the unflushed tail on a crash is accepted. Writes, security events, exports and downloads stay synchronous.
 5. **Adapters with fakes.** Every external system (OCR, WhatsApp, mail, fax, clearing house, e-sign, translation) is behind an interface with a fake used by the tests and by the demo profile (REQUIREMENTS section 9).
 6. **Boring and small.** Fewest moving parts: no message broker, no search cluster, no cache in v1 unless a measured need appears.
 7. **Israeli data stays in Israel** unless the owner approves otherwise (section 8).

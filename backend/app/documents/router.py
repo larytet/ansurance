@@ -92,6 +92,7 @@ def upload(
 
 @router.get("/clients/{client_id}/documents")
 def list_documents(
+    request: Request,
     client_id: uuid.UUID,
     p: Principal = Depends(require("document.read")),
     db: Db = Depends(get_db),
@@ -105,7 +106,9 @@ def list_documents(
     ).all()
     allowed = can_see_restricted(p, client)
     out = [_doc_dict(d, b) for d, b in rows if allowed or not d.restricted]
-    chain.append(db, str(p.user.id), "document.list", f"client:{client.id}", {"n": len(out)})
+    request.app.state.read_audit.record(
+        str(p.user.id), "document.list", f"client:{client.id}", {"n": len(out)}
+    )
     return out
 
 

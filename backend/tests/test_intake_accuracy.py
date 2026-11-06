@@ -33,7 +33,10 @@ try:
 except OcrUnavailable:
     HAVE_OCR = False
 
-pytestmark = pytest.mark.skipif(not HAVE_OCR, reason="tesseract with heb+eng is not installed")
+pytestmark = [
+    pytest.mark.skipif(not HAVE_OCR, reason="tesseract with heb+eng is not installed"),
+    pytest.mark.slow,
+]
 RESULTS = Path(__file__).parent / "intake_data" / "last_accuracy.json"
 
 

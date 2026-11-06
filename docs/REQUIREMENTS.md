@@ -55,7 +55,7 @@ Rules:
 
 - Role-based access plus per-client ownership (the agent of record).
 - A role switcher in the UI (see section 8) is a view switch for demo and for the manager. For real users it only offers roles they actually hold. A user may hold more than one role.
-- Every read of a client record is audit-logged (section 7).
+- Every read of a client record is audit-logged (section 7), asynchronously and in batches: a few seconds of read entries may be lost if the system crashes, which is accepted. Writes, security events, exports and document downloads are logged synchronously and are never lost.
 - Work can be handed between roles from the Inbox (reassign with a note). An item that needs another role's approval goes to that role's Inbox, never by side channel.
 
 ## 3. Core flows
@@ -368,6 +368,7 @@ Behaviour:
 - Privacy and security: Israeli Privacy Protection Law as amended by Amendment 13 (in force 14 Aug 2025) and the Data Security Regulations 5777-2017. Insurance data is sensitive, so confirm with counsel whether the agency must appoint a Privacy Protection Officer and notify or register its database **[verify]** (sources conflict on scope; insurers are cited as large-scale sensitive-data processors).
 - Data residency: store data in Israel or an approved jurisdiction; confirm vendor regions for OCR, translation and WhatsApp BSP **[verify]**.
 - Audit log: append-only, hash-chained (each entry includes the hash of the previous one) with a "verify chain" action for the manager. Logs reads, writes, exports, consent changes, AI actions and misfile corrections.
+- Read auditing is asynchronous: reads (client record, search, policy list, document list and metadata, marketing projection) are queued in memory and written to the chain in batches (at least every 5 seconds or 200 entries, and on orderly shutdown). Losing the unflushed tail of read entries on a crash is accepted; the chain stays valid because batches are appended through the same serialized writer, and the loss is visible as a gap in sequence time, never as a broken chain. Everything that changes data or leaves the system is synchronous: writes, logins and denials, consent changes, AI actions, exports and document downloads.
 - Retention: configurable per document type; legal hold for open claims and complaints.
 - Authentication: SSO with two-factor; session timeout; device list.
 - Availability: business hours critical (07:00-19:00 Sun-Thu), nightly encrypted backup, restore tested quarterly.

@@ -78,3 +78,38 @@ def verify(db: Session) -> VerifyResult:
             return VerifyResult(False, count, e.seq, "hash mismatch")
         prev = e.hash
     return VerifyResult(True, count)
+
+
+@dataclass(frozen=True)
+class Pending:
+    """An entry captured at the time of the action, written later in a batch."""
+
+    at: datetime
+    actor: str
+    action: str
+    obj: str
+    detail: dict[str, Any]
+
+
+def append_many(db: Session, entries: list[Pending]) -> int:
+    """Append several entries under one lock acquisition and one transaction."""
+    if not entries:
+        return 0
+    db.execute(text("SELECT pg_advisory_xact_lock(:k)"), {"k": _LOCK_KEY})
+    prev = db.scalar(select(AuditEntry.hash).order_by(AuditEntry.seq.desc()).limit(1)) or GENESIS
+    for e in entries:
+        h = _hash(prev, _canonical(e.at, e.actor, e.action, e.obj, e.detail))
+        db.add(
+            AuditEntry(
+                at=e.at,
+                actor=e.actor,
+                action=e.action,
+                object=e.obj,
+                detail=e.detail,
+                prev_hash=prev,
+                hash=h,
+            )
+        )
+        prev = h
+    db.flush()
+    return len(entries)

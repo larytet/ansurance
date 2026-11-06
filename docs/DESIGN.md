@@ -78,7 +78,7 @@ Authorization at the database: row-level security policies for the marketing pro
 - **SSO:** OIDC authorization code with PKCE for Microsoft 365 and Google Workspace. A login is accepted only if the verified `sub` and e-mail match a pre-created `user`; no auto-provisioning. Per user the manager chooses "SSO only" or "local + TOTP". For SSO-only users the provider's MFA is trusted (configurable).
 - **Sessions:** random 256-bit token in an HttpOnly, Secure, SameSite=Lax cookie; stored hashed in `session`; idle timeout 30 min, absolute 12 h; device list and revoke; CSRF token for state-changing requests.
 - **Authorization:** capabilities (named, e.g. `client.read`, `kyc.approve`, `audit.read`, `campaign.approve`) attached to roles; checked in the service layer via a single `require()` helper; ownership rules (agent of record, team share) in one policy module; denies are audited.
-- **Everything audited:** login success and failure, 2FA events, session revoke, reads of client records, exports, downloads, role changes.
+- **Everything audited:** login success and failure, 2FA events, session revoke, role changes, exports and downloads (synchronous, same transaction as the action). Reads of client records, search, policy and document listings and the marketing projection are audited **asynchronously in batches** (owner decision 2026-11-06): the request hands the entry to an in-memory buffer; a background flusher appends a batch to the chain in one transaction every 5 seconds or 200 entries and on shutdown. A crash can lose the unflushed tail of read entries, which is accepted; the chain stays valid because batches go through the same serialized appender.
 
 ## 6. Audit chain
 

@@ -9,9 +9,11 @@ from fastapi import FastAPI, Request, Response
 from fastapi.responses import JSONResponse
 from sqlalchemy import Engine
 from sqlalchemy.orm import sessionmaker
+from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
 from app import __version__
 from app.adapters.antivirus import Antivirus, ClamdAntivirus, FakeAntivirus
+from app.audit.readbuffer import ReadAuditBuffer
 from app.auth.router import router as auth_router
 from app.blob.base import BlobStore
 from app.blob.fake import FakeBlobStore
@@ -65,6 +67,14 @@ def create_app(
     )
 
     app.state.settings = settings
+    app.state.read_audit = ReadAuditBuffer(
+        sessionmaker(engine),
+        settings.read_audit_flush_seconds,
+        settings.read_audit_batch,
+    )
+    app.router.add_event_handler("shutdown", app.state.read_audit.stop)
+    # the real client address (not the proxy's) feeds the per-IP login limit and the audit log
+    app.add_middleware(ProxyHeadersMiddleware, trusted_hosts=settings.trusted_proxies)
     app.state.sessionmaker = sessionmaker(engine, expire_on_commit=False)
     app.state.http = http or httpx.Client(timeout=10)
     app.include_router(auth_router)

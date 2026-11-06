@@ -4,10 +4,12 @@ from datetime import UTC, datetime, timedelta
 
 import pyotp
 from fastapi.testclient import TestClient
-from sqlalchemy import text
+from sqlalchemy import Engine, text
 from sqlalchemy.orm import Session
 
 from app.auth.passwords import check_policy, hash_password, verify_password
+from app.config import Settings
+from app.main import create_app
 from tests.conftest import PASSWORD, Account, login, make_account
 
 
@@ -208,3 +210,41 @@ def test_manager_creates_users_with_policy(api: TestClient, db: Session) -> None
     assert api.post("/api/users", json=weak, headers=hdr).status_code == 422
     bad_role = {**body, "email": "r@agency.il", "roles": ["god"]}
     assert api.post("/api/users", json=bad_role, headers=hdr).status_code == 422
+
+
+# ---- the real client address behind a proxy ----
+def _fail(c: TestClient, who: str, xff: str | None) -> int:
+    headers = {"x-forwarded-for": xff} if xff else {}
+    return c.post(
+        "/api/auth/login",
+        headers=headers,
+        json={"email": who, "password": "w" * 14, "code": "000000"},
+    ).status_code
+
+
+def test_behind_a_trusted_proxy_the_limit_counts_each_client_separately(
+    settings: Settings, fresh_db: Engine, db: Session
+) -> None:
+    """A single attacker must not be able to lock the whole office out by exhausting the
+    per-IP limit while every request appears to come from the proxy."""
+    s = settings.model_copy(update={"trusted_proxies": "*", "ip_failure_limit": 3})
+    c = TestClient(create_app(s, fresh_db), base_url="https://testserver")
+    for _ in range(3):
+        assert _fail(c, "x@agency.il", "198.51.100.9") == 401
+    assert _fail(c, "x@agency.il", "198.51.100.9") == 429  # this client is throttled
+    assert _fail(c, "y@agency.il", "203.0.113.5") == 401  # everybody else is not
+    ips = {r[0] for r in db.execute(text("SELECT DISTINCT ip FROM login_event"))}
+    assert {"198.51.100.9", "203.0.113.5"} <= ips and "testclient" not in ips
+
+
+def test_forwarded_header_is_ignored_when_the_sender_is_not_a_trusted_proxy(
+    settings: Settings, fresh_db: Engine, db: Session
+) -> None:
+    """Someone reaching the API directly cannot choose their own address."""
+    s = settings.model_copy(update={"ip_failure_limit": 3})  # default: private ranges only
+    c = TestClient(create_app(s, fresh_db), base_url="https://testserver")
+    for i in range(3):
+        _fail(c, f"u{i}@agency.il", f"198.51.100.{i}")  # a different forged address each time
+    assert _fail(c, "u9@agency.il", "198.51.100.77") == 429  # still one client: no evasion
+    ips = {r[0] for r in db.execute(text("SELECT DISTINCT ip FROM login_event"))}
+    assert not any(ip.startswith("198.51.100.") for ip in ips)

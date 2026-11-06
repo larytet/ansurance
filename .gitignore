@@ -8,3 +8,9 @@ backend/.venv/
 .ruff_cache/
 web/node_modules/
 web/dist/
+
+infra/aws/.terraform/
+infra/aws/*.tfplan
+infra/aws/backend-dev.hcl
+infra/aws/backend-prod.hcl
+backend/tests/intake_data/last_accuracy.json

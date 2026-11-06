@@ -1,0 +1,5 @@
+bucket         = "REPLACE-ansurance-terraform-state"
+key            = "ansurance/dev.tfstate"
+region         = "il-central-1"
+dynamodb_table = "REPLACE-ansurance-terraform-lock"
+encrypt        = true

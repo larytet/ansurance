@@ -257,6 +257,7 @@ def test_reads_and_searches_are_audited(api: TestClient, db: Session) -> None:
     api.get(f"/api/clients/{cl['id']}")
     api.get("/api/clients", params={"q": "david"})
     api.get(f"/api/clients/{cl['id']}/policies")
+    api.app.state.read_audit.flush()  # reads are audited asynchronously, in batches
     rows = db.execute(
         text(
             "SELECT actor, action, object FROM audit_entry "
