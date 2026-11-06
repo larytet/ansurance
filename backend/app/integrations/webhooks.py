@@ -13,6 +13,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session as Db
 
 from app.audit import chain
+from app.campaigns import service as campaign_service
 from app.config import Settings
 from app.consent import service as consent_service
 from app.deps import get_db, get_settings_dep
@@ -93,15 +94,21 @@ def process(db: Db, request: Request, payload: dict[str, Any]) -> dict[str, int]
                 )
             continue
         agent = client.agent_id if client else None
+        camp = (
+            campaign_service.recent_campaign_for_reply(db, client.id, item.at) if client else None
+        )
+        text = (item.body or "(media)")[:200]
         db.add(
             InboxItem(
-                type="client_reply",
+                type="campaign_reply" if camp else "client_reply",  # F10: replies reach the agent
                 role="agent" if agent else "backoffice",
                 assignee_id=agent,
                 client_id=client.id if client else None,
                 urgency="important",
-                title=f"WhatsApp from {who}",
-                detail=(item.body or "(media)")[:200],
+                title=f"Client replied to campaign: {camp.name}"
+                if camp
+                else f"WhatsApp from {who}",
+                detail=f"{text} [campaign:{camp.id}]" if camp else text,
             )
         )
         if item.kind == "media" and item.media_id:

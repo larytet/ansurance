@@ -84,6 +84,12 @@ def run_daily(
 
     report["renewal_items"] = flows.renewal_tick(db, now.date())
     report["claim_reminders"] = flows.late_claims(db, now)
+    from app.manager import service as manager
+
+    report["complaint_items"] = manager.complaint_tick(db, now)
+    from app.tax import service as tax
+
+    report["tax"] = tax.tick(db, settings, now)
     set_info(db, "ops.daily_last", now.isoformat())
     return report
 

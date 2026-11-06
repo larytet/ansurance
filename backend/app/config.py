@@ -79,7 +79,7 @@ class Settings(BaseSettings):
     fax_poll_seconds: int = 30
     render_dpi: int = 200
     # integrations: an adapter runs only if it is both configured and on the approved list
-    approved_adapters: list[str] = ["whatsapp", "imap", "agency", "esign"]
+    approved_adapters: list[str] = ["whatsapp", "imap", "agency", "esign", "translate"]
     whatsapp_phone_id: str = ""
     whatsapp_token: SecretStr | None = None
     whatsapp_app_secret: SecretStr | None = None  # verifies webhook signatures
@@ -91,6 +91,16 @@ class Settings(BaseSettings):
     imap_password: SecretStr | None = None
     imap_folder: str = "INBOX"
     mailbox_poll_seconds: int = 60
+    tax_cert_wait_days: int = 30  # a requested certificate not received by then raises an item
+    tax_deadline_warn_days: int = 14
+    portal_link_days: int = 7
+    complaint_sla_days: int = 14
+    kyc_valid_days: int = 365
+    licence_warn_days: int = 60
+    commission_tolerance_ils: float = 0.05
+    campaign_batch_size: int = 50  # recipients queued per worker run (throttling)
+    campaign_batch_seconds: int = 60  # pause between batches
+    campaign_frequency_days: int = 30  # one marketing contact per client in this period
     esign_webhook_secret: SecretStr | None = None
     esign_validity_months: int = 12  # signed data-lookup authorizations (verify per form)
     esign_warn_days: int = 183  # flag authorizations that expire within about six months

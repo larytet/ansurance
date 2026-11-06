@@ -128,7 +128,7 @@ def s3_settings(settings: Settings, minio: MinioInfo) -> Settings:
 _migrated: set[str] = set()
 _DATA_TABLES = (
     "audit_entry, login_event, sso_state, sso_identity, session, recovery_code, "
-    "claim_item, claim_event, claim, renewal_outcome, application, advice_record, kyc_form, esign_request, "
+    "portal_link, translation_record, tax_deadline, tax_residency, tax_certificate, commission_line, commission_statement, commission_term, complaint, agent_licence, campaign_recipient, campaign_translation, outbox_message, campaign, claim_item, claim_event, claim, renewal_outcome, application, advice_record, kyc_form, esign_request, "
     "mail_seen, adapter_call, inbound_message, sync_state, audit_seal, intake_feedback, intake_item, job, "
     "check_instance, stage_instance, process_instance, process_def, "
     "outbox_message, consent_event, inbox_event, inbox_item, derived_artifact, document, "

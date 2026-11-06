@@ -356,6 +356,7 @@ class OutboxMessage(Base):
     attempts: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     last_error: Mapped[str | None] = mapped_column(Text)
     delivery: Mapped[str | None] = mapped_column(String(12))  # sent | delivered | read | failed
+    campaign_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("campaign.id"), index=True)
 
 
 # ---- processes (M4) -----------------------------------------------------------------
@@ -676,3 +677,194 @@ class ClaimItem(Base):
     )
     label: Mapped[str] = mapped_column(String(80), nullable=False)
     document_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("document.id"))
+
+
+# ---- M10 campaigns (F10) ------------------------------------------------------------------
+class Campaign(Base):
+    __tablename__ = "campaign"
+    id: Mapped[uuid.UUID] = _pk()
+    name: Mapped[str] = mapped_column(String(120), nullable=False)
+    type: Mapped[str] = mapped_column(String(16), nullable=False)
+    purpose: Mapped[str] = mapped_column(String(10), nullable=False)  # service or marketing
+    benefit: Mapped[str] = mapped_column(Text, nullable=False)  # the stated client benefit
+    segment: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False, default=dict)
+    base_language: Mapped[str] = mapped_column(String(2), nullable=False)
+    body: Mapped[str] = mapped_column(Text, nullable=False)
+    status: Mapped[str] = mapped_column(String(18), nullable=False, default="draft")
+    requires_approval: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    approved_by: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("user_account.id"))
+    approved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    created_by: Mapped[uuid.UUID] = mapped_column(ForeignKey("user_account.id"), nullable=False)
+    created_at: Mapped[datetime] = _now()
+    snapshot_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class CampaignTranslation(Base):
+    """A translation of the campaign text. Nothing is sent in a language until a person has
+    reviewed it (F10 step 4)."""
+
+    __tablename__ = "campaign_translation"
+    campaign_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("campaign.id", ondelete="CASCADE"), primary_key=True
+    )
+    language: Mapped[str] = mapped_column(String(2), primary_key=True)
+    body: Mapped[str] = mapped_column(Text, nullable=False)
+    reviewed_by: Mapped[uuid.UUID] = mapped_column(ForeignKey("user_account.id"), nullable=False)
+    reviewed_at: Mapped[datetime] = _now()
+
+
+class CampaignRecipient(Base):
+    """The audience snapshot: who was selected, who was excluded and why (evidence)."""
+
+    __tablename__ = "campaign_recipient"
+    __table_args__ = (UniqueConstraint("campaign_id", "client_id"),)
+    id: Mapped[uuid.UUID] = _pk()
+    campaign_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("campaign.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    client_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("client.id"), nullable=False)
+    status: Mapped[str] = mapped_column(
+        String(10), nullable=False
+    )  # selected excluded queued blocked
+    channel: Mapped[str | None] = mapped_column(String(10))
+    language: Mapped[str] = mapped_column(String(2), nullable=False)
+    reason: Mapped[str] = mapped_column(String(64), nullable=False, default="")
+    outbox_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("outbox_message.id"))
+
+
+# ---- M10 manager: complaints and compliance (F8), commissions (F7) -----------------------------
+class Complaint(Base):
+    __tablename__ = "complaint"
+    id: Mapped[uuid.UUID] = _pk()
+    client_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("client.id"))
+    policy_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("policy.id"))
+    kind: Mapped[str] = mapped_column(String(12), nullable=False, default="complaint")
+    channel: Mapped[str] = mapped_column(String(12), nullable=False, default="other")
+    text: Mapped[str] = mapped_column(Text, nullable=False)
+    status: Mapped[str] = mapped_column(String(10), nullable=False, default="open")
+    owner_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("user_account.id"))
+    opened_at: Mapped[datetime] = _now()
+    due_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    responded_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    response: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    opened_by: Mapped[uuid.UUID] = mapped_column(ForeignKey("user_account.id"), nullable=False)
+
+
+class AgentLicence(Base):
+    __tablename__ = "agent_licence"
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("user_account.id"), primary_key=True)
+    licence_no: Mapped[str] = mapped_column(String(32), nullable=False)
+    expires_on: Mapped[date] = mapped_column(Date, nullable=False)
+    cpd_required_hours: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    cpd_done_hours: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+
+
+class CommissionTerm(Base):
+    """Expected commission: a percentage of the premium, per insurer and product."""
+
+    __tablename__ = "commission_term"
+    __table_args__ = (UniqueConstraint("insurer_id", "product"),)
+    id: Mapped[uuid.UUID] = _pk()
+    insurer_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("insurer.id"), nullable=False)
+    product: Mapped[str] = mapped_column(String(32), nullable=False)
+    rate_pct: Mapped[Decimal] = mapped_column(Numeric(6, 3), nullable=False)
+
+
+class CommissionStatement(Base):
+    __tablename__ = "commission_statement"
+    __table_args__ = (UniqueConstraint("insurer_id", "period"),)
+    id: Mapped[uuid.UUID] = _pk()
+    insurer_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("insurer.id"), nullable=False)
+    period: Mapped[str] = mapped_column(String(7), nullable=False)  # 2026-10
+    declared_total_ils: Mapped[Decimal] = mapped_column(Numeric(14, 2), nullable=False)
+    status: Mapped[str] = mapped_column(String(10), nullable=False, default="open")
+    imported_by: Mapped[uuid.UUID] = mapped_column(ForeignKey("user_account.id"), nullable=False)
+    imported_at: Mapped[datetime] = _now()
+    approved_by: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("user_account.id"))
+    approved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class CommissionLine(Base):
+    __tablename__ = "commission_line"
+    id: Mapped[uuid.UUID] = _pk()
+    statement_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("commission_statement.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    policy_number: Mapped[str] = mapped_column(String(64), nullable=False)
+    amount_ils: Mapped[Decimal] = mapped_column(Numeric(14, 2), nullable=False)
+    policy_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("policy.id"))
+    expected_ils: Mapped[Decimal | None] = mapped_column(Numeric(14, 2))
+    result: Mapped[str] = mapped_column(String(16), nullable=False)
+    # matched | wrong_amount | unknown_policy | no_terms | clawback | missing (not on the statement)
+
+
+# ---- M10 tax (F15), translation, client portal ---------------------------------------------------
+class TaxCertificate(Base):
+    """F15 A: the yearly certificate of deposits, per client, policy and tax year."""
+
+    __tablename__ = "tax_certificate"
+    __table_args__ = (UniqueConstraint("policy_id", "tax_year"),)
+    id: Mapped[uuid.UUID] = _pk()
+    client_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("client.id"), nullable=False, index=True
+    )
+    policy_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("policy.id"), nullable=False)
+    tax_year: Mapped[int] = mapped_column(Integer, nullable=False)
+    status: Mapped[str] = mapped_column(String(12), nullable=False, default="to_request")
+    requested_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    received_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    sent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    document_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("document.id"))
+
+
+class TaxResidency(Base):
+    """F15 C: the self-declaration of tax residency the insurers ask for."""
+
+    __tablename__ = "tax_residency"
+    client_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("client.id"), primary_key=True)
+    residency: Mapped[str] = mapped_column(String(10), nullable=False)  # israel | us | foreign
+    form_received: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    declared_at: Mapped[datetime] = _now()
+
+
+class TaxDeadline(Base):
+    """F15 D: the agency's own tax dates. One may not pass without a manager Inbox item."""
+
+    __tablename__ = "tax_deadline"
+    id: Mapped[uuid.UUID] = _pk()
+    kind: Mapped[str] = mapped_column(String(24), nullable=False)
+    title: Mapped[str] = mapped_column(String(200), nullable=False)
+    due_on: Mapped[date] = mapped_column(Date, nullable=False)
+    done_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    done_by: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("user_account.id"))
+
+
+class TranslationRecord(Base):
+    """Original and translation kept side by side in the client timeline (REQUIREMENTS 5)."""
+
+    __tablename__ = "translation_record"
+    id: Mapped[uuid.UUID] = _pk()
+    client_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("client.id"), index=True)
+    source_lang: Mapped[str] = mapped_column(String(2), nullable=False)
+    target_lang: Mapped[str] = mapped_column(String(2), nullable=False)
+    original: Mapped[str] = mapped_column(Text, nullable=False)
+    translated: Mapped[str] = mapped_column(Text, nullable=False)
+    flagged: Mapped[list[str]] = mapped_column(JSONB, nullable=False, default=list)
+    requested_by: Mapped[uuid.UUID] = mapped_column(ForeignKey("user_account.id"), nullable=False)
+    created_at: Mapped[datetime] = _now()
+
+
+class PortalLink(Base):
+    """A read-only view for the client. Only the hash of the token is stored."""
+
+    __tablename__ = "portal_link"
+    id: Mapped[uuid.UUID] = _pk()
+    client_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("client.id"), nullable=False, index=True
+    )
+    token_hash: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    last_used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    created_by: Mapped[uuid.UUID] = mapped_column(ForeignKey("user_account.id"), nullable=False)
+    created_at: Mapped[datetime] = _now()

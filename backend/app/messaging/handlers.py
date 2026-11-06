@@ -13,4 +13,9 @@ def make_delivery_handlers(settings: Settings, whatsapp: WhatsApp | None) -> dic
     def run(db: Session, payload: dict[str, Any]) -> None:
         deliver(db, settings, whatsapp, uuid.UUID(payload["message_id"]))
 
-    return {"message.deliver": run}
+    def batch(db: Session, payload: dict[str, Any]) -> None:
+        from app.campaigns.service import run_batch
+
+        run_batch(db, settings, uuid.UUID(payload["campaign_id"]))
+
+    return {"message.deliver": run, "campaign.batch": batch}

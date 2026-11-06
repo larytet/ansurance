@@ -14,11 +14,13 @@ from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 from app import __version__, metrics
 from app.adapters.antivirus import Antivirus, ClamdAntivirus, FakeAntivirus
 from app.adapters.esign import ESign, FakeESign
+from app.adapters.translate import FakeTranslator, Translator
 from app.audit.readbuffer import ReadAuditBuffer
 from app.auth.router import router as auth_router
 from app.blob.base import BlobStore
 from app.blob.fake import FakeBlobStore
 from app.blob.s3 import S3BlobStore
+from app.campaigns.router import router as campaigns_router
 from app.clients.router import router as clients_router
 from app.config import Profile, Settings, get_settings
 from app.consent.router import router as consent_router
@@ -35,8 +37,12 @@ from app.integrations.router import router as integrations_router
 from app.integrations.webhooks import router as webhooks_router
 from app.integrations.whatsapp import FakeWhatsApp, MetaCloudWhatsApp, WhatsApp
 from app.logging import configure_logging, request_id_var
+from app.manager.router import router as manager_router
 from app.messaging.router import router as messaging_router
+from app.portal.router import router as portal_router
 from app.processes.router import router as processes_router
+from app.tax.router import router as tax_router
+from app.translation.router import router as translation_router
 
 log = logging.getLogger("ansurance")
 
@@ -104,6 +110,7 @@ def create_app(
     archive_blobs: BlobStore | None = None,
     whatsapp: WhatsApp | None = None,
     esign: ESign | None = None,
+    translator: Translator | None = None,
 ) -> FastAPI:
     settings = settings or get_settings()
     configure_logging(settings.log_level)
@@ -132,6 +139,11 @@ def create_app(
     app.state.blobs = blobs or make_blob_store(settings)
     app.state.archive_blobs = archive_blobs or make_archive_store(settings)
     app.state.whatsapp = whatsapp if whatsapp is not None else make_whatsapp(settings)
+    app.state.translator = (
+        translator
+        if translator is not None
+        else (FakeTranslator() if settings.profile is Profile.DEMO else None)
+    )
     app.state.esign = esign if esign is not None else make_esign(settings)
     app.state.antivirus = antivirus or make_antivirus(settings)
     app.state.intake = intake or IntakeContext(settings, app.state.blobs, app.state.antivirus, None)
@@ -145,6 +157,11 @@ def create_app(
     app.include_router(webhooks_router)
     app.include_router(integrations_router)
     app.include_router(flows_router)
+    app.include_router(campaigns_router)
+    app.include_router(manager_router)
+    app.include_router(tax_router)
+    app.include_router(translation_router)
+    app.include_router(portal_router)
     app.include_router(esign_hook)
 
     @app.middleware("http")
