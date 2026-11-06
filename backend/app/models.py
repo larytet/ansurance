@@ -556,3 +556,123 @@ class MailSeen(Base):
     __tablename__ = "mail_seen"
     message_id: Mapped[str] = mapped_column(String(255), primary_key=True)
     at: Mapped[datetime] = _now()
+
+
+# ---- M9 flows F1 to F5 ------------------------------------------------------------------
+class ESignRequest(Base):
+    """A document sent to the client for signature. `kind` says what the signature is for."""
+
+    __tablename__ = "esign_request"
+    __table_args__ = (Index("ix_esign_client_kind", "client_id", "kind"),)
+    id: Mapped[uuid.UUID] = _pk()
+    client_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("client.id"), nullable=False)
+    kind: Mapped[str] = mapped_column(String(24), nullable=False)
+    title: Mapped[str] = mapped_column(String(200), nullable=False)
+    document_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("document.id"))
+    signed_document_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("document.id"))
+    provider_ref: Mapped[str] = mapped_column(String(128), nullable=False, default="")
+    status: Mapped[str] = mapped_column(String(10), nullable=False, default="sent")
+    signer_name: Mapped[str] = mapped_column(String(200), nullable=False, default="")
+    legal_text_version: Mapped[str] = mapped_column(String(32), nullable=False, default="")
+    sent_at: Mapped[datetime] = _now()
+    signed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    expires_at: Mapped[date | None] = mapped_column(Date)  # validity of the signed authorization
+    created_by: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("user_account.id"))
+
+
+class KycForm(Base):
+    __tablename__ = "kyc_form"
+    client_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("client.id"), primary_key=True)
+    data: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False, default=dict)
+    risk: Mapped[str] = mapped_column(String(8), nullable=False, default="normal")
+    flags: Mapped[list[str]] = mapped_column(JSONB, nullable=False, default=list)
+    completed_by: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("user_account.id"))
+    completed_at: Mapped[datetime] = _now()
+    approved_by: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("user_account.id"))
+    approved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class AdviceRecord(Base):
+    __tablename__ = "advice_record"
+    id: Mapped[uuid.UUID] = _pk()
+    client_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("client.id"), nullable=False)
+    product: Mapped[str] = mapped_column(String(32), nullable=False)
+    needs: Mapped[str] = mapped_column(Text, nullable=False)
+    advice: Mapped[str] = mapped_column(Text, nullable=False)
+    created_by: Mapped[uuid.UUID] = mapped_column(ForeignKey("user_account.id"), nullable=False)
+    created_at: Mapped[datetime] = _now()
+
+
+class Application(Base):
+    """F2: an application for a new policy, from advice to the issued policy."""
+
+    __tablename__ = "application"
+    id: Mapped[uuid.UUID] = _pk()
+    client_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("client.id"), nullable=False)
+    insurer_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("insurer.id"), nullable=False)
+    product: Mapped[str] = mapped_column(String(32), nullable=False)
+    advice_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("advice_record.id"))
+    esign_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("esign_request.id"))
+    policy_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("policy.id"))
+    confirmation_doc_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("document.id"))
+    status: Mapped[str] = mapped_column(String(12), nullable=False, default="draft")
+    created_by: Mapped[uuid.UUID] = mapped_column(ForeignKey("user_account.id"), nullable=False)
+    created_at: Mapped[datetime] = _now()
+
+
+class RenewalOutcome(Base):
+    """F3: what happened to a policy at a renewal date. One row per policy and cycle."""
+
+    __tablename__ = "renewal_outcome"
+    __table_args__ = (UniqueConstraint("policy_id", "cycle_date"),)
+    id: Mapped[uuid.UUID] = _pk()
+    policy_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("policy.id"), nullable=False)
+    cycle_date: Mapped[date] = mapped_column(Date, nullable=False)
+    outcome: Mapped[str] = mapped_column(String(10), nullable=False)
+    reason: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    new_renewal_date: Mapped[date | None] = mapped_column(Date)
+    recorded_by: Mapped[uuid.UUID] = mapped_column(ForeignKey("user_account.id"), nullable=False)
+    recorded_at: Mapped[datetime] = _now()
+
+
+class Claim(Base):
+    __tablename__ = "claim"
+    id: Mapped[uuid.UUID] = _pk()
+    client_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("client.id"), nullable=False)
+    policy_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("policy.id"), nullable=False)
+    event_date: Mapped[date] = mapped_column(Date, nullable=False)
+    place: Mapped[str] = mapped_column(String(200), nullable=False, default="")
+    description: Mapped[str] = mapped_column(Text, nullable=False)
+    status: Mapped[str] = mapped_column(String(12), nullable=False, default="open")
+    owner_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("user_account.id"), nullable=False)
+    insurer_ref: Mapped[str] = mapped_column(String(64), nullable=False, default="")
+    submitted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    reminder_days: Mapped[int] = mapped_column(Integer, nullable=False, default=14)
+    paid_ils: Mapped[Decimal | None] = mapped_column(Numeric(12, 2))
+    outcome_note: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    created_at: Mapped[datetime] = _now()
+
+
+class ClaimEvent(Base):
+    __tablename__ = "claim_event"
+    id: Mapped[uuid.UUID] = _pk()
+    claim_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("claim.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    kind: Mapped[str] = mapped_column(String(16), nullable=False)
+    note: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    actor_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("user_account.id"))
+    at: Mapped[datetime] = _now()
+
+
+class ClaimItem(Base):
+    """One line of a claim's document checklist; done when a document is attached."""
+
+    __tablename__ = "claim_item"
+    __table_args__ = (UniqueConstraint("claim_id", "label"),)
+    id: Mapped[uuid.UUID] = _pk()
+    claim_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("claim.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    label: Mapped[str] = mapped_column(String(80), nullable=False)
+    document_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("document.id"))

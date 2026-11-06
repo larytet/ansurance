@@ -13,6 +13,7 @@ from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
 from app import __version__, metrics
 from app.adapters.antivirus import Antivirus, ClamdAntivirus, FakeAntivirus
+from app.adapters.esign import ESign, FakeESign
 from app.audit.readbuffer import ReadAuditBuffer
 from app.auth.router import router as auth_router
 from app.blob.base import BlobStore
@@ -23,6 +24,8 @@ from app.config import Profile, Settings, get_settings
 from app.consent.router import router as consent_router
 from app.db import database_ready, make_engine
 from app.documents.router import router as documents_router
+from app.flows.router import hook as esign_hook
+from app.flows.router import router as flows_router
 from app.inbox.router import router as inbox_router
 from app.intake.context import IntakeContext
 from app.intake.router import router as intake_router
@@ -64,6 +67,12 @@ def make_whatsapp(settings: Settings) -> WhatsApp | None:
     )
 
 
+def make_esign(settings: Settings) -> ESign | None:
+    if settings.profile is Profile.DEMO:
+        return FakeESign()
+    return None  # no provider adapter yet: Comsign or DocuSign needs a contract and credentials
+
+
 def make_mailbox(settings: Settings) -> Mailbox | None:
     if not (settings.imap_host and settings.imap_user and settings.imap_password):
         return None  # not configured
@@ -94,6 +103,7 @@ def create_app(
     intake: IntakeContext | None = None,
     archive_blobs: BlobStore | None = None,
     whatsapp: WhatsApp | None = None,
+    esign: ESign | None = None,
 ) -> FastAPI:
     settings = settings or get_settings()
     configure_logging(settings.log_level)
@@ -122,6 +132,7 @@ def create_app(
     app.state.blobs = blobs or make_blob_store(settings)
     app.state.archive_blobs = archive_blobs or make_archive_store(settings)
     app.state.whatsapp = whatsapp if whatsapp is not None else make_whatsapp(settings)
+    app.state.esign = esign if esign is not None else make_esign(settings)
     app.state.antivirus = antivirus or make_antivirus(settings)
     app.state.intake = intake or IntakeContext(settings, app.state.blobs, app.state.antivirus, None)
     app.include_router(clients_router)
@@ -133,6 +144,8 @@ def create_app(
     app.include_router(intake_router)
     app.include_router(webhooks_router)
     app.include_router(integrations_router)
+    app.include_router(flows_router)
+    app.include_router(esign_hook)
 
     @app.middleware("http")
     async def request_id_middleware(

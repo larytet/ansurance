@@ -1,7 +1,7 @@
 import base64
 import json
 import uuid
-from datetime import UTC, date, datetime
+from datetime import UTC, datetime
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -222,7 +222,7 @@ def counts(
         .select_from(InboxItem)
         .where(scope, InboxItem.status == "open")
     ).one()
-    today = datetime.combine(date.today(), datetime.min.time(), tzinfo=UTC)
+    today = datetime.combine(datetime.now(UTC).date(), datetime.min.time(), tzinfo=UTC)
     done_today = db.scalar(
         select(func.count())
         .select_from(InboxItem)

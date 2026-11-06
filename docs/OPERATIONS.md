@@ -106,6 +106,8 @@ Every call to an outside system is recorded in `adapter_call` (no message bodies
 - Mailbox (IMAP): polled by the worker; each Message-ID is ingested once.
 - Agency system: `POST /api/import/agency` (dry run first). The existing system wins for policy
   data; contact data entered in ansurance is kept and only blanks are filled.
+- E-signature: `ANS_ESIGN_WEBHOOK_SECRET` signs the provider's callback to `/api/webhooks/esign` (same firewall exception as WhatsApp). No provider adapter ships yet; the contract and a fake are in `app/adapters/esign.py`.
+- Renewals and late claims: the daily job adds Inbox items for the agent (T-60, T-30, T-10, overdue; insurer late on a submitted claim).
 - Excel: `POST /api/excel/join` and `GET /api/export/clients.xlsx` (manager and back-office).
 
 ## Watching it

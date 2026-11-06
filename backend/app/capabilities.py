@@ -34,6 +34,8 @@ CAPABILITIES = [
     "import.run",
     "excel.use",
     "export.run",
+    "flow.write",
+    "flow.approve",
 ]
 
 _COMMON = [
@@ -55,6 +57,7 @@ ROLE_CAPABILITIES: dict[str, list[str]] = {
         "document.read",
         "document.write",
         "intake.write",
+        "flow.write",
         *_COMMON,
     ],
     "backoffice": [
@@ -72,6 +75,7 @@ ROLE_CAPABILITIES: dict[str, list[str]] = {
         "import.run",
         "excel.use",
         "export.run",
+        "flow.write",
         *_COMMON,
     ],
     "marketing": ["client.read_min", "excel.use", *_COMMON],

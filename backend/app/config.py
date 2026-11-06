@@ -79,7 +79,7 @@ class Settings(BaseSettings):
     fax_poll_seconds: int = 30
     render_dpi: int = 200
     # integrations: an adapter runs only if it is both configured and on the approved list
-    approved_adapters: list[str] = ["whatsapp", "imap", "agency"]
+    approved_adapters: list[str] = ["whatsapp", "imap", "agency", "esign"]
     whatsapp_phone_id: str = ""
     whatsapp_token: SecretStr | None = None
     whatsapp_app_secret: SecretStr | None = None  # verifies webhook signatures
@@ -91,6 +91,9 @@ class Settings(BaseSettings):
     imap_password: SecretStr | None = None
     imap_folder: str = "INBOX"
     mailbox_poll_seconds: int = 60
+    esign_webhook_secret: SecretStr | None = None
+    esign_validity_months: int = 12  # signed data-lookup authorizations (verify per form)
+    esign_warn_days: int = 183  # flag authorizations that expire within about six months
     max_delivery_attempts: int = 5
     default_country_code: str = "972"
     daily_seconds: int = 86_400  # sealing, nightly audit verification, backup-age check

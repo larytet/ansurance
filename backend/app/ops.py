@@ -80,6 +80,10 @@ def run_daily(
             else f"The last successful backup is {age.total_seconds() / 3600:.0f} hours old "
             f"(limit {settings.backup_max_age_hours}).",
         )
+    from app.flows import service as flows
+
+    report["renewal_items"] = flows.renewal_tick(db, now.date())
+    report["claim_reminders"] = flows.late_claims(db, now)
     set_info(db, "ops.daily_last", now.isoformat())
     return report
 
