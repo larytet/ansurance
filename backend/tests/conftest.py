@@ -29,7 +29,10 @@ def pg_url() -> Iterator[str]:
         return
     from testcontainers.postgres import PostgresContainer
 
-    with PostgresContainer("postgres:16-alpine", driver="psycopg") as pg:
+    with PostgresContainer(
+        "postgres:16-alpine@sha256:0cefaabd882e42bcb2a2f3dc56d3ce4770560ba62fd7f197f1a2e008fd5731ab",
+        driver="psycopg",
+    ) as pg:
         yield pg.get_connection_url()
 
 

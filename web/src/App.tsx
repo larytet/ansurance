@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { ApiError } from "./api";
+import { ClientFile } from "./pages/ClientFile";
 import { Clients } from "./pages/Clients";
 import { Inbox } from "./pages/Inbox";
 import { Login } from "./pages/Login";
@@ -11,6 +12,7 @@ export function App() {
   const { api, me, setMe, tr, lang, setLang, theme, setTheme } = useUi();
   const [ready, setReady] = useState(false);
   const [tab, setTab] = useState<Tab>("inbox");
+  const [open, setOpen] = useState<string | null>(null);
 
   useEffect(() => {
     api
@@ -32,7 +34,7 @@ export function App() {
         <strong>{tr("app")}</strong>
         <nav aria-label="main">
           {tabs.map((x) => (
-            <button key={x} aria-current={tab === x ? "page" : undefined} onClick={() => setTab(x)}>
+            <button key={x} aria-current={tab === x ? "page" : undefined} onClick={() => { setTab(x); setOpen(null); }}>
               {tr(x)}
             </button>
           ))}
@@ -55,7 +57,7 @@ export function App() {
           {tr("logout")}
         </button>
       </header>
-      {tab === "inbox" ? <Inbox /> : <Clients />}
+      {tab === "inbox" ? <Inbox /> : open ? <ClientFile clientId={open} onBack={() => setOpen(null)} /> : <Clients onOpen={setOpen} />}
     </div>
   );
 }

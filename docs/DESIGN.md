@@ -110,6 +110,7 @@ REST, JSON, `/api/v1`, OpenAPI published; cursor pagination; ETag/If-Match for o
 
 - **onprem:** `docker-compose.yml` with profiles `core`, `demo`, `observability`; images pinned by digest; `.env` for settings, Docker secrets for credentials; proxy listens only on the VPN-facing interface; data on named volumes; `make up|down|backup|restore|upgrade`. Backup container runs `pg_dump` nightly plus WAL archiving to a mounted path, and syncs the object store to a second location, all encrypted with `age` or `gpg`.
 - **cloud:** Terraform modules `network`, `data` (RDS, S3, KMS), `app` (ECS, ALB), `security` (CloudTrail, GuardDuty, Inspector, Config), `ops` (CloudWatch, Budgets). Region from a variable, default `il-central-1`. Tasks read secrets from Secrets Manager. Migrations run as a one-off ECS task before the new task set receives traffic.
+- **Pinning:** see PLATFORM-REQUIREMENTS principle 8. Base images by digest, sources by commit, packages by exact version, lock files used strictly, Terraform and the provider lock file, CI actions by commit; `scripts/check_pins.py` enforces it and has its own tests. The object store (MinIO) and its client (`mc`) are built from the commits behind releases `RELEASE.2025-10-15T17-29-55Z` and `RELEASE.2025-08-13T08-35-41Z`.
 - **Parity:** the same container image runs in both; only environment variables and the adapter set differ. A conformance test target runs the API suite against compose and against LocalStack-backed settings.
 
 ## 13. Observability

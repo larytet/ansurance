@@ -60,13 +60,16 @@ variable "alarm_email" {
 
 variable "image_tag" {
   type        = string
-  default     = "latest"
-  description = "Tag of the api and web images in ECR (CI pushes the git SHA)."
+  description = "Immutable tag of the api and web images in ECR: the git SHA that CI pushed. No default on purpose: a deploy must name exactly what it deploys."
+  validation {
+    condition     = can(regex("^[0-9a-f]{7,40}$", var.image_tag))
+    error_message = "image_tag must be a git commit SHA, never a moving tag such as latest."
+  }
 }
 
 variable "clamav_image" {
   type    = string
-  default = "clamav/clamav:stable"
+  default = "clamav/clamav:stable@sha256:6d87c712e3391e13c1ba6e05dfb074d4b1ddb5a6834b23bb9da990d2a4ef042a"
 }
 
 # --- sizing -----------------------------------------------------------------------------

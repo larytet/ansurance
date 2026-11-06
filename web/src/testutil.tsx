@@ -11,7 +11,13 @@ export function fakeServer(...handlers: Handler[]) {
   const fetcher = (async (input: RequestInfo | URL, init?: RequestInit) => {
     const path = String(input);
     const method = init?.method ?? "GET";
-    const body = init?.body ? JSON.parse(String(init.body)) : undefined;
+    let body: unknown;
+    if (init?.body instanceof FormData) {
+      const f = init.body.get("file");
+      body = { file: f instanceof File ? f.name : null, doc_type: init.body.get("doc_type") };
+    } else if (init?.body) {
+      body = JSON.parse(String(init.body));
+    }
     const csrf = (init?.headers as Record<string, string> | undefined)?.["x-csrf-token"];
     calls.push({ method, path, body, csrf });
     for (const h of handlers) {

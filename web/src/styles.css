@@ -14,3 +14,11 @@ section { max-width:60rem; margin:1rem auto; padding:0 1rem; }
 .login { max-width:22rem; margin:4rem auto; padding:0 1rem; } .login label { display:block; margin:.7rem 0; } .login input { width:100%; box-sizing:border-box; }
 [role="alert"] { color:var(--urgent); } .clients { list-style:none; padding:0; } .clients li { padding:.4rem 0; border-bottom:1px solid var(--line); }
 input[type="search"] { width:100%; box-sizing:border-box; margin-bottom:.6rem; }
+button.link { border:0; background:none; color:var(--accent); padding:0; text-decoration:underline; }
+.facts { display:grid; grid-template-columns:max-content 1fr; gap:.2rem 1rem; } .facts dt { color:var(--muted); } .facts dd { margin:0; }
+.rows { list-style:none; padding:0; } .rows > li { padding:.4rem 0; border-bottom:1px solid var(--line); }
+.badge { border:1px solid var(--important); color:var(--important); border-radius:4px; padding:0 .3rem; font-size:.8rem; }
+.scan.infected { color:var(--urgent); } .scan.pending { color:var(--important); }
+.pipeline { display:flex; gap:.3rem; list-style:none; padding:0; margin:.3rem 0 0; flex-wrap:wrap; }
+.stage { border:1px solid var(--line); border-radius:4px; padding:.1rem .5rem; font-size:.85rem; color:var(--muted); }
+.stage.ready, .stage.in_progress { border-color:var(--accent); color:var(--accent); } .stage.final { background:var(--line); }

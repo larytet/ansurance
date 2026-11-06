@@ -75,6 +75,25 @@ started again automatically. The database schema only moves forward: if a failed
 already applied a migration, the script says so and prints the command that restores the
 pre-upgrade backup into a fresh stack.
 
+## Updating pinned versions
+
+Everything is pinned (images by digest, MinIO and its client by commit, packages by exact
+version, lock files, CI actions by commit) so that a rebuild gives the same system.
+`make pins` fails if anything has floated. To update something on purpose, change the pin in
+one reviewed commit and run the full tests:
+
+| What | How |
+|---|---|
+| A base image | `docker pull <name:tag>`, then `docker image inspect --format '{{index .RepoDigests 0}}' <name:tag>`; replace the digest in the Dockerfile, compose file and the test that names it (`make pins` lists every place) |
+| MinIO or its client | pick the new release tag, then `git ls-remote https://github.com/minio/minio refs/tags/<tag>^{}` gives the commit; update `MINIO_COMMIT` / `MC_COMMIT` in `deploy/objectstore/Dockerfile` and `deploy/backup/Dockerfile`, and the test that documents them |
+| Debian or Alpine packages | Debian: move the snapshot date in `backend/Dockerfile` and update the `=version` pins; Alpine: bump the `pkg=version` pins (`apk list` in a fresh container shows the available ones). If a pinned version disappears from the repository the build fails: that is intended |
+| Python / Node packages | `uv lock --upgrade-package <name>` / `npm update <name>`; commit the lock file |
+| Terraform provider | `terraform init -upgrade`, then `terraform providers lock -platform=linux_amd64 -platform=linux_arm64 -platform=darwin_amd64 -platform=darwin_arm64` |
+| A CI action | resolve the new tag to its commit SHA and replace it (keep the version in a comment) |
+
+Never use `latest`, a branch, or a floating tag. A deployment to AWS names the git SHA of the
+images that CI pushed (`image_tag`); the plan refuses anything else.
+
 ## Watching it
 
 - Daily, the worker seals finished months of the audit log into Parquet files in the

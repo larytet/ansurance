@@ -68,7 +68,7 @@ def backups_now() -> set[str]:
         "--rm",
         "-v",
         f"{SRC}_backups:/b:ro",
-        "alpine",
+        "alpine:3.20@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc",
         "sh",
         "-c",
         "ls /b | grep '^20' || true",

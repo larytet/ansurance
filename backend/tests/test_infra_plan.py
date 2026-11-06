@@ -17,9 +17,10 @@ from typing import Any
 
 import pytest
 
+SHA = "0123456789abcdef0123456789abcdef01234567"  # a deploy always names the exact build
 INFRA = Path(__file__).resolve().parents[2] / "infra" / "aws"
 CACHE = Path.home() / ".cache" / "ansurance-terraform"
-IMAGE = "hashicorp/terraform:1.9"
+IMAGE = "hashicorp/terraform:1.9@sha256:18f9986038bbaf02cf49db9c09261c778161c51dcc7fb7e355ae8938459428cd"
 
 
 def _docker_ok() -> bool:
@@ -83,6 +84,8 @@ def plan(work: Path, name: str, tfvars: str, *extra: str) -> dict[str, Any]:
         "-lock=false",
         "-var",
         "offline=true",
+        "-var",
+        f"image_tag={SHA}",
         f"-var-file={tfvars}",
         *extra,
         f"-out={out}",
@@ -457,6 +460,8 @@ def test_unsafe_inputs_are_refused(work: Path, bad: str, message: str) -> None:
         "-lock=false",
         "-var",
         "offline=true",
+        "-var",
+        f"image_tag={SHA}",
         "-var-file=prod.tfvars",
         "-var",
         bad,
@@ -467,3 +472,23 @@ def test_unsafe_inputs_are_refused(work: Path, bad: str, message: str) -> None:
         and message in (r.stdout + r.stderr).replace("\n", " ").replace("│", " ").replace("  ", " ")
         or message in r.stdout + r.stderr
     )
+
+
+@pytest.mark.parametrize("tag", ["latest", "v1", "main", ""])
+def test_a_moving_image_tag_is_refused(work: Path, tag: str) -> None:
+    """A deployment must name an exact build: the plan refuses `latest` and other moving tags."""
+    r = tf(
+        work,
+        "plan",
+        "-input=false",
+        "-refresh=false",
+        "-lock=false",
+        "-var",
+        "offline=true",
+        "-var",
+        f"image_tag={tag}",
+        "-var-file=prod.tfvars",
+        check=False,
+    )
+    text = " ".join((r.stdout + r.stderr).replace("\u2502", " ").split())
+    assert r.returncode != 0 and "image_tag must be a git commit SHA" in text, text[-300:]

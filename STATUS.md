@@ -45,3 +45,7 @@ Owner decision 2026-11-06: audit of reads is asynchronous and batched; losing un
 ## Web front end (decision D7)
 
 Slice 1 done 2026-11-06: sign in, shell (role-based tabs, he/en with RTL, light/dark), Inbox, Clients list; 13 unit tests and a Playwright browser test against the live stack. Screen-by-screen tracker: docs/MOCK-PORT.md. Not started: client file, Today, Desk, intake review, processes, campaigns, manager overview, and everything that needs M8 and later.
+
+## Predictable deployment (owner decision 2026-11-06)
+
+Every external input is pinned and `make pins` / CI fail on anything that floats: images by digest, MinIO and mc by commit, Debian packages from a dated snapshot, Alpine and pip packages at exact versions, lock files used strictly, Terraform exact version plus a four-platform provider lock, CI actions by commit SHA, exact Node/uv/Terraform versions, fixed runner, AWS deploys name a git SHA. Requirement: PLATFORM-REQUIREMENTS principle 8; procedure: OPERATIONS.md "Updating pinned versions".

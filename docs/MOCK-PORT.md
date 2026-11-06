@@ -11,7 +11,7 @@ mock. States: **not started**, **ported** (works against the API, unit and brows
 | App shell: tabs per role, language (he/en, RTL), theme, sign out | all | ported | Arabic, Russian and French catalogs still to add; "follow the system" theme and the role switcher still to add |
 | Inbox | all | ported | counts, urgency filter, load more, done, dismiss with reason, reassign with note; the Lens and the "Open in work area" jump still to add |
 | Clients (search with transliteration) | agent, back-office, manager | ported (list) | multi-select, preferences editing, Lens still to add |
-| Client file | agent, back-office, manager | not started | client, policies, documents, consent, process banners |
+| Client file | agent, back-office, manager | ported | details, policies, documents (upload, download for clean files only, scan status, restricted), consent per channel with source, process pipeline and start; 8 unit tests and a real-browser test (real upload and virus scan) |
 | Today (agent home) | agent | not started | |
 | Desk (back-office home) | back-office, manager | not started | API: `/api/desk` |
 | Intake review (fax, email) | back-office | not started | API: `/api/intake` |

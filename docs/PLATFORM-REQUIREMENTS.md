@@ -25,6 +25,7 @@ Non-goals for the platform v1: multi-tenant SaaS, Kubernetes, active-active mult
 5. **Adapters with fakes.** Every external system (OCR, WhatsApp, mail, fax, clearing house, e-sign, translation) is behind an interface with a fake used by the tests and by the demo profile (REQUIREMENTS section 9).
 6. **Boring and small.** Fewest moving parts: no message broker, no search cluster, no cache in v1 unless a measured need appears.
 7. **Israeli data stays in Israel** unless the owner approves otherwise (section 8).
+8. **Predictable deployment** (owner decision, 2026-11-06). Nothing that goes into an image or a deployment may float: building or deploying the same commit on another day gives the same result. Concretely: every container image is referenced by digest (`name:tag@sha256:...`); software built from source is fetched by commit, never by branch or tag (a tag can be moved), with the commit verified after checkout; operating-system packages are installed at exact versions, Debian from a dated snapshot archive, Alpine at exact `pkg=version`; Python and Node dependencies come from lock files that are used strictly (`uv sync --frozen`, `npm ci`); Terraform and its providers are pinned (an exact version and a provider lock file covering every platform in use); CI actions are pinned to a commit SHA and tools to exact versions, with a fixed runner image; a deployment names an immutable build (the git SHA), never `latest`. The repository carries a check (`scripts/check_pins.py`, part of lint and CI) that fails on anything unpinned, and updating a pin is a deliberate, reviewed change (OPERATIONS.md, "Updating pinned versions"). A pin that can no longer be satisfied (a package removed from a repository) must make the build fail loudly, never fall back silently.
 
 ## 3. Functional scope by area
 
@@ -194,7 +195,7 @@ M0 to M7 produce a deployable, secure core in both profiles. M8 and later add in
 
 - Test plan in `docs/TESTPLAN.md`; progress in `STATUS.md`, updated at the end of every milestone and on every failing test left open.
 - Test layers: unit, API integration against real Postgres and an S3-compatible store in containers, end-to-end browser tests on the main flows, conformance suite across profiles, restore test, load test for Inbox and search.
-- CI on every push: lint, tests, image build, vulnerability scan; release by tag.
+- CI on every push: pin check, lint, tests, image build, vulnerability scan; release by tag. A release names exact image digests.
 - Synthetic data generator reproducing the mock's fictional clients, plus a labeled fax and scan sample set for the intake pipeline.
 - Documentation in the repo: install guide (onprem), AWS runbook, backup and restore guide, architecture decision records for each **[decide]** item once resolved.
 

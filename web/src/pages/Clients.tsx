@@ -8,7 +8,7 @@ function translit(c: ClientRow, lang: string): string {
   return t && t !== c.name ? t : "";
 }
 
-export function Clients() {
+export function Clients({ onOpen }: { onOpen: (id: string) => void }) {
   const { api, tr, lang } = useUi();
   const [q, setQ] = useState("");
   const [rows, setRows] = useState<ClientRow[] | null>(null);
@@ -27,7 +27,7 @@ export function Clients() {
       <ul className="clients">
         {(rows ?? []).map((c) => (
           <li key={c.id}>
-            <bdi>{c.name}</bdi>{" "}
+            <button className="link" onClick={() => onOpen(c.id)}><bdi>{c.name}</bdi></button>{" "}
             <small>
               {translit(c, lang) && <><bdi>{translit(c, lang)}</bdi> · </>}
               {c.id_number} · {c.preferred_language}

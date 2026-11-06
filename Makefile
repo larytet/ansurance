@@ -1,6 +1,6 @@
 COMPOSE = docker compose -f deploy/compose/docker-compose.yml --env-file deploy/compose/.env
 
-.PHONY: upgrade backup backup-verify restore conformance test-fast test-slow e2e-m1 up down logs ps smoke ci test-backend test-web lint
+.PHONY: pins upgrade backup backup-verify restore conformance test-fast test-slow e2e-m1 up down logs ps smoke ci test-backend test-web lint
 
 deploy/compose/.env:
 	@echo "Creating deploy/compose/.env with random secrets (edit BIND_ADDR for your VPN)"
@@ -47,7 +47,11 @@ restore:
 conformance:
 	./scripts/conformance_compose.sh
 
-lint:
+# Fails if any image, source, package or action is not pinned (predictable deployment)
+pins:
+	cd backend && uv run python ../scripts/check_pins.py
+
+lint: pins
 	cd backend && uv run ruff check . && uv run ruff format --check . && uv run mypy app
 	cd web && npm run lint && npm run typecheck
 

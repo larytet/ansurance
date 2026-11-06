@@ -44,6 +44,53 @@ export interface ClientRow {
   status: string;
 }
 
+export interface ClientDetail extends ClientRow {
+  phone: string | null;
+  email: string | null;
+  family: { head: string; member: string; relation: string }[];
+}
+
+export interface PolicyRow {
+  id: string;
+  insurer: string;
+  policy_number: string;
+  product: string;
+  premium_ils: number;
+  renewal_date: string | null;
+}
+
+export interface DocumentRow {
+  id: string;
+  doc_type: string;
+  filename: string;
+  media_type: string;
+  size: number;
+  restricted: boolean;
+  scan_status: string;
+  channel: string;
+  received_at: string;
+  retention_until: string;
+  legal_hold: boolean;
+}
+
+export interface ConsentState {
+  current: Record<string, "opt_in" | "opt_out">;
+  history: { channel: string; state: string; source: string; recorded_at: string; late: boolean }[];
+}
+
+export interface ProcessSummary {
+  id: string;
+  key: string;
+  title: string;
+  status: string;
+  stages: { id: string; status: string; role: string; name: { en: string; he: string } }[];
+}
+
+export interface ProcessDef {
+  key: string;
+  name: { en: string; he: string };
+}
+
 export class ApiError extends Error {
   constructor(
     public status: number,
@@ -105,5 +152,37 @@ export class Api {
   dismiss = (id: string, reason: string) => this.call<InboxItem>("POST", `/api/inbox/${id}/dismiss`, { reason });
   reassign = (id: string, role: string, note: string) =>
     this.call<InboxItem>("POST", `/api/inbox/${id}/reassign`, { role, note });
+  client = (id: string) => this.call<ClientDetail>("GET", `/api/clients/${id}`);
+  policies = (id: string) => this.call<PolicyRow[]>("GET", `/api/clients/${id}/policies`);
+  documents = (id: string) => this.call<DocumentRow[]>("GET", `/api/clients/${id}/documents`);
+  consent = (id: string) => this.call<ConsentState>("GET", `/api/clients/${id}/consent`);
+  recordConsent = (id: string, channel: string, state: "opt_in" | "opt_out", source: string) =>
+    this.call<unknown>("POST", `/api/clients/${id}/consent`, { channel, state, source });
+  processesFor = (id: string) => this.call<ProcessSummary[]>("GET", `/api/processes?client_id=${id}`);
+  processDefs = () => this.call<ProcessDef[]>("GET", "/api/process-defs");
+  startProcess = (key: string, clientId: string) =>
+    this.call<unknown>("POST", "/api/processes", { key, client_id: clientId });
+  async upload(id: string, file: File, docType: string): Promise<DocumentRow> {
+    const form = new FormData();
+    form.append("file", file);
+    form.append("doc_type", docType);
+    const r = await this.fetcher(`/api/clients/${id}/documents`, {
+      method: "POST",
+      headers: this.csrf ? { "x-csrf-token": this.csrf } : {},
+      credentials: "same-origin",
+      body: form,
+    });
+    if (!r.ok) {
+      let code = r.statusText;
+      try {
+        const j = (await r.json()) as { detail?: unknown };
+        if (typeof j.detail === "string") code = j.detail;
+      } catch {
+        /* not JSON */
+      }
+      throw new ApiError(r.status, code);
+    }
+    return (await r.json()) as DocumentRow;
+  }
   clients = (q: string) => this.call<ClientRow[]>("GET", `/api/clients?q=${encodeURIComponent(q)}`);
 }

@@ -14,7 +14,9 @@ pytestmark = pytest.mark.slow
 def clamd() -> Iterator[ClamdAntivirus]:
     from testcontainers.core.container import DockerContainer
 
-    c = DockerContainer("clamav/clamav:stable").with_exposed_ports(3310)
+    c = DockerContainer(
+        "clamav/clamav:stable@sha256:6d87c712e3391e13c1ba6e05dfb074d4b1ddb5a6834b23bb9da990d2a4ef042a"
+    ).with_exposed_ports(3310)
     with c:
         av = ClamdAntivirus(c.get_container_host_ip(), int(c.get_exposed_port(3310)))
         deadline = time.time() + 300

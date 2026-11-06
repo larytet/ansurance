@@ -51,7 +51,7 @@ select = ["E", "F", "I", "B", "UP", "S"]
 ignore = ["B008"]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/*" = ["S101", "S105", "S106", "S311", "S603", "S607", "S608"]
+"tests/*" = ["S101", "S105", "S106", "S311", "S603", "S607", "S608", "E501"]  # long digests
 "app/metrics.py" = ["E501"]  # metric descriptions read better on one line
 "app/intake/ocr.py" = ["S603", "S607"]  # runs the local tesseract binary, fixed arguments
 
