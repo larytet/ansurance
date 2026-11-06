@@ -1,9 +1,14 @@
 {
 	admin off
-	auto_https off
+	local_certs
+	default_sni localhost
+	skip_install_trust
 }
 
-:80 {
+:443 {
+	tls internal {
+		on_demand
+	}
 	encode gzip
 	header {
 		X-Content-Type-Options nosniff
@@ -22,4 +27,9 @@
 	handle {
 		reverse_proxy web:8080
 	}
+}
+
+# Plain HTTP only redirects to HTTPS.
+:80 {
+	redir https://{host}:{$HTTPS_PORT:8443}{uri} permanent
 }

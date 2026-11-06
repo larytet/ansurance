@@ -4,11 +4,15 @@ import logging
 import uuid
 from collections.abc import Awaitable, Callable
 
+import httpx
 from fastapi import FastAPI, Request, Response
 from fastapi.responses import JSONResponse
 from sqlalchemy import Engine
+from sqlalchemy.orm import sessionmaker
 
 from app import __version__
+from app.auth.router import router as auth_router
+from app.clients.router import router as clients_router
 from app.config import Settings, get_settings
 from app.db import database_ready, make_engine
 from app.logging import configure_logging, request_id_var
@@ -16,7 +20,11 @@ from app.logging import configure_logging, request_id_var
 log = logging.getLogger("ansurance")
 
 
-def create_app(settings: Settings | None = None, engine: Engine | None = None) -> FastAPI:
+def create_app(
+    settings: Settings | None = None,
+    engine: Engine | None = None,
+    http: httpx.Client | None = None,
+) -> FastAPI:
     settings = settings or get_settings()
     configure_logging(settings.log_level)
     engine = engine or make_engine(settings)
@@ -27,6 +35,12 @@ def create_app(settings: Settings | None = None, engine: Engine | None = None) -
         docs_url="/api/docs",
         openapi_url="/api/openapi.json",
     )
+
+    app.state.settings = settings
+    app.state.sessionmaker = sessionmaker(engine, expire_on_commit=False)
+    app.state.http = http or httpx.Client(timeout=10)
+    app.include_router(auth_router)
+    app.include_router(clients_router)
 
     @app.middleware("http")
     async def request_id_middleware(

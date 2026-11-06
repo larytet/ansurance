@@ -1,6 +1,6 @@
 COMPOSE = docker compose -f deploy/compose/docker-compose.yml --env-file deploy/compose/.env
 
-.PHONY: up down logs ps smoke ci test-backend test-web lint
+.PHONY: e2e-m1 up down logs ps smoke ci test-backend test-web lint
 
 deploy/compose/.env:
 	@echo "Creating deploy/compose/.env with random secrets (edit BIND_ADDR for your VPN)"
@@ -22,6 +22,9 @@ ps:
 
 smoke:
 	./scripts/smoke.sh
+
+e2e-m1:
+	uv run --project backend python scripts/e2e_m1.py
 
 lint:
 	cd backend && uv run ruff check . && uv run ruff format --check . && uv run mypy app

@@ -15,8 +15,12 @@ services:
     ports:
       # Bind to the VPN-facing address only (set BIND_ADDR in .env). Default: loopback.
       - "${BIND_ADDR:-127.0.0.1}:${HTTP_PORT:-8080}:80"
+      - "${BIND_ADDR:-127.0.0.1}:${HTTPS_PORT:-8443}:443"
+    environment:
+      HTTPS_PORT: ${HTTPS_PORT:-8443}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
     depends_on:
       api: { condition: service_healthy }
       web: { condition: service_started }
@@ -74,5 +78,6 @@ services:
       retries: 20
 
 volumes:
+  caddy_data:
   pgdata:
   objdata:

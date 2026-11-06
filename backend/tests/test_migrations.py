@@ -20,7 +20,10 @@ def _cfg(url: str, monkeypatch) -> Config:  # type: ignore[no-untyped-def]
     return cfg
 
 
-def test_upgrade_from_empty_matches_models_and_downgrades(pg_url: str, monkeypatch) -> None:  # type: ignore[no-untyped-def]
+def test_upgrade_from_empty_matches_models_and_downgrades(pg_url: str, monkeypatch) -> None:
+    from tests import conftest
+
+    conftest._migrated.discard(pg_url)  # this test leaves the schema re-created  # type: ignore[no-untyped-def]
     eng = create_engine(pg_url)
     with eng.begin() as c:
         c.execute(text("DROP SCHEMA public CASCADE; CREATE SCHEMA public;"))

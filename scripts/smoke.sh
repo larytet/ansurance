@@ -6,15 +6,17 @@ cd "$(dirname "$0")/.."
 ENV=deploy/compose/.env
 BIND=$(grep -E '^BIND_ADDR=' "$ENV" | cut -d= -f2); BIND=${BIND:-127.0.0.1}
 PORT=$(grep -E '^HTTP_PORT=' "$ENV" | cut -d= -f2); PORT=${PORT:-8080}
-BASE="http://${BIND}:${PORT}"
+HPORT=$(grep -E "^HTTPS_PORT=" "$ENV" | cut -d= -f2); HPORT=${HPORT:-8443}
+BASE="https://${BIND}:${HPORT}"
+CURL="curl -k"
 fail() { echo "SMOKE FAIL: $*" >&2; exit 1; }
 
-health=$(curl -fsS "$BASE/api/health") || fail "health"
+health=$($CURL -fsS "$BASE/api/health") || fail "health"
 echo "$health" | grep -q '"status":"ok"' || fail "health body: $health"
-curl -fsS "$BASE/api/ready" | grep -q '"status":"ready"' || fail "ready"
-curl -fsS "$BASE/" | grep -qi '<title>ansurance</title>' || fail "web app not served"
+$CURL -fsS "$BASE/api/ready" | grep -q '"status":"ready"' || fail "ready"
+$CURL -fsS "$BASE/" | grep -qi '<title>ansurance</title>' || fail "web app not served"
 
-hdrs=$(curl -fsS -D - -o /dev/null "$BASE/api/health")
+hdrs=$($CURL -fsS -D - -o /dev/null "$BASE/api/health")
 for h in 'x-content-type-options: nosniff' 'x-frame-options: DENY' 'content-security-policy' 'x-request-id'; do
   echo "$hdrs" | grep -qi "$h" || fail "missing header $h"
 done
