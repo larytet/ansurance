@@ -8,7 +8,7 @@ Updated: 2026-11-06
 | 2. Requirements brief and owner decisions D1..D10 | Done (decisions log below) |
 | 3. Design spec (`docs/DESIGN.md`, v0.1) | Approved by owner 2026-11-06 |
 | 4. Test plan (`docs/TESTPLAN.md`) | Written (v0.1); results table updated per milestone |
-| 5. Milestones M0..M10 | M0..M5 done; M6 built and verified offline (real AWS deployment pending); M7 next. Rule: commit and push after every completed milestone (owner instruction 2026-11-06) |
+| 5. Milestones M0..M10 | M0..M5 done; M6 built and verified offline (real AWS deployment pending); M7 done; M8 next. Rule: commit and push after every completed milestone (owner instruction 2026-11-06) |
 
 ## Decisions log (from the requirements brief)
 
@@ -37,6 +37,7 @@ Updated: 2026-11-06
 | M4 Process engine | Done 2026-11-06 | 225 backend, e2e on live stack | Definitions as validated, versioned data (acyclic, roles, four-eyes option), the 18 processes seeded from the mock (72 stages, 221 checks), locked and parallel stages, checks, role-restricted finalize, immutable final stages (DB trigger), instances pinned to their version, My work, banner data per client, cancel, Mermaid diagrams generated and identical to the stored files; mock bug in Hebrew headings fixed |
 | M5 Intake pipeline | Done 2026-11-06 | 314 backend, e2e on live stack | Postgres job queue and worker container, fax drop folder, .eml ingest, virus scan (fail closed), page rendering, de-skew, crop, de-noise, split on blank pages, real Tesseract with a second Latin pass, rules classifier, ID and policy extraction, evidence-based attribution (never name-only, sender only breaks ties), routing to filed, review (back-office Inbox) or unassigned, wrong-client correction with misfile metric, feedback records. Synthetic accuracy 96.7% auto-filed, 0 misfiled; real scans still to be measured |
 | M6 Cloud deployment (AWS) | Built, verified offline 2026-11-06; **deployment to a real account not done** | 27 infra plan tests, conformance on compose | Terraform (network, KMS, RDS, S3 with Object Lock, IAM guard, ECS Fargate services, ALB, WAF option, CloudTrail, GuardDuty, Inspector, Config, alarms, budget, backup), deploy-dev workflow, conformance script, settings from parts. Needs from the owner: AWS account and OIDC role, ACM certificate, allowed addresses, region availability check (D4) |
-| M7..M10 | Not started | | |
+| M7 Operations and backup | Done 2026-11-06 | 17 audit archive + 4 daily ops + 8 metrics + 6 observability + 5 disaster recovery + 6 point-in-time recovery + 5 upgrade/rollback, all on the real stack | Encrypted backups (dump, base backup, 15-minute incremental originals), continuous WAL archiving, restore.sh (full and point-in-time), monthly self-test, audit sealing to Parquet with verification across hot and archive, nightly audit and backup checks reaching the manager, Prometheus/Grafana profile with 13 alert rules, make upgrade with backup, health gate and automatic rollback, OPERATIONS.md |
+| M8..M10 | Not started | | |
 
 Owner decision 2026-11-06: audit of reads is asynchronous and batched; losing unflushed read entries on a crash is accepted (implemented, tested).

@@ -16,6 +16,8 @@ from app.intake.context import make_context
 from app.intake.handlers import make_handlers, poll_fax_folder
 from app.jobs import queue
 from app.logging import configure_logging
+from app.main import make_archive_store
+from app.ops import daily_due, run_daily
 
 log = logging.getLogger("ansurance.worker")
 
@@ -25,6 +27,7 @@ def main() -> int:
     configure_logging(settings.log_level)
     maker = sessionmaker(make_engine(settings), expire_on_commit=False)
     ctx = make_context(settings)
+    archive_store = make_archive_store(settings)
     handlers = make_handlers(ctx)
     worker_id = f"{os.uname().nodename}:{os.getpid()}"
     stop = False
@@ -42,6 +45,13 @@ def main() -> int:
             if settings.fax_dir and time.time() - last_fax >= settings.fax_poll_seconds:
                 last_fax = time.time()
                 poll_fax_folder(db, ctx)
+            if daily_due(db, settings):
+                try:
+                    log.info("daily operations: %s", run_daily(db, settings, archive_store))
+                    db.commit()
+                except Exception:  # noqa: BLE001  (never stops the job loop)
+                    db.rollback()
+                    log.exception("daily operations failed")
             queue.reclaim_stale(db)
             db.commit()
             busy = queue.run_one(db, handlers, worker_id)

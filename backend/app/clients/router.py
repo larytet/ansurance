@@ -99,7 +99,9 @@ def search_clients(
     for tok in normalize(q).split():
         conds = [Client.search_text.ilike(f"%{tok}%")]
         sk = skeleton(tok)
-        if len(sk) >= 2:
+        # the consonant skeleton is for names; a token with digits (an ID, a code) must match
+        # literally, or "8bf2f032" would match every name containing the letters b and f
+        if len(sk) >= 2 and tok.isalpha():
             conds.append(Client.search_skel.ilike(f"%{sk}%"))
         stmt = stmt.where(or_(*conds))
     rows = db.scalars(stmt.order_by(Client.name).limit(50)).all()
@@ -241,15 +243,21 @@ def marketing_contacts(
 
 @router.get("/audit/verify")
 def verify_audit(
-    p: Principal = Depends(require("audit.read")), db: Db = Depends(get_db)
+    request: Request, p: Principal = Depends(require("audit.read")), db: Db = Depends(get_db)
 ) -> dict[str, Any]:
-    res = chain.verify(db)
+    """The hot chain and every sealed archive file (REQUIREMENTS section 7)."""
+    from app.audit import archive
+
+    res = archive.verify_all(db, request.app.state.archive_blobs)
     chain.append(db, str(p.user.id), "audit.verify", "audit", {"ok": res.ok})
     return {
         "ok": res.ok,
-        "entries": res.entries,
-        "first_bad_seq": res.first_bad_seq,
-        "reason": res.reason,
+        "entries": res.hot_entries,
+        "first_bad_seq": None,
+        "reason": "; ".join(res.problems[:3]),
+        "seals": res.seals,
+        "sealed_entries": res.sealed_entries,
+        "problems": res.problems,
     }
 
 

@@ -1,0 +1,79 @@
+groups:
+  - name: ansurance
+    rules:
+      - alert: ApiDown
+        expr: up{job="api"} == 0
+        for: 2m
+        labels: { severity: critical }
+        annotations: { summary: "The API is not answering" }
+
+      - alert: DatabaseDown
+        expr: ansurance_database_up == 0
+        for: 2m
+        labels: { severity: critical }
+        annotations: { summary: "The API cannot reach the database" }
+
+      - alert: JobQueueStuck
+        expr: ansurance_jobs_oldest_queued_seconds > 900
+        for: 5m
+        labels: { severity: critical }
+        annotations:
+          summary: "A background job has waited more than 15 minutes: is the worker running?"
+
+      - alert: DeadJobs
+        expr: ansurance_jobs{status="dead"} > 0
+        for: 10m
+        labels: { severity: warning }
+        annotations: { summary: "Jobs failed all their retries and need attention" }
+
+      - alert: IntakeBacklog
+        expr: sum(ansurance_intake_items{state=~"received|scanned|digitized|classified|extracted"}) > 50
+        for: 15m
+        labels: { severity: warning }
+        annotations: { summary: "More than 50 incoming documents are not yet filed or queued for review" }
+
+      - alert: AuditVerifyFailed
+        expr: ansurance_audit_verify_ok == 0
+        labels: { severity: critical }
+        annotations: { summary: "The audit chain verification FAILED: possible tampering" }
+
+      - alert: AuditVerifyStale
+        expr: ansurance_audit_verify_age_seconds > 93600
+        labels: { severity: warning }
+        annotations: { summary: "The audit chain has not been verified for more than 26 hours" }
+
+      - alert: BackupStale
+        expr: ansurance_backup_age_seconds > 93600
+        labels: { severity: critical }
+        annotations: { summary: "No successful backup for more than 26 hours" }
+
+      - alert: FilesSyncStale
+        expr: ansurance_backup_files_sync_age_seconds > 3600
+        labels: { severity: warning }
+        annotations: { summary: "New originals have not been copied to the backup for an hour" }
+
+      - alert: RestoreTestFailed
+        expr: ansurance_restore_test_ok == 0
+        labels: { severity: critical }
+        annotations: { summary: "The last restore self-test FAILED: the backups may not be usable" }
+
+      - alert: HighErrorRate
+        expr: >
+          sum(rate(ansurance_http_requests_total{status=~"5.."}[5m]))
+          / clamp_min(sum(rate(ansurance_http_requests_total[5m])), 1) > 0.05
+        for: 10m
+        labels: { severity: warning }
+        annotations: { summary: "More than 5% of requests fail with a server error" }
+
+      - alert: SlowRequests
+        expr: >
+          histogram_quantile(0.95,
+            sum by (le) (rate(ansurance_http_request_duration_seconds_bucket[5m]))) > 2
+        for: 10m
+        labels: { severity: warning }
+        annotations: { summary: "The slowest 5% of requests take more than 2 seconds" }
+
+      - alert: ReadAuditDropping
+        expr: increase(ansurance_read_audit_dropped_total[1h]) > 0
+        labels: { severity: warning }
+        annotations: { summary: "Read-audit entries are being dropped: the writer cannot keep up" }

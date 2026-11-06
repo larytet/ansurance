@@ -1,0 +1,56 @@
+rule_files:
+  - alerts.yml
+
+evaluation_interval: 1m
+
+tests:
+  - interval: 1m
+    input_series:
+      - series: 'up{job="api"}'
+        values: "1 1 0 0 0 0"
+      - series: "ansurance_jobs_oldest_queued_seconds"
+        values: "0 0 1000 1000 1000 1000 1000 1000"
+      - series: "ansurance_audit_verify_ok"
+        values: "1 1 1 0 0"
+      - series: "ansurance_backup_age_seconds"
+        values: "100 100 100 100000 100000"
+      - series: "ansurance_restore_test_ok"
+        values: "1 1 1 1 0"
+    alert_rule_test:
+      - eval_time: 5m
+        alertname: ApiDown
+        exp_alerts:
+          - exp_labels: { severity: critical, job: api }
+            exp_annotations: { summary: "The API is not answering" }
+      - eval_time: 3m
+        alertname: ApiDown
+        exp_alerts: []   # down for only one minute so far
+      - eval_time: 8m
+        alertname: JobQueueStuck
+        exp_alerts:
+          - exp_labels: { severity: critical }
+            exp_annotations:
+              summary: "A background job has waited more than 15 minutes: is the worker running?"
+      - eval_time: 3m
+        alertname: AuditVerifyFailed
+        exp_alerts:
+          - exp_labels: { severity: critical }
+            exp_annotations:
+              summary: "The audit chain verification FAILED: possible tampering"
+      - eval_time: 2m
+        alertname: AuditVerifyFailed
+        exp_alerts: []
+      - eval_time: 4m
+        alertname: BackupStale
+        exp_alerts:
+          - exp_labels: { severity: critical }
+            exp_annotations: { summary: "No successful backup for more than 26 hours" }
+      - eval_time: 2m
+        alertname: BackupStale
+        exp_alerts: []
+      - eval_time: 4m
+        alertname: RestoreTestFailed
+        exp_alerts:
+          - exp_labels: { severity: critical }
+            exp_annotations:
+              summary: "The last restore self-test FAILED: the backups may not be usable"

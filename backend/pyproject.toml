@@ -21,6 +21,8 @@ dependencies = [
   "pillow>=13.0.0",
   "numpy>=2.5.4",
   "opencv-python-headless>=5.0.0.93",
+  "pyarrow>=26.0.1",
+  "prometheus-client>=0.26.0",
 ]
 
 [dependency-groups]
@@ -32,6 +34,8 @@ dev = [
   "pip-audit>=2.7",
   "types-authlib>=1.8.0.20261106",
   "python-bidi>=0.6.12",
+  "pyyaml>=6.0.3",
+  "types-pyyaml>=6.0.12.20261103",
 ]
 
 [tool.setuptools.packages.find]
@@ -47,7 +51,8 @@ select = ["E", "F", "I", "B", "UP", "S"]
 ignore = ["B008"]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/*" = ["S101", "S105", "S106", "S311", "S603", "S607"]
+"tests/*" = ["S101", "S105", "S106", "S311", "S603", "S607", "S608"]
+"app/metrics.py" = ["E501"]  # metric descriptions read better on one line
 "app/intake/ocr.py" = ["S603", "S607"]  # runs the local tesseract binary, fixed arguments
 
 [tool.mypy]
@@ -61,5 +66,5 @@ pythonpath = ["."]
 markers = ["slow: needs containers or a long run (real OCR accuracy, Terraform plans, ClamAV)"]
 
 [[tool.mypy.overrides]]
-module = ["boto3", "botocore.*", "pypdfium2"]
+module = ["boto3", "botocore.*", "pypdfium2", "pyarrow", "pyarrow.*"]
 ignore_missing_imports = true

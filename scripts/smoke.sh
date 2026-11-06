@@ -22,10 +22,15 @@ for h in 'x-content-type-options: nosniff' 'x-frame-options: DENY' 'content-secu
 done
 echo "$hdrs" | grep -qi '^server:' && fail "Server header must be removed"
 
-# only the proxy publishes a host port
-published=$(docker compose -f deploy/compose/docker-compose.yml --env-file "$ENV" ps --format '{{.Service}}|{{.Publishers}}' \
-  | grep -E '\{[^ ]* [0-9]+ [1-9][0-9]* ' | cut -d'|' -f1 | sort -u | tr '\n' ' ')
+# only the proxy publishes a host port (plus Prometheus and Grafana when the optional
+# observability profile is running; they bind to the same VPN-facing address)
+published=$(docker compose -f deploy/compose/docker-compose.yml --env-file "$ENV" --profile observability ps --format '{{.Service}}|{{.Publishers}}' \
+  | grep -E '\{[^ ]* [0-9]+ [1-9][0-9]* ' | cut -d'|' -f1 | sort -u | grep -vxE 'prometheus|grafana' | tr '\n' ' ')
 [ "$published" = "proxy " ] || fail "published services: '$published' (expected only proxy)"
+
+# metrics are internal: the proxy must not serve them
+body=$($CURL -sS "$BASE/metrics" || true)
+echo "$body" | grep -q 'ansurance_' && fail "/metrics is reachable through the proxy"
 
 unhealthy=$(docker compose -f deploy/compose/docker-compose.yml --env-file "$ENV" ps --format '{{.Service}} {{.Health}}' | awk '$2=="unhealthy"')
 [ -z "$unhealthy" ] || fail "unhealthy: $unhealthy"

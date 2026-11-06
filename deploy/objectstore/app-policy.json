@@ -6,6 +6,7 @@
       "Action": ["s3:GetObject", "s3:PutObject", "s3:ListBucket", "s3:GetBucketLocation",
                  "s3:GetObjectRetention", "s3:GetBucketObjectLockConfiguration"],
       "Resource": ["arn:aws:s3:::originals", "arn:aws:s3:::originals/*",
+                   "arn:aws:s3:::audit-archive", "arn:aws:s3:::audit-archive/*",
                    "arn:aws:s3:::derived", "arn:aws:s3:::derived/*"]
     },
     {
@@ -13,7 +14,8 @@
       "Action": ["s3:DeleteObject", "s3:DeleteObjectVersion", "s3:PutBucketPolicy",
                  "s3:PutObjectRetention", "s3:BypassGovernanceRetention",
                  "s3:DeleteBucket", "s3:PutBucketObjectLockConfiguration"],
-      "Resource": ["arn:aws:s3:::originals", "arn:aws:s3:::originals/*"]
+      "Resource": ["arn:aws:s3:::originals", "arn:aws:s3:::originals/*",
+                   "arn:aws:s3:::audit-archive", "arn:aws:s3:::audit-archive/*"]
     }
   ]
 }

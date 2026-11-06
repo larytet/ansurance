@@ -47,6 +47,7 @@ class Settings(BaseSettings):
     s3_secret_key: SecretStr | None = None
     s3_region: str = "il-central-1"
     s3_bucket_originals: str = "originals"
+    s3_bucket_audit_archive: str = "audit-archive"
     log_level: str = "INFO"
     # audit of reads is asynchronous and batched (see app/audit/readbuffer.py)
     read_audit_flush_seconds: float = 5.0
@@ -77,6 +78,8 @@ class Settings(BaseSettings):
     fax_dir: str = ""  # watched drop folder; empty disables the fax channel
     fax_poll_seconds: int = 30
     render_dpi: int = 200
+    daily_seconds: int = 86_400  # sealing, nightly audit verification, backup-age check
+    backup_max_age_hours: int = 26
     second_pass_below: float = 0.80  # re-read with the Latin model when IDs read below this
 
     @model_validator(mode="after")

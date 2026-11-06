@@ -1,0 +1,30 @@
+{
+  "title": "ansurance",
+  "uid": "ansurance-overview",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "time": { "from": "now-6h", "to": "now" },
+  "panels": [
+    { "id": 1, "type": "timeseries", "title": "Requests per second", "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [ { "expr": "sum by (status) (rate(ansurance_http_requests_total[5m]))", "legendFormat": "{{status}}" } ] },
+    { "id": 2, "type": "timeseries", "title": "Latency, 95th percentile (s)", "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [ { "expr": "histogram_quantile(0.95, sum by (le) (rate(ansurance_http_request_duration_seconds_bucket[5m])))" } ] },
+    { "id": 3, "type": "timeseries", "title": "Jobs by status", "gridPos": { "h": 8, "w": 8, "x": 0, "y": 8 },
+      "targets": [ { "expr": "ansurance_jobs", "legendFormat": "{{status}}" } ] },
+    { "id": 4, "type": "stat", "title": "Oldest waiting job (s)", "gridPos": { "h": 8, "w": 4, "x": 8, "y": 8 },
+      "targets": [ { "expr": "ansurance_jobs_oldest_queued_seconds" } ] },
+    { "id": 5, "type": "bargauge", "title": "Intake items, last 30 days", "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "targets": [ { "expr": "ansurance_intake_items", "legendFormat": "{{state}}" } ] },
+    { "id": 6, "type": "stat", "title": "Backup age (h)", "gridPos": { "h": 6, "w": 6, "x": 0, "y": 16 },
+      "targets": [ { "expr": "ansurance_backup_age_seconds / 3600" } ] },
+    { "id": 7, "type": "stat", "title": "Audit verification (1 = ok)", "gridPos": { "h": 6, "w": 6, "x": 6, "y": 16 },
+      "targets": [ { "expr": "ansurance_audit_verify_ok" } ] },
+    { "id": 8, "type": "stat", "title": "Restore self-test (1 = ok)", "gridPos": { "h": 6, "w": 6, "x": 12, "y": 16 },
+      "targets": [ { "expr": "ansurance_restore_test_ok" } ] },
+    { "id": 9, "type": "stat", "title": "Documents moved to another client, 30 d", "gridPos": { "h": 6, "w": 6, "x": 18, "y": 16 },
+      "targets": [ { "expr": "ansurance_intake_misfiled_30d" } ] },
+    { "id": 10, "type": "timeseries", "title": "Open Inbox items by role", "gridPos": { "h": 8, "w": 12, "x": 0, "y": 22 },
+      "targets": [ { "expr": "ansurance_inbox_open", "legendFormat": "{{role}}" } ] }
+  ]
+}

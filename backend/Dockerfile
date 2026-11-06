@@ -12,6 +12,8 @@ RUN uv sync --frozen --no-dev --no-install-project
 COPY app ./app
 COPY migrations ./migrations
 COPY alembic.ini ./
+ARG BUILD_ID=dev
+LABEL org.ansurance.build=$BUILD_ID
 USER app
 ENV PATH="/srv/.venv/bin:$PATH"
 EXPOSE 8000

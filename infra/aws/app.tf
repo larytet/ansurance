@@ -12,6 +12,7 @@ locals {
     { name = "ANS_DB_USER", value = "ansurance" },
     { name = "ANS_S3_REGION", value = var.region },
     { name = "ANS_S3_BUCKET_ORIGINALS", value = aws_s3_bucket.b["originals"].bucket },
+    { name = "ANS_S3_BUCKET_AUDIT_ARCHIVE", value = aws_s3_bucket.b["audit_archive"].bucket },
     { name = "ANS_CLAMD_HOST", value = "clamav.${local.service_dns}" },
   ]
 

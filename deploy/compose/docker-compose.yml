@@ -30,11 +30,17 @@ services:
       web: { condition: service_started }
 
   web:
-    build: ../../web
+    build:
+      context: ../../web
+      args:
+        BUILD_ID: ${BUILD_ID:-dev}
     restart: unless-stopped
 
   api:
-    build: ../../backend
+    build:
+      context: ../../backend
+      args:
+        BUILD_ID: ${BUILD_ID:-dev}
     restart: unless-stopped
     environment: *api-env
     command: >
@@ -55,7 +61,10 @@ services:
   worker:
     # Same image as the API. Runs the job queue: the intake pipeline (virus scan, OCR,
     # classify, attribute, file) and the fax drop-folder poller.
-    build: ../../backend
+    build:
+      context: ../../backend
+      args:
+        BUILD_ID: ${BUILD_ID:-dev}
     restart: unless-stopped
     environment:
       <<: *api-env
@@ -67,15 +76,97 @@ services:
     depends_on:
       api: { condition: service_healthy }
 
-  postgres:
-    image: postgres:16-alpine
+  # ---- optional: docker compose --profile observability up -d ----------------------------
+  prometheus:
+    profiles: ["observability"]
+    image: prom/prometheus:v2.55.1
     restart: unless-stopped
+    ports:
+      - "${BIND_ADDR:-127.0.0.1}:9090:9090"
+    volumes:
+      - ../observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ../observability/alerts.yml:/etc/prometheus/alerts.yml:ro
+      - promdata:/prometheus
+    depends_on:
+      api: { condition: service_healthy }
+
+  grafana:
+    profiles: ["observability"]
+    image: grafana/grafana:11.3.0
+    restart: unless-stopped
+    ports:
+      - "${BIND_ADDR:-127.0.0.1}:3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-change-me}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - ../observability/grafana-datasource.yml:/etc/grafana/provisioning/datasources/ds.yml:ro
+      - ../observability/grafana-dashboards.yml:/etc/grafana/provisioning/dashboards/db.yml:ro
+      - ../observability/dashboard.json:/var/lib/grafana/dashboards/ansurance.json:ro
+      - grafanadata:/var/lib/grafana
+    depends_on:
+      - prometheus
+
+  walarchive-init:
+    # The archive directory must be writable by the database user (uid 70).
+    image: postgres:16-alpine
+    restart: "no"
+    user: root
+    entrypoint: ["sh", "-c", "chown postgres:postgres /wal && chmod 700 /wal"]
+    volumes:
+      - ${BACKUP_WAL_PATH:-walarchive}:/wal
+
+  backup:
+    # Nightly encrypted backup (database dump and every original), monthly restore self-test.
+    # Point BACKUP_PATH at a directory on a different disk, and keep BACKUP_PASSPHRASE somewhere
+    # safe: without it a backup cannot be read.
+    build: ../backup
+    restart: unless-stopped
+    environment:
+      PGHOST: postgres
+      PGUSER: ansurance
+      PGPASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      PGDATABASE: ansurance
+      S3_ENDPOINT: http://objectstore:9000
+      S3_ACCESS_KEY: ${OBJECTSTORE_APP_USER:-ansurance-app}
+      S3_SECRET_KEY: ${OBJECTSTORE_APP_PASSWORD:?set OBJECTSTORE_APP_PASSWORD in .env}
+      BACKUP_PASSPHRASE: ${BACKUP_PASSPHRASE:?set BACKUP_PASSPHRASE in .env}
+      BACKUP_DIR: /backups
+      BACKUP_KEEP: ${BACKUP_KEEP:-14}
+    volumes:
+      - ${BACKUP_PATH:-backups}:/backups
+      - ${BACKUP_WAL_PATH:-walarchive}:/wal
+    depends_on:
+      api: { condition: service_healthy }
+
+  postgres:
+    build: ../postgres
+    restart: unless-stopped
+    # Continuous archiving of the write-ahead log (encrypted, every 5 minutes at most) gives
+    # point-in-time recovery with an RPO of minutes; the backup service takes the base backups.
+    command:
+      - postgres
+      - -c
+      - wal_level=replica
+      - -c
+      - archive_mode=on
+      - -c
+      - archive_timeout=300
+      - -c
+      - hba_file=/etc/postgresql/pg_hba.conf
+      - -c
+      - "archive_command=test ! -f /wal/%f.enc && openssl enc -aes-256-cbc -pbkdf2 -salt -pass env:BACKUP_PASSPHRASE -in %p -out /wal/%f.enc.tmp && mv /wal/%f.enc.tmp /wal/%f.enc"
     environment:
       POSTGRES_USER: ansurance
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
       POSTGRES_DB: ansurance
+      BACKUP_PASSPHRASE: ${BACKUP_PASSPHRASE:?set BACKUP_PASSPHRASE in .env}
     volumes:
       - pgdata:/var/lib/postgresql/data
+      - ${BACKUP_WAL_PATH:-walarchive}:/wal
+      - ./pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
+    depends_on:
+      walarchive-init: { condition: service_completed_successfully }
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ansurance -d ansurance"]
       interval: 5s
@@ -128,6 +219,10 @@ services:
       start_period: 60s
 
 volumes:
+  promdata:
+  grafanadata:
+  walarchive:
+  backups:
   faxdrop:
   clamdata:
   caddy_data:

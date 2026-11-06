@@ -315,3 +315,19 @@ def test_mass_assignment_ignored(api: TestClient, db: Session) -> None:
     )
     assert r.status_code == 201
     assert r.json()["agent_id"] == a.id and r.json()["status"] == "lead"
+
+
+def test_a_token_with_digits_matches_literally_not_by_consonants(
+    api: TestClient, db: Session
+) -> None:
+    """Codes and ID fragments must not match every name that happens to contain the letters."""
+    hdr = login(api, db, acct(db, "backoffice"))
+    new_client(api, hdr, "123456782", "David Cohen")
+    new_client(api, hdr, "000000026", "Beba Fofo")  # consonants b and f, like the code below
+    assert api.get("/api/clients", params={"q": "8bf2f032"}).json() == []
+    assert [c["name"] for c in api.get("/api/clients", params={"q": "000000026"}).json()] == [
+        "Beba Fofo"
+    ]
+    assert [c["name"] for c in api.get("/api/clients", params={"q": "fofo"}).json()] == [
+        "Beba Fofo"
+    ]  # names still match normally

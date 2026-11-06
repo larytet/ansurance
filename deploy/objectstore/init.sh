@@ -11,6 +11,8 @@ mc alias set s "$ENDPOINT" "$MINIO_ROOT_USER" "$MINIO_ROOT_PASSWORD" >/dev/null
 
 mc mb --ignore-existing --with-lock s/originals
 mc retention set --default GOVERNANCE "${LOCK_DAYS}d" s/originals
+mc mb --ignore-existing --with-lock s/audit-archive
+mc retention set --default GOVERNANCE "${LOCK_DAYS}d" s/audit-archive
 mc mb --ignore-existing s/derived
 mc mb --ignore-existing s/exports
 

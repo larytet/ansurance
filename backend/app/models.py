@@ -484,3 +484,20 @@ class IntakeFeedback(Base):
     to_client_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
     suggested_client_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
     note: Mapped[str] = mapped_column(Text, nullable=False, default="")
+
+
+# ---- audit archive (M7) -------------------------------------------------------------
+class AuditSeal(Base):
+    """A month of the audit chain sealed into a Parquet file held outside the database."""
+
+    __tablename__ = "audit_seal"
+    id: Mapped[uuid.UUID] = _pk()
+    period: Mapped[str] = mapped_column(String(7), unique=True, nullable=False)  # YYYY-MM
+    first_seq: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    last_seq: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    entries: Mapped[int] = mapped_column(Integer, nullable=False)
+    head_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    file_sha256: Mapped[str] = mapped_column(String(64), nullable=False)
+    bucket: Mapped[str] = mapped_column(String(64), nullable=False)
+    key: Mapped[str] = mapped_column(String(128), nullable=False)
+    sealed_at: Mapped[datetime] = _now()

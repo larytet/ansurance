@@ -9,6 +9,7 @@ events, exports and downloads do not use this buffer.
 
 import logging
 import threading
+import weakref
 from collections import deque
 from datetime import UTC, datetime
 from typing import Any
@@ -18,6 +19,13 @@ from sqlalchemy.orm import Session, sessionmaker
 from app.audit import chain
 
 log = logging.getLogger("ansurance.audit")
+_LIVE: "weakref.WeakSet[ReadAuditBuffer]" = weakref.WeakSet()
+
+
+def discard_all() -> None:
+    """Forget every unflushed entry of every buffer in this process (test isolation only)."""
+    for b in list(_LIVE):
+        b.discard()
 
 
 class ReadAuditBuffer:
@@ -35,6 +43,7 @@ class ReadAuditBuffer:
         self._stop = threading.Event()
         self._thread: threading.Thread | None = None
         self.dropped = 0  # entries discarded because the queue was full
+        _LIVE.add(self)
         self.flushed = 0
 
     # -- called by requests ---------------------------------------------------------------

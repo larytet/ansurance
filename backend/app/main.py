@@ -11,7 +11,7 @@ from sqlalchemy import Engine
 from sqlalchemy.orm import sessionmaker
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
-from app import __version__
+from app import __version__, metrics
 from app.adapters.antivirus import Antivirus, ClamdAntivirus, FakeAntivirus
 from app.audit.readbuffer import ReadAuditBuffer
 from app.auth.router import router as auth_router
@@ -39,6 +39,13 @@ def make_blob_store(settings: Settings) -> BlobStore:
     return S3BlobStore(settings)
 
 
+def make_archive_store(settings: Settings) -> BlobStore:
+    """The write-once bucket that holds sealed audit files."""
+    if settings.profile is Profile.DEMO and not settings.s3_endpoint:
+        return FakeBlobStore(settings.s3_bucket_audit_archive)
+    return S3BlobStore(settings, bucket=settings.s3_bucket_audit_archive)
+
+
 def make_antivirus(settings: Settings) -> Antivirus:
     if settings.clamd_host:
         return ClamdAntivirus(settings.clamd_host, settings.clamd_port)
@@ -54,6 +61,7 @@ def create_app(
     blobs: BlobStore | None = None,
     antivirus: Antivirus | None = None,
     intake: IntakeContext | None = None,
+    archive_blobs: BlobStore | None = None,
 ) -> FastAPI:
     settings = settings or get_settings()
     configure_logging(settings.log_level)
@@ -73,12 +81,14 @@ def create_app(
         settings.read_audit_batch,
     )
     app.router.add_event_handler("shutdown", app.state.read_audit.stop)
+    metrics.install(app, sessionmaker(engine), app.state.read_audit)
     # the real client address (not the proxy's) feeds the per-IP login limit and the audit log
     app.add_middleware(ProxyHeadersMiddleware, trusted_hosts=settings.trusted_proxies)
     app.state.sessionmaker = sessionmaker(engine, expire_on_commit=False)
     app.state.http = http or httpx.Client(timeout=10)
     app.include_router(auth_router)
     app.state.blobs = blobs or make_blob_store(settings)
+    app.state.archive_blobs = archive_blobs or make_archive_store(settings)
     app.state.antivirus = antivirus or make_antivirus(settings)
     app.state.intake = intake or IntakeContext(settings, app.state.blobs, app.state.antivirus, None)
     app.include_router(clients_router)

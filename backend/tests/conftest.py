@@ -125,7 +125,7 @@ def s3_settings(settings: Settings, minio: MinioInfo) -> Settings:
 _migrated: set[str] = set()
 _DATA_TABLES = (
     "audit_entry, login_event, sso_state, sso_identity, session, recovery_code, "
-    "intake_feedback, intake_item, job, "
+    "audit_seal, intake_feedback, intake_item, job, "
     "check_instance, stage_instance, process_instance, process_def, "
     "outbox_message, consent_event, inbox_event, inbox_item, derived_artifact, document, "
     "blob, family_link, external_id, policy, insurer, client, user_role, user_account"
@@ -139,6 +139,9 @@ def fresh_db(engine: Engine, pg_url: str) -> Engine:
     Migrates once per session, then truncates between tests. The audit_entry append-only
     trigger is bypassed for the reset only, with session_replication_role.
     """
+    from app.audit.readbuffer import discard_all
+
+    discard_all()  # buffers of earlier tests must not write into this one
     if pg_url not in _migrated:
         with engine.begin() as c:
             c.execute(text("DROP SCHEMA public CASCADE; CREATE SCHEMA public;"))
@@ -148,6 +151,7 @@ def fresh_db(engine: Engine, pg_url: str) -> Engine:
         c.execute(text("SET session_replication_role = replica"))
         c.execute(text(f"TRUNCATE {_DATA_TABLES} RESTART IDENTITY CASCADE"))
         c.execute(text("SET session_replication_role = DEFAULT"))
+        c.execute(text("DELETE FROM platform_info WHERE key <> 'schema_era'"))
     return engine
 
 
