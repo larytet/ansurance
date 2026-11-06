@@ -22,3 +22,11 @@ button.link { border:0; background:none; color:var(--accent); padding:0; text-de
 .pipeline { display:flex; gap:.3rem; list-style:none; padding:0; margin:.3rem 0 0; flex-wrap:wrap; }
 .stage { border:1px solid var(--line); border-radius:4px; padding:.1rem .5rem; font-size:.85rem; color:var(--muted); }
 .stage.ready, .stage.in_progress { border-color:var(--accent); color:var(--accent); } .stage.final { background:var(--line); }
+
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr)); gap: 0.75rem; list-style: none; padding: 0; }
+.cards li { border: 1px solid var(--border, #ccc); border-radius: 8px; padding: 0.75rem; }
+.cards li strong { font-size: 1.6rem; display: block; }
+.cards li.attention { border-color: #b7791f; background: color-mix(in srgb, #b7791f 12%, transparent); }
+.trust .ok { color: #1b7f4c; }
+.trust .bad { color: #b42318; font-weight: 600; }
+.campaigns li, .work li { margin: 0.5rem 0; }

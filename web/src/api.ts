@@ -91,6 +91,67 @@ export interface ProcessDef {
   name: { en: string; he: string };
 }
 
+export interface Overview {
+  inbox_urgent: number;
+  renewals_overdue: number;
+  renewals_next_30: number;
+  claims_open: number;
+  intake_waiting_review: number;
+  kyc_waiting_approval: number;
+  campaigns_sending: number;
+  clients: number;
+  complaints_overdue: number;
+  licences_attention: number;
+}
+
+export interface AuditVerify {
+  ok: boolean;
+  entries: number;
+  seals: number;
+  sealed_entries: number;
+  problems: string[];
+}
+
+export interface Campaign {
+  id: string;
+  name: string;
+  type: string;
+  purpose: string;
+  status: string;
+  benefit: string;
+  body: string;
+  base_language: string;
+  requires_approval: boolean;
+  approved: boolean;
+}
+
+export interface CampaignPreview {
+  matching: number;
+  selected: number;
+  excluded: Record<string, number>;
+  languages: Record<string, number>;
+  sample: { name: string; language: string; channel: string }[];
+}
+
+export interface CampaignIn {
+  name: string;
+  type: string;
+  benefit: string;
+  body: string;
+  base_language: string;
+  segment: { has_product?: string[]; lacks_product?: string[] };
+}
+
+export interface WorkItem {
+  instance_id: string;
+  key: string;
+  title: string;
+  stage: string;
+  stage_status: string;
+  role: string;
+  client_id: string | null;
+}
+
 export class ApiError extends Error {
   constructor(
     public status: number,
@@ -119,6 +180,10 @@ export class Api {
       try {
         const j = (await r.json()) as { detail?: unknown };
         if (typeof j.detail === "string") code = j.detail;
+        else if (j.detail && typeof j.detail === "object" && "error" in j.detail) {
+          const d = j.detail as { error: string; detail?: unknown };
+          code = d.detail ? `${d.error}: ${JSON.stringify(d.detail)}` : d.error;
+        }
       } catch {
         /* not JSON */
       }
@@ -185,4 +250,12 @@ export class Api {
     return (await r.json()) as DocumentRow;
   }
   clients = (q: string) => this.call<ClientRow[]>("GET", `/api/clients?q=${encodeURIComponent(q)}`);
+  overview = () => this.call<Overview>("GET", "/api/overview");
+  verifyAudit = () => this.call<AuditVerify>("GET", "/api/audit/verify");
+  campaigns = () => this.call<Campaign[]>("GET", "/api/campaigns");
+  createCampaign = (b: CampaignIn) => this.call<Campaign>("POST", "/api/campaigns", b);
+  previewCampaign = (id: string) => this.call<CampaignPreview>("GET", `/api/campaigns/${id}/preview`);
+  approveCampaign = (id: string) => this.call<Campaign>("POST", `/api/campaigns/${id}/approve`);
+  startCampaign = (id: string) => this.call<{ selected: number; excluded: number }>("POST", `/api/campaigns/${id}/start`);
+  myWork = () => this.call<{ count: number; items: WorkItem[] }>("GET", "/api/my-work");
 }
