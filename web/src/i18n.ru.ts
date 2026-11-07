@@ -60,5 +60,11 @@ export const ru: Record<Key, string> = {
   integrations: "Интеграции", adapterConfigured: "Настроено", adapterApproved: "Одобрено", calls24: "Вызовы за последние 24 часа", lastError: "Последняя ошибка",
   notConfigured: "Не настроено", syncs: "Синхронизации", failed: "неудачных",
   settings: "Настройки", account: "Учётная запись", capabilities: "Права",
+  translations: "Переводы", translatedText: "Переведённый текст (проверен человеком)", markReviewed: "Сохранить как проверенный", translationSaved: "Перевод сохранён как проверенный.",
+  results: "Результаты", delivery: "Доставка", replied: "Ответили", unsubscribed: "Отписались",
+  deadlines: "Налоговые даты агентства", addDeadline: "Добавить дату", dueOn: "Срок", markDone: "Отметить выполненным", residency: "Декларации налогового резидентства", noGaps: "У всех клиентов есть декларация.",
+  markIsrael: "Отметить: резидент Израиля", markReceived: "Отметить: форма получена",
+  "dl.commission_invoice": "Счёт на комиссионные", "dl.withholding_cert": "Справки об удержании налога", "dl.vat_report": "Отчёт по НДС", "dl.accountant_package": "Пакет для бухгалтера", "dl.other": "Другое",
+  "gap.no_declaration": "Нет декларации", "gap.foreign_residency_without_form": "Иностранное резидентство без дополнительной формы",
   openClient: "Открыть досье клиента", pendingApproval: "Ожидает руководителя", noWork: "Для вашей роли работы нет.", stage: "Этап",
 };

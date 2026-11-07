@@ -362,7 +362,7 @@ def run_batch(
                 "campaign": str(c.id),
             },
         )
-        if r.channel == "whatsapp":
+        if r.channel in ("whatsapp", "email"):
             queue.enqueue(
                 db, "message.deliver", {"message_id": str(msg.id)}, dedupe_key=f"deliver:{msg.id}"
             )

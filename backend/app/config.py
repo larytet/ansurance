@@ -79,7 +79,7 @@ class Settings(BaseSettings):
     fax_poll_seconds: int = 30
     render_dpi: int = 200
     # integrations: an adapter runs only if it is both configured and on the approved list
-    approved_adapters: list[str] = ["whatsapp", "imap", "agency", "esign", "translate"]
+    approved_adapters: list[str] = ["whatsapp", "imap", "agency", "esign", "translate", "smtp"]
     whatsapp_phone_id: str = ""
     whatsapp_token: SecretStr | None = None
     whatsapp_app_secret: SecretStr | None = None  # verifies webhook signatures
@@ -101,6 +101,12 @@ class Settings(BaseSettings):
     campaign_batch_size: int = 50  # recipients queued per worker run (throttling)
     campaign_batch_seconds: int = 60  # pause between batches
     campaign_frequency_days: int = 30  # one marketing contact per client in this period
+    smtp_host: str = ""
+    smtp_port: int = 587
+    smtp_user: str = ""
+    smtp_password: SecretStr | None = None
+    smtp_from: str = ""
+    smtp_starttls: bool = True
     esign_webhook_secret: SecretStr | None = None
     esign_validity_months: int = 12  # signed data-lookup authorizations (verify per form)
     esign_warn_days: int = 183  # flag authorizations that expire within about six months

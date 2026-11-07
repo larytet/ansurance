@@ -17,7 +17,7 @@ from app.intake.handlers import make_handlers, poll_fax_folder
 from app.integrations.mailbox_poll import poll as poll_mailbox
 from app.jobs import queue
 from app.logging import configure_logging
-from app.main import make_archive_store, make_mailbox, make_whatsapp
+from app.main import make_archive_store, make_mailbox, make_mailer, make_whatsapp
 from app.messaging.handlers import make_delivery_handlers
 from app.ops import daily_due, run_daily
 
@@ -32,7 +32,7 @@ def main() -> int:
     archive_store = make_archive_store(settings)
     handlers = {
         **make_handlers(ctx),
-        **make_delivery_handlers(settings, make_whatsapp(settings)),
+        **make_delivery_handlers(settings, make_whatsapp(settings), make_mailer(settings)),
     }
     worker_id = f"{os.uname().nodename}:{os.getpid()}"
     stop = False

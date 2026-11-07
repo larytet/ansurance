@@ -106,6 +106,7 @@ Every call to an outside system is recorded in `adapter_call` (no message bodies
 - Mailbox (IMAP): polled by the worker; each Message-ID is ingested once.
 - Agency system: `POST /api/import/agency` (dry run first). The existing system wins for policy
   data; contact data entered in ansurance is kept and only blanks are filled.
+- E-mail (SMTP): `ANS_SMTP_HOST`, `ANS_SMTP_PORT` (587), `ANS_SMTP_USER`, `ANS_SMTP_PASSWORD`, `ANS_SMTP_FROM` (also the unsubscribe address in the List-Unsubscribe header of advertising). STARTTLS is on and the certificate is verified. Works with the agency's own server, Microsoft 365 or Google. Without these settings e-mail stays queued. Advertising e-mail carries the advertisement label in the subject; the consent gate is checked again at send time.
 - E-signature: `ANS_ESIGN_WEBHOOK_SECRET` signs the provider's callback to `/api/webhooks/esign` (same firewall exception as WhatsApp). No provider adapter ships yet; the contract and a fake are in `app/adapters/esign.py`.
 - Renewals and late claims: the daily job adds Inbox items for the agent (T-60, T-30, T-10, overdue; insurer late on a submitted claim).
 - Excel: `POST /api/excel/join` and `GET /api/export/clients.xlsx` (manager and back-office).

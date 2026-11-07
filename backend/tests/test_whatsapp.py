@@ -440,13 +440,15 @@ def test_a_message_is_delivered_once_even_if_the_job_runs_twice(env: Env) -> Non
     assert len(env.fake.sent) == 1
 
 
-def test_other_channels_are_not_picked_up_by_the_whatsapp_worker(env: Env) -> None:
+def test_sms_is_not_picked_up_by_any_worker_and_whatsapp_sends_nothing_for_it(
+    env: Env,
+) -> None:  # e-mail has its own adapter
     c = env.client()
     mgr, hdr, _ = env.user("manager")
     mgr.post(
         "/api/messages",
         headers=hdr,
-        json={"client_id": str(c.id), "channel": "email", "purpose": "service", "body": "x"},
+        json={"client_id": str(c.id), "channel": "sms", "purpose": "service", "body": "x"},
     )
     assert env.drain() == 0 and env.fake.sent == []
 

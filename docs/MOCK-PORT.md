@@ -16,9 +16,9 @@ mock. States: **not started**, **ported** (works against the API, unit and brows
 | Desk (back-office home) | back-office, manager | ported (work areas with counts and urgent marks) | opening an area's items still to add |
 | Intake review (fax, email) | back-office | ported (review and unassigned queues, candidates with evidence, weak-match warning, confirm to a chosen candidate) | wrong-client correction, client picker for items with no candidate, and the metrics view still to add |
 | Processes: pipeline, My work, diagrams | all | ported (My work list) | pipeline per client is on the client file; diagrams and the definition editor still to add |
-| Campaigns | marketing, manager, agent | ported (create, preview with exclusions, approve, start, server reason shown) | translation review, audience snapshot and results screens still to add; consent registry is on the client file |
+| Campaigns | marketing, manager, agent | ported (create, preview with exclusions, approve, start, server reason shown) | translation review (per language, saved as reviewed by a person) and results with the exclusions are ported; consent registry is on the client file |
 | Manager overview, Trust (audit verify) | manager | ported | ten counts with attention marks, chain verification; compliance, complaints and commission screens still to add |
-| Complaints, Compliance, Commissions, Tax, Client app (the client's page at `/portal#token`) | manager, back-office, agent, accountant, client | ported | complaint assignment, statement file upload, tax residency and deadlines, translation review still to add |
+| Complaints, Compliance, Commissions, Tax, Client app (the client's page at `/portal#token`) | manager, back-office, agent, accountant, client | ported | complaint assignment and statement file upload still to add; tax deadlines and residency are ported |
 | Pension (authorizations and lookup request, on the client file) | agent, back-office, manager | ported | the portfolio view itself needs the clearing-house adapter, which does not exist |
 | WhatsApp (conversation and send on the client file, with the consent gate's reason shown) | agent, back-office, manager | ported | inline translation of incoming messages still to add |
 | Excel join | back-office, marketing, manager | ported (upload, join, download, summary) | |
@@ -26,6 +26,6 @@ mock. States: **not started**, **ported** (works against the API, unit and brows
 | System settings (account, language, theme, permissions) | all | ported | editing roles and approvals is by command line and API |
 | Live call | agent | not started | needs a speech-translation vendor |
 
-Slices 3 to 5 (Overview, Trust, Compliance, My work, Campaigns, Desk, Scans, Today, Complaints, Commissions, Tax, the client's page) have 24 unit tests and 2 real-browser tests on the live stack with a fake API and no real-browser test yet.
+Slices 3 to 7 (Overview, Trust, Compliance, My work, Campaigns, Desk, Scans, Today, Complaints, Commissions, Tax, the client's page) have 24 unit tests and 2 real-browser tests on the live stack with a fake API and no real-browser test yet.
 
 Tests: `npm test` (unit, fake API) and `make e2e-web` (Playwright against the running stack).

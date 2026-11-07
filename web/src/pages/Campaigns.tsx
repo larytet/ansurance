@@ -3,6 +3,10 @@ import { ApiError, type Campaign, type CampaignPreview } from "../api";
 import { type Key } from "../i18n";
 import { useUi } from "../ui";
 
+const LANGS = ["he", "ar", "ru", "fr", "en"];
+interface Results { status: string; recipients: Record<string, number>; exclusions: Record<string, number>; delivery: Record<string, number>; replied: number; unsubscribed: number }
+interface Snapshot { client_id: string; name: string; status: string; channel: string | null; language: string; reason: string }
+
 const TYPES = ["regulatory", "renewal", "offer", "gap", "life_event"];
 
 export function Campaigns() {
@@ -10,6 +14,8 @@ export function Campaigns() {
   const [list, setList] = useState<Campaign[] | null>(null);
   const [preview, setPreview] = useState<{ id: string; data: CampaignPreview } | null>(null);
   const [message, setMessage] = useState("");
+  const [detail, setDetail] = useState<{ id: string; results: Results; audience: Snapshot[] } | null>(null);
+  const [tl, setTl] = useState<{ id: string; lang: string; text: string } | null>(null);
   const [form, setForm] = useState({ name: "", type: "offer", benefit: "", body: "", base_language: "he", product: "" });
   const canApprove = me?.capabilities.includes("flow.approve") ?? false;
 
@@ -60,8 +66,27 @@ export function Campaigns() {
           <li key={c.id}>
             <strong><bdi>{c.name}</bdi></strong> · {tr(`type.${c.type}` as Key)} · <small>{c.status === "pending_approval" ? tr("pendingApproval") : c.status}</small>{" "}
             <button onClick={() => void run(async () => setPreview({ id: c.id, data: await api.previewCampaign(c.id) }))}>{tr("preview")}</button>
+            <button onClick={() => setTl({ id: c.id, lang: LANGS.find((l) => l !== c.base_language) ?? "en", text: "" })}>{tr("translations")}</button>
+            {c.status !== "draft" && c.status !== "pending_approval" && (
+              <button onClick={() => void run(async () => setDetail({ id: c.id, results: await api.get<Results>(`/api/campaigns/${c.id}/results`), audience: await api.get<Snapshot[]>(`/api/campaigns/${c.id}/audience`) }))}>{tr("results")}</button>
+            )}
             {canApprove && c.status === "pending_approval" && <button onClick={() => void run(() => api.approveCampaign(c.id))}>{tr("approve")}</button>}
             {c.status === "draft" && <button onClick={() => void run(() => api.startCampaign(c.id))}>{tr("send")}</button>}
+            {tl?.id === c.id && (
+              <form onSubmit={(e) => { e.preventDefault(); void run(async () => { await api.put(`/api/campaigns/${c.id}/translations/${tl.lang}`, { body: tl.text }); setTl(null); setMessage(tr("translationSaved")); }); }}>
+                <select aria-label={tr("baseLanguage")} value={tl.lang} onChange={(e) => setTl({ ...tl, lang: e.target.value })}>
+                  {LANGS.filter((l) => l !== c.base_language).map((l) => <option key={l} value={l}>{l}</option>)}
+                </select>
+                <textarea aria-label={tr("translatedText")} value={tl.text} onChange={(e) => setTl({ ...tl, text: e.target.value })} required minLength={3} />
+                <button type="submit">{tr("markReviewed")}</button>
+              </form>
+            )}
+            {detail?.id === c.id && (
+              <div role="region" aria-label={tr("results")}>
+                <p>{Object.entries(detail.results.recipients).map(([k, v]) => `${k} ${v}`).join(" · ")} · {tr("delivery")}: {Object.entries(detail.results.delivery).map(([k, v]) => `${k} ${v}`).join(", ") || "0"} · {tr("replied")}: {detail.results.replied} · {tr("unsubscribed")}: {detail.results.unsubscribed}</p>
+                <ul>{detail.audience.filter((a) => a.status !== "selected" && a.status !== "queued").map((a) => <li key={a.client_id}><bdi>{a.name}</bdi>: {a.status} ({a.reason})</li>)}</ul>
+              </div>
+            )}
             {preview?.id === c.id && (
               <p role="status">
                 {tr("matching")}: {preview.data.matching} · {tr("selected")}: {preview.data.selected} · {tr("excluded")}:{" "}

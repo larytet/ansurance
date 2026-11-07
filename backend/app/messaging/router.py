@@ -67,7 +67,7 @@ def queue_message(
     if not decision.allowed:
         db.commit()  # keep the blocked record and its audit entry
         raise HTTPException(409, decision.reason)
-    if msg.channel == "whatsapp":
+    if msg.channel in ("whatsapp", "email"):
         queue.enqueue(
             db, "message.deliver", {"message_id": str(msg.id)}, dedupe_key=f"deliver:{msg.id}"
         )

@@ -63,6 +63,12 @@ const en = {
     integrations: "Integrations", adapterConfigured: "Configured", adapterApproved: "Approved", calls24: "Calls in the last 24 hours", lastError: "Last error",
     notConfigured: "Not configured", syncs: "Synchronisations", failed: "failed",
     settings: "Settings", account: "Account", capabilities: "Permissions",
+    translations: "Translations", translatedText: "Translated text (reviewed by a person)", markReviewed: "Save as reviewed", translationSaved: "The translation was saved as reviewed.",
+    results: "Results", delivery: "Delivery", replied: "Replied", unsubscribed: "Unsubscribed",
+    deadlines: "The agency's tax dates", addDeadline: "Add a date", dueOn: "Due on", markDone: "Mark done", residency: "Tax residency declarations", noGaps: "Every client has a declaration.",
+    markIsrael: "Mark: resident in Israel", markReceived: "Mark: form received",
+    "dl.commission_invoice": "Commission invoice", "dl.withholding_cert": "Withholding certificates", "dl.vat_report": "VAT report", "dl.accountant_package": "Package for the accountant", "dl.other": "Other",
+    "gap.no_declaration": "No declaration", "gap.foreign_residency_without_form": "Foreign residency without the extra form",
     openClient: "Open the client file", pendingApproval: "Waiting for the manager", noWork: "Nothing is waiting for your role.", stage: "Stage",
 } as const;
 
@@ -123,6 +129,12 @@ const he = {
     integrations: "אינטגרציות", adapterConfigured: "מוגדר", adapterApproved: "מאושר", calls24: "קריאות ב-24 השעות האחרונות", lastError: "שגיאה אחרונה",
     notConfigured: "לא מוגדר", syncs: "סנכרונים", failed: "נכשלו",
     settings: "הגדרות", account: "חשבון", capabilities: "הרשאות",
+    translations: "תרגומים", translatedText: "הנוסח המתורגם (נבדק על ידי אדם)", markReviewed: "שמירה כנבדק", translationSaved: "התרגום נשמר כנבדק.",
+    results: "תוצאות", delivery: "מסירה", replied: "השיבו", unsubscribed: "הסירו את עצמם",
+    deadlines: "מועדי המס של הסוכנות", addDeadline: "הוספת מועד", dueOn: "תאריך יעד", markDone: "סימון כבוצע", residency: "הצהרות תושבות מס", noGaps: "לכל הלקוחות יש הצהרה.",
+    markIsrael: "סימון: תושב ישראל", markReceived: "סימון: הטופס התקבל",
+    "dl.commission_invoice": "חשבונית עמלות", "dl.withholding_cert": "אישורי ניכוי במקור", "dl.vat_report": "דוח מע״מ", "dl.accountant_package": "חבילה לרואה החשבון", "dl.other": "אחר",
+    "gap.no_declaration": "אין הצהרה", "gap.foreign_residency_without_form": "תושבות זרה ללא הטופס הנוסף",
     openClient: "פתיחת תיק לקוח", pendingApproval: "ממתין למנהל", noWork: "אין עבודה הממתינה לתפקיד שלך.", stage: "שלב",
 } as const;
 

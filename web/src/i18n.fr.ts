@@ -60,5 +60,11 @@ export const fr: Record<Key, string> = {
   integrations: "Intégrations", adapterConfigured: "Configuré", adapterApproved: "Approuvé", calls24: "Appels des dernières 24 heures", lastError: "Dernière erreur",
   notConfigured: "Non configuré", syncs: "Synchronisations", failed: "échecs",
   settings: "Paramètres", account: "Compte", capabilities: "Autorisations",
+  translations: "Traductions", translatedText: "Texte traduit (relu par une personne)", markReviewed: "Enregistrer comme relu", translationSaved: "La traduction a été enregistrée comme relue.",
+  results: "Résultats", delivery: "Remise", replied: "Ont répondu", unsubscribed: "Désinscrits",
+  deadlines: "Échéances fiscales de l'agence", addDeadline: "Ajouter une échéance", dueOn: "Échéance", markDone: "Marquer comme fait", residency: "Déclarations de résidence fiscale", noGaps: "Chaque client a une déclaration.",
+  markIsrael: "Marquer : résident d'Israël", markReceived: "Marquer : formulaire reçu",
+  "dl.commission_invoice": "Facture de commissions", "dl.withholding_cert": "Attestations de retenue à la source", "dl.vat_report": "Déclaration de TVA", "dl.accountant_package": "Dossier pour le comptable", "dl.other": "Autre",
+  "gap.no_declaration": "Aucune déclaration", "gap.foreign_residency_without_form": "Résidence étrangère sans le formulaire supplémentaire",
   openClient: "Ouvrir le dossier du client", pendingApproval: "En attente du responsable", noWork: "Rien n'attend votre rôle.", stage: "Étape",
 };

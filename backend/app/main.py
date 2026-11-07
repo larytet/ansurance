@@ -34,6 +34,7 @@ from app.intake.router import router as intake_router
 from app.integrations.calls import require_approved
 from app.integrations.mailbox import ImapMailbox, Mailbox
 from app.integrations.router import router as integrations_router
+from app.integrations.smtp import FakeMailer, Mailer, SmtpMailer
 from app.integrations.webhooks import router as webhooks_router
 from app.integrations.whatsapp import FakeWhatsApp, MetaCloudWhatsApp, WhatsApp
 from app.logging import configure_logging, request_id_var
@@ -77,6 +78,22 @@ def make_esign(settings: Settings) -> ESign | None:
     if settings.profile is Profile.DEMO:
         return FakeESign()
     return None  # no provider adapter yet: Comsign or DocuSign needs a contract and credentials
+
+
+def make_mailer(settings: Settings) -> Mailer | None:
+    if settings.profile is Profile.DEMO and not settings.smtp_host:
+        return FakeMailer()
+    if not (settings.smtp_host and settings.smtp_from):
+        return None  # not configured: e-mail stays queued
+    require_approved(settings, "smtp")
+    return SmtpMailer(
+        settings.smtp_host,
+        settings.smtp_port,
+        settings.smtp_user,
+        settings.smtp_password.get_secret_value() if settings.smtp_password else "",
+        settings.smtp_from,
+        settings.smtp_starttls,
+    )
 
 
 def make_mailbox(settings: Settings) -> Mailbox | None:

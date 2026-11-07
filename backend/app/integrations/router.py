@@ -170,6 +170,7 @@ def integrations_status(
     configured = {
         "whatsapp": request.app.state.whatsapp is not None,
         "imap": bool(settings.imap_host and settings.imap_user),
+        "smtp": bool(settings.smtp_host and settings.smtp_from),
         "esign": request.app.state.esign is not None,
         "translate": request.app.state.translator is not None,
         "agency": True,  # file import needs no credentials

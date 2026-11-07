@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session as Db
 
 from app.audit import chain
 from app.config import Settings
+from app.jobs import queue
 from app.messaging import gate
 from app.models import (
     Client,
@@ -129,16 +130,22 @@ def send_all(db: Db, actor: uuid.UUID, year: int, now: datetime | None = None) -
         for ch in ("whatsapp", "email"):
             d = gate.decide(db, cid, ch, "service")
             if d.allowed and (cl.phone if ch == "whatsapp" else cl.email):
-                db.add(
-                    OutboxMessage(
-                        client_id=cid,
-                        channel=ch,
-                        purpose="service",
-                        language=cl.preferred_language,
-                        status="queued",
-                        created_by=actor,
-                        body=f"Your {year} tax certificates are ready ({len(certs)}).",
-                    )
+                out = OutboxMessage(
+                    client_id=cid,
+                    channel=ch,
+                    purpose="service",
+                    language=cl.preferred_language,
+                    status="queued",
+                    created_by=actor,
+                    body=f"Your {year} tax certificates are ready ({len(certs)}).",
+                )
+                db.add(out)
+                db.flush()
+                queue.enqueue(
+                    db,
+                    "message.deliver",
+                    {"message_id": str(out.id)},
+                    dedupe_key=f"deliver:{out.id}",
                 )
                 sent = True
                 break

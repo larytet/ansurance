@@ -60,5 +60,11 @@ export const ar: Record<Key, string> = {
   integrations: "التكاملات", adapterConfigured: "مُعدّ", adapterApproved: "معتمد", calls24: "الاستدعاءات في آخر 24 ساعة", lastError: "آخر خطأ",
   notConfigured: "غير مُعدّ", syncs: "المزامنات", failed: "فشلت",
   settings: "الإعدادات", account: "الحساب", capabilities: "الصلاحيات",
+  translations: "الترجمات", translatedText: "النص المترجَم (راجعه شخص)", markReviewed: "حفظ كمُراجَع", translationSaved: "تم حفظ الترجمة كمُراجَعة.",
+  results: "النتائج", delivery: "التسليم", replied: "ردّوا", unsubscribed: "ألغوا الاشتراك",
+  deadlines: "مواعيد الضرائب للوكالة", addDeadline: "إضافة موعد", dueOn: "تاريخ الاستحقاق", markDone: "تعليم كمنجز", residency: "إقرارات الإقامة الضريبية", noGaps: "لكل العملاء إقرار.",
+  markIsrael: "تعليم: مقيم في إسرائيل", markReceived: "تعليم: وصل النموذج",
+  "dl.commission_invoice": "فاتورة العمولات", "dl.withholding_cert": "شهادات الخصم من المصدر", "dl.vat_report": "تقرير ضريبة القيمة المضافة", "dl.accountant_package": "حزمة المحاسب", "dl.other": "أخرى",
+  "gap.no_declaration": "لا يوجد إقرار", "gap.foreign_residency_without_form": "إقامة أجنبية دون النموذج الإضافي",
   openClient: "فتح ملف العميل", pendingApproval: "بانتظار المدير", noWork: "لا يوجد عمل بانتظار دورك.", stage: "المرحلة",
 };
