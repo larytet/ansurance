@@ -28,7 +28,7 @@ def _hash(token: str) -> str:
 def issue(
     client_id: uuid.UUID,
     p: Principal = Depends(require("flow.write")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
     settings: Settings = Depends(get_settings_dep),
 ) -> dict[str, Any]:
     c = get_visible(db, p, client_id)
@@ -51,7 +51,9 @@ def issue(
 
 @router.delete("/portal-links/{link_id}")
 def revoke(
-    link_id: uuid.UUID, p: Principal = Depends(require("flow.write")), db: Db = Depends(get_db)
+    link_id: uuid.UUID,
+    p: Principal = Depends(require("flow.write")),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, str]:
     link = db.get(PortalLink, link_id)
     if link is None:
@@ -64,7 +66,7 @@ def revoke(
 
 @router.get("/portal/summary")
 def summary(
-    request: Request, x_portal_token: str = Header(""), db: Db = Depends(get_db)
+    request: Request, x_portal_token: str = Header(""), db: Db = Depends(get_db, scope="function")
 ) -> dict[str, Any]:
     link = (
         db.scalar(select(PortalLink).where(PortalLink.token_hash == _hash(x_portal_token)))

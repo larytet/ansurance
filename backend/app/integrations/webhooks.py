@@ -168,7 +168,9 @@ def _ingest_media(db: Db, request: Request, item: wa.InboundItem, who: str) -> N
 
 @router.post("/whatsapp")
 async def receive(
-    request: Request, db: Db = Depends(get_db), settings: Settings = Depends(get_settings_dep)
+    request: Request,
+    db: Db = Depends(get_db, scope="function"),
+    settings: Settings = Depends(get_settings_dep),
 ) -> dict[str, int]:
     secret = settings.whatsapp_app_secret.get_secret_value() if settings.whatsapp_app_secret else ""
     if not secret:

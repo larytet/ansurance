@@ -45,7 +45,7 @@ def submit(
     channel: str = Form("upload"),
     sender: str = Form(""),
     p: Principal = Depends(require("intake.write")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
     settings: Settings = Depends(get_settings_dep),
 ) -> dict[str, Any]:
     data = file.file.read(settings.max_upload_bytes + 1)
@@ -69,7 +69,7 @@ def list_items(
     state: str | None = None,
     limit: int = Query(50, ge=1, le=200),
     p: Principal = Depends(require("intake.read")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
 ) -> list[dict[str, Any]]:
     stmt = select(IntakeItem)
     if state:
@@ -82,7 +82,7 @@ def list_items(
 def metrics(
     days: int = Query(30, ge=1, le=365),
     p: Principal = Depends(require("intake.read")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     since = datetime.now(UTC) - timedelta(days=days)
     by_state = dict(
@@ -125,7 +125,9 @@ def metrics(
 
 @router.get("/intake/{item_id}")
 def get_item(
-    item_id: uuid.UUID, p: Principal = Depends(require("intake.read")), db: Db = Depends(get_db)
+    item_id: uuid.UUID,
+    p: Principal = Depends(require("intake.read")),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     item = _item(db, item_id)
     return {**pipeline.result_summary(item), "text": item.ocr_text, "entities": item.entities}
@@ -137,7 +139,7 @@ def confirm(
     body: ConfirmIn,
     request: Request,
     p: Principal = Depends(require("intake.review")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     item = _item(db, item_id)
     client = db.get(Client, body.client_id)
@@ -155,7 +157,7 @@ def wrong_client(
     item_id: uuid.UUID,
     body: WrongClientIn,
     p: Principal = Depends(require("intake.review")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     item = _item(db, item_id)
     client = db.get(Client, body.client_id)
@@ -170,7 +172,9 @@ def wrong_client(
 
 @router.get("/intake/{item_id}/feedback")
 def feedback(
-    item_id: uuid.UUID, p: Principal = Depends(require("intake.read")), db: Db = Depends(get_db)
+    item_id: uuid.UUID,
+    p: Principal = Depends(require("intake.read")),
+    db: Db = Depends(get_db, scope="function"),
 ) -> list[dict[str, Any]]:
     _item(db, item_id)
     rows = db.scalars(

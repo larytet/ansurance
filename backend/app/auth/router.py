@@ -69,7 +69,7 @@ def login(
     body: LoginIn,
     request: Request,
     response: Response,
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
     settings: Settings = Depends(get_settings_dep),
 ) -> dict[str, Any]:
     try:
@@ -90,7 +90,9 @@ def login(
 
 @router.post("/auth/logout")
 def logout(
-    response: Response, p: Principal = Depends(current_principal), db: Db = Depends(get_db)
+    response: Response,
+    p: Principal = Depends(current_principal),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, str]:
     auth.revoke(db, p.session_id, str(p.user.id))
     response.delete_cookie(SESSION_COOKIE, path="/")
@@ -104,7 +106,7 @@ def me(p: Principal = Depends(current_principal)) -> dict[str, Any]:
 
 @router.get("/auth/sessions")
 def sessions(
-    p: Principal = Depends(current_principal), db: Db = Depends(get_db)
+    p: Principal = Depends(current_principal), db: Db = Depends(get_db, scope="function")
 ) -> list[dict[str, Any]]:
     rows = db.scalars(
         select(Session)
@@ -125,7 +127,9 @@ def sessions(
 
 @router.delete("/auth/sessions/{session_id}")
 def revoke_session(
-    session_id: str, p: Principal = Depends(current_principal), db: Db = Depends(get_db)
+    session_id: str,
+    p: Principal = Depends(current_principal),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, str]:
     s = db.get(Session, session_id)
     if s is None or s.user_id != p.user.id:
@@ -136,7 +140,9 @@ def revoke_session(
 
 @router.post("/users", status_code=201)
 def create_user(
-    body: UserIn, p: Principal = Depends(require("user.manage")), db: Db = Depends(get_db)
+    body: UserIn,
+    p: Principal = Depends(require("user.manage")),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     bad = [r for r in body.roles if r not in ROLES]
     if bad or not body.roles:
@@ -166,7 +172,9 @@ def create_user(
 
 @router.get("/auth/sso/{provider}/start")
 def sso_start(
-    provider: str, db: Db = Depends(get_db), settings: Settings = Depends(get_settings_dep)
+    provider: str,
+    db: Db = Depends(get_db, scope="function"),
+    settings: Settings = Depends(get_settings_dep),
 ) -> Response:
     try:
         url = sso.start(db, settings, provider)
@@ -182,7 +190,7 @@ def sso_callback(
     state: str,
     request: Request,
     response: Response,
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
     settings: Settings = Depends(get_settings_dep),
 ) -> dict[str, Any]:
     try:

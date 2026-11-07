@@ -72,7 +72,7 @@ def put_kyc(
     client_id: uuid.UUID,
     body: KycIn,
     p: Principal = Depends(require("flow.write")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     c = get_visible(db, p, client_id)
     try:
@@ -84,7 +84,9 @@ def put_kyc(
 
 @router.post("/clients/{client_id}/kyc/approve")
 def approve_kyc(
-    client_id: uuid.UUID, p: Principal = Depends(require("flow.approve")), db: Db = Depends(get_db)
+    client_id: uuid.UUID,
+    p: Principal = Depends(require("flow.approve")),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     c = get_visible(db, p, client_id)
     try:
@@ -108,7 +110,7 @@ def send_for_signature(
     client_id: uuid.UUID,
     body: SignIn,
     p: Principal = Depends(require("flow.write")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
     settings: Settings = Depends(get_settings_dep),
 ) -> dict[str, Any]:
     if body.kind not in service.SIGN_KINDS:
@@ -152,7 +154,9 @@ def send_for_signature(
 
 @router.get("/clients/{client_id}/esign")
 def list_esign(
-    client_id: uuid.UUID, p: Principal = Depends(require("client.read")), db: Db = Depends(get_db)
+    client_id: uuid.UUID,
+    p: Principal = Depends(require("client.read")),
+    db: Db = Depends(get_db, scope="function"),
 ) -> list[dict[str, Any]]:
     c = get_visible(db, p, client_id)
     rows = db.scalars(select(ESign).where(ESign.client_id == c.id).order_by(ESign.sent_at.desc()))
@@ -240,7 +244,7 @@ async def esign_webhook(
 def flow_status(
     client_id: uuid.UUID,
     p: Principal = Depends(require("client.read")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
     settings: Settings = Depends(get_settings_dep),
 ) -> dict[str, Any]:
     c = get_visible(db, p, client_id)
@@ -258,7 +262,9 @@ def flow_status(
 
 @router.post("/clients/{client_id}/activate")
 def activate(
-    client_id: uuid.UUID, p: Principal = Depends(require("flow.write")), db: Db = Depends(get_db)
+    client_id: uuid.UUID,
+    p: Principal = Depends(require("flow.write")),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     c = get_visible(db, p, client_id)
     try:
@@ -273,7 +279,7 @@ def activate(
 def lookup_request(
     client_id: uuid.UUID,
     p: Principal = Depends(require("flow.write")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
     settings: Settings = Depends(get_settings_dep),
 ) -> dict[str, Any]:
     c = get_visible(db, p, client_id)
@@ -295,7 +301,7 @@ def add_advice(
     client_id: uuid.UUID,
     body: AdviceIn,
     p: Principal = Depends(require("flow.write")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     c = get_visible(db, p, client_id)
     a = AdviceRecord(
@@ -322,7 +328,7 @@ def new_application(
     client_id: uuid.UUID,
     body: AppIn,
     p: Principal = Depends(require("flow.write")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     c = get_visible(db, p, client_id)
     if body.advice_id is not None:
@@ -367,7 +373,7 @@ def application_sign(
     app_id: uuid.UUID,
     body: AppSignIn,
     p: Principal = Depends(require("flow.write")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
     settings: Settings = Depends(get_settings_dep),
 ) -> dict[str, Any]:
     a, c = _application(db, p, app_id)
@@ -402,7 +408,7 @@ def issue(
     app_id: uuid.UUID,
     body: IssueIn,
     p: Principal = Depends(require("flow.write")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     a, c = _application(db, p, app_id)
     if body.confirmation_document_id is not None:
@@ -424,7 +430,9 @@ def issue(
 
 @router.get("/policies/{policy_id}/checklist")
 def checklist(
-    policy_id: uuid.UUID, p: Principal = Depends(require("policy.read")), db: Db = Depends(get_db)
+    policy_id: uuid.UUID,
+    p: Principal = Depends(require("policy.read")),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     pol, _ = _policy(db, p, policy_id)
     return service.policy_checklist(db, pol)
@@ -439,7 +447,7 @@ def attach_confirmation(
     app_id: uuid.UUID,
     body: ConfirmIn,
     p: Principal = Depends(require("flow.write")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     a, c = _application(db, p, app_id)
     _document(db, c, body.document_id)
@@ -451,7 +459,9 @@ def attach_confirmation(
 # ---- F3 ---------------------------------------------------------------------------------------
 @router.get("/renewals")
 def renewals(
-    within: int = 60, p: Principal = Depends(require("policy.read")), db: Db = Depends(get_db)
+    within: int = 60,
+    p: Principal = Depends(require("policy.read")),
+    db: Db = Depends(get_db, scope="function"),
 ) -> list[dict[str, Any]]:
     q = service.renewal_queue(db, within=max(0, min(within, 365)))
     if "client.read_all" in p.capabilities:
@@ -463,7 +473,7 @@ def renewals(
 
 @router.get("/renewals/leaks")
 def renewal_leaks(
-    p: Principal = Depends(require("flow.approve")), db: Db = Depends(get_db)
+    p: Principal = Depends(require("flow.approve")), db: Db = Depends(get_db, scope="function")
 ) -> list[dict[str, Any]]:
     return service.leaks(db)
 
@@ -479,7 +489,7 @@ def renewal_outcome(
     policy_id: uuid.UUID,
     body: OutcomeIn,
     p: Principal = Depends(require("flow.write")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     pol, _ = _policy(db, p, policy_id)
     try:
@@ -505,7 +515,7 @@ def open_claim(
     client_id: uuid.UUID,
     body: ClaimIn,
     p: Principal = Depends(require("flow.write")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     c = get_visible(db, p, client_id)
     pol = db.get(Policy, body.policy_id)
@@ -529,7 +539,9 @@ def _claim(db: Db, p: Principal, claim_id: uuid.UUID) -> tuple[Claim, Client]:
 
 @router.get("/claims/{claim_id}")
 def get_claim(
-    claim_id: uuid.UUID, p: Principal = Depends(require("client.read")), db: Db = Depends(get_db)
+    claim_id: uuid.UUID,
+    p: Principal = Depends(require("client.read")),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     cl, _ = _claim(db, p, claim_id)
     return service.claim_view(db, cl)
@@ -545,7 +557,7 @@ def attach(
     item_id: uuid.UUID,
     body: AttachIn,
     p: Principal = Depends(require("flow.write")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     cl, c = _claim(db, p, claim_id)
     item = db.get(ClaimItem, item_id)
@@ -566,7 +578,7 @@ def submit(
     claim_id: uuid.UUID,
     body: SubmitIn,
     p: Principal = Depends(require("flow.write")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     cl, _ = _claim(db, p, claim_id)
     if cl.status != "open":
@@ -586,7 +598,7 @@ def set_owner(
     claim_id: uuid.UUID,
     body: OwnerIn,
     p: Principal = Depends(require("flow.write")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     cl, _ = _claim(db, p, claim_id)  # always an owner: it can be changed, never emptied
     cl.owner_id = body.owner_id
@@ -606,7 +618,7 @@ def claim_outcome(
     claim_id: uuid.UUID,
     body: ClaimOutcomeIn,
     p: Principal = Depends(require("flow.write")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     cl, c = _claim(db, p, claim_id)
     if cl.status != "submitted":

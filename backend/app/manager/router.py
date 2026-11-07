@@ -38,7 +38,7 @@ class ComplaintIn(BaseModel):
 def open_complaint(
     body: ComplaintIn,
     p: Principal = Depends(require("complaint.write")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
     settings: Settings = Depends(get_settings_dep),
 ) -> dict[str, Any]:
     if body.client_id:
@@ -56,7 +56,7 @@ def _visible(p: Principal, c: Complaint) -> bool:
 
 @router.get("/complaints")
 def list_complaints(
-    p: Principal = Depends(require("complaint.write")), db: Db = Depends(get_db)
+    p: Principal = Depends(require("complaint.write")), db: Db = Depends(get_db, scope="function")
 ) -> list[dict[str, Any]]:
     now = datetime.now(UTC)
     rows = [c for c in db.scalars(select(Complaint).order_by(Complaint.due_at)) if _visible(p, c)]
@@ -65,7 +65,7 @@ def list_complaints(
 
 @router.get("/complaints/export.csv")
 def export_complaints(
-    p: Principal = Depends(require("flow.approve")), db: Db = Depends(get_db)
+    p: Principal = Depends(require("flow.approve")), db: Db = Depends(get_db, scope="function")
 ) -> Response:
     chain.append(
         db, str(p.user.id), "export.complaints", "complaint", {}
@@ -82,7 +82,7 @@ def assign(
     cid: uuid.UUID,
     body: OwnerIn,
     p: Principal = Depends(require("flow.approve")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     c = db.get(Complaint, cid)
     if c is None or db.get(User, body.owner_id) is None:
@@ -103,7 +103,7 @@ def respond(
     cid: uuid.UUID,
     body: RespondIn,
     p: Principal = Depends(require("complaint.write")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     c = db.get(Complaint, cid)
     if c is None or not _visible(p, c):
@@ -127,7 +127,7 @@ def set_licence(
     user_id: uuid.UUID,
     body: LicenceIn,
     p: Principal = Depends(require("flow.approve")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, str]:
     if db.get(User, user_id) is None:
         raise HTTPException(404, "not_found")
@@ -144,7 +144,7 @@ def set_licence(
 @router.get("/compliance")
 def compliance(
     p: Principal = Depends(require("flow.approve")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
     settings: Settings = Depends(get_settings_dep),
 ) -> dict[str, Any]:
     return service.compliance(db, settings)
@@ -153,7 +153,7 @@ def compliance(
 @router.get("/overview")
 def overview(
     p: Principal = Depends(require("flow.approve")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
     settings: Settings = Depends(get_settings_dep),
 ) -> dict[str, Any]:
     return service.overview(db, settings)
@@ -168,7 +168,9 @@ class TermIn(BaseModel):
 
 @router.put("/commissions/terms")
 def set_term(
-    body: TermIn, p: Principal = Depends(require("commission.manage")), db: Db = Depends(get_db)
+    body: TermIn,
+    p: Principal = Depends(require("commission.manage")),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, str]:
     service.set_term(db, p.user.id, body.insurer, body.product, body.rate_pct)
     return {"status": "saved"}
@@ -190,7 +192,7 @@ class StatementIn(BaseModel):
 def import_json(
     body: StatementIn,
     p: Principal = Depends(require("commission.manage")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
     settings: Settings = Depends(get_settings_dep),
 ) -> dict[str, Any]:
     try:
@@ -219,7 +221,7 @@ def import_xlsx(
     declared_total: Decimal = Form(...),
     file: UploadFile = File(...),
     p: Principal = Depends(require("commission.manage")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
     settings: Settings = Depends(get_settings_dep),
 ) -> dict[str, Any]:
     try:
@@ -260,14 +262,18 @@ def _stmt(db: Db, sid: uuid.UUID) -> CommissionStatement:
 
 @router.get("/commissions/statements/{sid}")
 def get_statement(
-    sid: uuid.UUID, p: Principal = Depends(require("commission.manage")), db: Db = Depends(get_db)
+    sid: uuid.UUID,
+    p: Principal = Depends(require("commission.manage")),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     return service.statement_view(db, _stmt(db, sid))
 
 
 @router.post("/commissions/statements/{sid}/approve")
 def approve_statement(
-    sid: uuid.UUID, p: Principal = Depends(require("flow.approve")), db: Db = Depends(get_db)
+    sid: uuid.UUID,
+    p: Principal = Depends(require("flow.approve")),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     st = _stmt(db, sid)
     try:
@@ -279,7 +285,9 @@ def approve_statement(
 
 @router.get("/commissions/statements/{sid}/payout")
 def get_payout(
-    sid: uuid.UUID, p: Principal = Depends(require("flow.approve")), db: Db = Depends(get_db)
+    sid: uuid.UUID,
+    p: Principal = Depends(require("flow.approve")),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     try:
         return service.payout(db, _stmt(db, sid))

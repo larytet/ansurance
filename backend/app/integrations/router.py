@@ -31,7 +31,7 @@ def import_agency(
     policies: UploadFile | None = File(None),
     dry_run: bool = Form(False),
     p: Principal = Depends(require("import.run")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     """One-time or repeated import from the existing system's CSV export (REQUIREMENTS 9.1)."""
     try:
@@ -53,7 +53,7 @@ def excel_join(
     insurer: UploadFile | None = File(None),
     clearing: UploadFile | None = File(None),
     p: Principal = Depends(require("excel.use")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
 ) -> Response:
     others = []
     try:
@@ -79,7 +79,7 @@ def excel_join(
 
 @router.get("/export/clients.xlsx")
 def export_clients(
-    p: Principal = Depends(require("export.run")), db: Db = Depends(get_db)
+    p: Principal = Depends(require("export.run")), db: Db = Depends(get_db, scope="function")
 ) -> Response:
     """A client list for Excel. An export leaves the system, so it is audited at once."""
     counts = dict(
@@ -115,7 +115,7 @@ def export_clients(
 def client_messages(
     client_id: uuid.UUID,
     p: Principal = Depends(require("client.read")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
 ) -> list[dict[str, Any]]:
     """The conversation with a client, newest first: what was sent (and whether the consent gate
     blocked it) and what the client sent."""
@@ -156,7 +156,7 @@ def client_messages(
 def integrations_status(
     request: Request,
     p: Principal = Depends(require("import.run")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     """Which outside systems are configured and approved, and how their calls went lately.
     No secrets and no message content."""

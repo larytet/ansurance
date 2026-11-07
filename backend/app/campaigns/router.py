@@ -55,7 +55,9 @@ class CampaignIn(BaseModel):
 
 @router.post("/campaigns", status_code=201)
 def create(
-    body: CampaignIn, p: Principal = Depends(require("campaign.write")), db: Db = Depends(get_db)
+    body: CampaignIn,
+    p: Principal = Depends(require("campaign.write")),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     try:
         c = service.create(db, p.user.id, p.roles, **body.model_dump())
@@ -66,7 +68,7 @@ def create(
 
 @router.get("/campaigns")
 def list_campaigns(
-    p: Principal = Depends(require("campaign.write")), db: Db = Depends(get_db)
+    p: Principal = Depends(require("campaign.write")), db: Db = Depends(get_db, scope="function")
 ) -> list[dict[str, Any]]:
     q = select(Campaign).order_by(Campaign.created_at.desc())
     if "manager" not in p.roles and "marketing" not in p.roles:
@@ -76,7 +78,9 @@ def list_campaigns(
 
 @router.get("/campaigns/{cid}")
 def get(
-    cid: uuid.UUID, p: Principal = Depends(require("campaign.write")), db: Db = Depends(get_db)
+    cid: uuid.UUID,
+    p: Principal = Depends(require("campaign.write")),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     return _dict(_get(db, p, cid))
 
@@ -85,7 +89,7 @@ def get(
 def preview(
     cid: uuid.UUID,
     p: Principal = Depends(require("campaign.write")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
     settings: Settings = Depends(get_settings_dep),
 ) -> dict[str, Any]:
     return service.preview(db, settings, _get(db, p, cid))
@@ -101,7 +105,7 @@ def translate(
     language: str,
     body: TranslationIn,
     p: Principal = Depends(require("campaign.write")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, str]:
     try:
         service.save_translation(db, p.user.id, _get(db, p, cid), language, body.body)
@@ -112,7 +116,9 @@ def translate(
 
 @router.post("/campaigns/{cid}/approve")
 def approve(
-    cid: uuid.UUID, p: Principal = Depends(require("flow.approve")), db: Db = Depends(get_db)
+    cid: uuid.UUID,
+    p: Principal = Depends(require("flow.approve")),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     c = _get(db, p, cid)
     try:
@@ -126,7 +132,7 @@ def approve(
 def start(
     cid: uuid.UUID,
     p: Principal = Depends(require("campaign.write")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
     settings: Settings = Depends(get_settings_dep),
 ) -> dict[str, Any]:
     try:
@@ -137,14 +143,18 @@ def start(
 
 @router.get("/campaigns/{cid}/results")
 def results(
-    cid: uuid.UUID, p: Principal = Depends(require("campaign.write")), db: Db = Depends(get_db)
+    cid: uuid.UUID,
+    p: Principal = Depends(require("campaign.write")),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     return service.results(db, _get(db, p, cid))
 
 
 @router.get("/campaigns/{cid}/audience")
 def snapshot(
-    cid: uuid.UUID, p: Principal = Depends(require("campaign.write")), db: Db = Depends(get_db)
+    cid: uuid.UUID,
+    p: Principal = Depends(require("campaign.write")),
+    db: Db = Depends(get_db, scope="function"),
 ) -> list[dict[str, Any]]:
     """Who was selected or excluded and why: the evidence kept for every campaign."""
     c = _get(db, p, cid)

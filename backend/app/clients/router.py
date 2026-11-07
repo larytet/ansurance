@@ -57,7 +57,9 @@ def _client_dict(c: Client) -> dict[str, Any]:
 
 @router.post("/clients", status_code=201)
 def create_client(
-    body: ClientIn, p: Principal = Depends(require("client.write")), db: Db = Depends(get_db)
+    body: ClientIn,
+    p: Principal = Depends(require("client.write")),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     if not is_valid_israeli_id(body.id_number):
         raise HTTPException(422, "invalid_id_number")
@@ -93,7 +95,7 @@ def search_clients(
     request: Request,
     q: str = "",
     p: Principal = Depends(require("client.read")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
 ) -> list[dict[str, Any]]:
     stmt = select(Client).where(visible(p))
     for tok in normalize(q).split():
@@ -116,7 +118,7 @@ def get_client(
     request: Request,
     client_id: uuid.UUID,
     p: Principal = Depends(require("client.read")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     c = get_visible(db, p, client_id)
     request.app.state.read_audit.record(str(p.user.id), "client.read", f"client:{c.id}")
@@ -143,7 +145,7 @@ def link_family(
     client_id: uuid.UUID,
     body: FamilyIn,
     p: Principal = Depends(require("client.write")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, str]:
     head = get_visible(db, p, client_id)
     member = get_visible(db, p, body.member_id)
@@ -164,7 +166,7 @@ def add_policy(
     client_id: uuid.UUID,
     body: PolicyIn,
     p: Principal = Depends(require("policy.write")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     c = get_visible(db, p, client_id)
     ins = db.scalar(select(Insurer).where(Insurer.name == body.insurer))
@@ -197,7 +199,7 @@ def list_policies(
     request: Request,
     client_id: uuid.UUID,
     p: Principal = Depends(require("policy.read")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
 ) -> list[dict[str, Any]]:
     c = get_visible(db, p, client_id)
     rows = db.execute(
@@ -221,7 +223,7 @@ def list_policies(
 def marketing_contacts(
     request: Request,
     p: Principal = Depends(require("client.read_min")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
 ) -> list[dict[str, Any]]:
     """The only client data marketing can read: the marketing_contact view."""
     rows = (
@@ -243,7 +245,9 @@ def marketing_contacts(
 
 @router.get("/audit/verify")
 def verify_audit(
-    request: Request, p: Principal = Depends(require("audit.read")), db: Db = Depends(get_db)
+    request: Request,
+    p: Principal = Depends(require("audit.read")),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     """The hot chain and every sealed archive file (REQUIREMENTS section 7)."""
     from app.audit import archive
@@ -266,7 +270,7 @@ def verify_audit(
 def request_id(
     client_id: uuid.UUID,
     p: Principal = Depends(require("client.write")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     """An agent asks the back-office to get the ID document and register the client."""
     from app.models import InboxItem
@@ -294,7 +298,7 @@ def request_id(
 def register_client(
     client_id: uuid.UUID,
     p: Principal = Depends(require("client.write")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     """Back-office registers the client once a clean ID card is on file."""
     from datetime import UTC, datetime

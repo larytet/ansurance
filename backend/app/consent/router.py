@@ -39,7 +39,7 @@ def record_consent(
     client_id: uuid.UUID,
     body: ConsentIn,
     p: Principal = Depends(require("consent.write")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     if body.channel not in CHANNELS or body.state not in ("opt_in", "opt_out"):
         raise HTTPException(422, "invalid_channel_or_state")
@@ -54,7 +54,7 @@ def record_consent(
 def get_consent(
     client_id: uuid.UUID,
     p: Principal = Depends(require("consent.read")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     client = _client_for_consent(db, p, client_id)
     current = (

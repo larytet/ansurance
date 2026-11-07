@@ -47,7 +47,7 @@ def translate(
     request: Request,
     body: TranslateIn,
     p: Principal = Depends(require("inbox.read")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
     settings: Settings = Depends(get_settings_dep),
 ) -> dict[str, Any]:
     if body.source not in LANGS or body.target not in LANGS or body.source == body.target:
@@ -85,7 +85,9 @@ def translate(
 
 @router.get("/clients/{client_id}/translations")
 def timeline(
-    client_id: uuid.UUID, p: Principal = Depends(require("client.read")), db: Db = Depends(get_db)
+    client_id: uuid.UUID,
+    p: Principal = Depends(require("client.read")),
+    db: Db = Depends(get_db, scope="function"),
 ) -> list[dict[str, Any]]:
     c = get_visible(db, p, client_id)
     rows = db.scalars(

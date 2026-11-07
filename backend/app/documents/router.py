@@ -63,7 +63,7 @@ def upload(
     restricted: bool = Form(False),
     channel: str = Form("upload"),
     p: Principal = Depends(require("document.write")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
     settings: Settings = Depends(get_settings_dep),
 ) -> dict[str, Any]:
     client = get_visible(db, p, client_id)
@@ -95,7 +95,7 @@ def list_documents(
     request: Request,
     client_id: uuid.UUID,
     p: Principal = Depends(require("document.read")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
 ) -> list[dict[str, Any]]:
     client = get_visible(db, p, client_id)
     rows = db.execute(
@@ -114,7 +114,9 @@ def list_documents(
 
 @router.get("/documents/{doc_id}")
 def get_document(
-    doc_id: uuid.UUID, p: Principal = Depends(require("document.read")), db: Db = Depends(get_db)
+    doc_id: uuid.UUID,
+    p: Principal = Depends(require("document.read")),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     doc, blob = _load(db, p, doc_id)
     return _doc_dict(doc, blob)
@@ -125,7 +127,7 @@ def download(
     doc_id: uuid.UUID,
     request: Request,
     p: Principal = Depends(require("document.read")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
 ) -> Response:
     doc, blob = _load(db, p, doc_id)
     if blob.scan_status != "clean":
@@ -167,7 +169,7 @@ def set_hold(
     doc_id: uuid.UUID,
     body: HoldIn,
     p: Principal = Depends(require("document.hold")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     doc, blob = _load(db, p, doc_id)
     doc.legal_hold = body.legal_hold

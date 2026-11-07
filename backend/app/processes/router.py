@@ -53,7 +53,7 @@ def _visible_instance(db: Db, p: Principal, instance_id: uuid.UUID) -> ProcessIn
 # ---- definitions ----------------------------------------------------------------------------
 @router.get("/process-defs")
 def list_defs(
-    p: Principal = Depends(require("process.read")), db: Db = Depends(get_db)
+    p: Principal = Depends(require("process.read")), db: Db = Depends(get_db, scope="function")
 ) -> list[dict[str, Any]]:
     rows = db.scalars(select(ProcessDef).order_by(ProcessDef.key, ProcessDef.version.desc()))
     seen: set[str] = set()
@@ -82,7 +82,7 @@ def get_def(
     key: str,
     version: int | None = None,
     p: Principal = Depends(require("process.read")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     row = (
         service.latest(db, key)
@@ -101,7 +101,7 @@ def get_mermaid(
     key: str,
     lang: Literal["en", "he"] = "en",
     p: Principal = Depends(require("process.read")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
 ) -> Response:
     row = service.latest(db, key)
     if row is None:
@@ -113,7 +113,7 @@ def get_mermaid(
 def new_def_version(
     body: dict[str, Any],
     p: Principal = Depends(require("process.define")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     """A manager publishes a new version. Running instances keep the version they started on."""
     try:
@@ -134,7 +134,9 @@ def new_def_version(
 # ---- instances ------------------------------------------------------------------------------
 @router.post("/processes", status_code=201)
 def start(
-    body: StartIn, p: Principal = Depends(require("process.start")), db: Db = Depends(get_db)
+    body: StartIn,
+    p: Principal = Depends(require("process.start")),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     if body.client_id is not None:
         get_visible(db, p, body.client_id)  # you can only run a process on a client you may see
@@ -150,7 +152,7 @@ def list_instances(
     status: str = "running",
     client_id: uuid.UUID | None = None,
     p: Principal = Depends(require("process.read")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
 ) -> list[dict[str, Any]]:
     stmt = select(ProcessInstance).where(ProcessInstance.status == status)
     if "manager" not in p.roles:
@@ -179,7 +181,7 @@ def list_instances(
 def get_instance(
     instance_id: uuid.UUID,
     p: Principal = Depends(require("process.read")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     inst = _visible_instance(db, p, instance_id)
     return service.instance_view(db, inst, service.load_definition(db, inst))
@@ -197,7 +199,7 @@ def start_stage(
     instance_id: uuid.UUID,
     stage: str,
     p: Principal = Depends(require("process.read")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     _visible_instance(db, p, instance_id)
     inst = service.lock_instance(db, instance_id)
@@ -215,7 +217,7 @@ def tick(
     idx: int,
     body: CheckIn,
     p: Principal = Depends(require("process.read")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     _visible_instance(db, p, instance_id)
     inst = service.lock_instance(db, instance_id)
@@ -232,7 +234,7 @@ def finalize(
     instance_id: uuid.UUID,
     stage: str,
     p: Principal = Depends(require("process.read")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     _visible_instance(db, p, instance_id)
     inst = service.lock_instance(db, instance_id)
@@ -249,7 +251,7 @@ def cancel(
     instance_id: uuid.UUID,
     body: CancelIn,
     p: Principal = Depends(require("process.cancel")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     inst = service.lock_instance(db, instance_id)
     try:
@@ -261,7 +263,7 @@ def cancel(
 
 @router.get("/my-work")
 def my_work(
-    p: Principal = Depends(require("process.read")), db: Db = Depends(get_db)
+    p: Principal = Depends(require("process.read")), db: Db = Depends(get_db, scope="function")
 ) -> dict[str, Any]:
     items = service.my_work(db, p.roles)
     return {"count": len(items), "items": items}

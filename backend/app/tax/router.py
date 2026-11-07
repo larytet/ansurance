@@ -29,14 +29,18 @@ class YearIn(BaseModel):
 
 @router.post("/certificates/generate", status_code=201)
 def generate(
-    body: YearIn, p: Principal = Depends(require("tax.write")), db: Db = Depends(get_db)
+    body: YearIn,
+    p: Principal = Depends(require("tax.write")),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, int]:
     return {"created": service.generate(db, p.user.id, body.tax_year)}
 
 
 @router.post("/certificates/request-all")
 def request_all(
-    body: YearIn, p: Principal = Depends(require("tax.write")), db: Db = Depends(get_db)
+    body: YearIn,
+    p: Principal = Depends(require("tax.write")),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     per = service.request_all(db, p.user.id, body.tax_year)
     return {"requested": sum(per.values()), "letters_per_insurer": per}
@@ -44,14 +48,18 @@ def request_all(
 
 @router.post("/certificates/send-all")
 def send_all(
-    body: YearIn, p: Principal = Depends(require("tax.write")), db: Db = Depends(get_db)
+    body: YearIn,
+    p: Principal = Depends(require("tax.write")),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, int]:
     return service.send_all(db, p.user.id, body.tax_year)
 
 
 @router.get("/certificates")
 def matrix(
-    tax_year: int, p: Principal = Depends(require("tax.read")), db: Db = Depends(get_db)
+    tax_year: int,
+    p: Principal = Depends(require("tax.read")),
+    db: Db = Depends(get_db, scope="function"),
 ) -> list[dict[str, Any]]:
     return service.status_matrix(db, tax_year)
 
@@ -65,7 +73,7 @@ def received(
     cert_id: uuid.UUID,
     body: ReceivedIn,
     p: Principal = Depends(require("tax.write")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, str]:
     cert = db.get(TaxCertificate, cert_id)
     if cert is None:
@@ -87,7 +95,7 @@ def residency(
     client_id: uuid.UUID,
     body: ResidencyIn,
     p: Principal = Depends(require("tax.write")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, str]:
     c = get_visible(db, p, client_id)
     try:
@@ -99,7 +107,7 @@ def residency(
 
 @router.get("/residency/gaps")
 def gaps(
-    p: Principal = Depends(require("tax.write")), db: Db = Depends(get_db)
+    p: Principal = Depends(require("tax.write")), db: Db = Depends(get_db, scope="function")
 ) -> list[dict[str, Any]]:
     return service.residency_gaps(db)
 
@@ -112,7 +120,9 @@ class DeadlineIn(BaseModel):
 
 @router.post("/deadlines", status_code=201)
 def add_deadline(
-    body: DeadlineIn, p: Principal = Depends(require("tax.write")), db: Db = Depends(get_db)
+    body: DeadlineIn,
+    p: Principal = Depends(require("tax.write")),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, str]:
     try:
         d = service.add_deadline(db, p.user.id, body.kind, body.title, body.due_on)
@@ -123,7 +133,7 @@ def add_deadline(
 
 @router.get("/deadlines")
 def deadlines(
-    p: Principal = Depends(require("tax.read")), db: Db = Depends(get_db)
+    p: Principal = Depends(require("tax.read")), db: Db = Depends(get_db, scope="function")
 ) -> list[dict[str, Any]]:
     return [
         {
@@ -139,7 +149,9 @@ def deadlines(
 
 @router.put("/deadlines/{did}/done")
 def done(
-    did: uuid.UUID, p: Principal = Depends(require("tax.write")), db: Db = Depends(get_db)
+    did: uuid.UUID,
+    p: Principal = Depends(require("tax.write")),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, str]:
     d = db.get(TaxDeadline, did)
     if d is None:
@@ -151,7 +163,9 @@ def done(
 
 @router.get("/package.xlsx")
 def package(
-    tax_year: int, p: Principal = Depends(require("tax.read")), db: Db = Depends(get_db)
+    tax_year: int,
+    p: Principal = Depends(require("tax.read")),
+    db: Db = Depends(get_db, scope="function"),
 ) -> Response:
     """The read-only yearly package for the accountant: no personal contact data, no documents."""
     wb = Workbook()

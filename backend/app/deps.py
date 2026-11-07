@@ -45,7 +45,9 @@ class Principal:
 
 
 def current_principal(
-    request: Request, db: Db = Depends(get_db), settings: Settings = Depends(get_settings_dep)
+    request: Request,
+    db: Db = Depends(get_db, scope="function"),
+    settings: Settings = Depends(get_settings_dep),
 ) -> Principal:
     token = request.cookies.get(SESSION_COOKIE)
     loaded = auth.load_session(db, settings, token) if token else None
@@ -70,7 +72,9 @@ def current_principal(
 def require(capability: str) -> Callable[..., Principal]:
     """Single place where capabilities are enforced. Denials are audited."""
 
-    def dep(p: Principal = Depends(current_principal), db: Db = Depends(get_db)) -> Principal:
+    def dep(
+        p: Principal = Depends(current_principal), db: Db = Depends(get_db, scope="function")
+    ) -> Principal:
         if capability not in p.capabilities:
             chain.append(db, str(p.user.id), "authz.deny", f"cap:{capability}", {})
             db.commit()

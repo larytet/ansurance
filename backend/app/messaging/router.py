@@ -24,7 +24,9 @@ class MessageIn(BaseModel):
 
 @router.post("/messages", status_code=201)
 def queue_message(
-    body: MessageIn, p: Principal = Depends(require("message.send")), db: Db = Depends(get_db)
+    body: MessageIn,
+    p: Principal = Depends(require("message.send")),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     """The only way a message leaves the system (delivery adapters arrive in M8)."""
     if body.channel not in gate.SEND_CHANNELS or body.purpose not in gate.PURPOSES:

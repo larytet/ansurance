@@ -151,7 +151,9 @@ def _decode(cursor: str) -> tuple[int, datetime, uuid.UUID]:
 
 @router.post("/inbox", status_code=201)
 def create_item(
-    body: ItemIn, p: Principal = Depends(require("inbox.create")), db: Db = Depends(get_db)
+    body: ItemIn,
+    p: Principal = Depends(require("inbox.create")),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     if body.role not in ROLES or body.type not in TYPES or body.urgency not in URGENCIES:
         raise HTTPException(422, "invalid_role_type_or_urgency")
@@ -182,7 +184,7 @@ def list_items(
     limit: int = Query(50, ge=1, le=200),
     cursor: str | None = None,
     p: Principal = Depends(require("inbox.read")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     scope, read_only = _scope(p, role)
     stmt = select(InboxItem, EFFECTIVE.label("eff"), RANK.label("rank")).where(
@@ -214,7 +216,7 @@ def list_items(
 def counts(
     role: str | None = None,
     p: Principal = Depends(require("inbox.read")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     scope, read_only = _scope(p, role)
     open_n, urgent_n = db.execute(
@@ -252,7 +254,7 @@ def reassign(
     item_id: uuid.UUID,
     body: ReassignIn,
     p: Principal = Depends(require("inbox.read")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     item = _open_item(db, p, item_id)
     if body.role not in ROLES:
@@ -284,7 +286,7 @@ def done(
     item_id: uuid.UUID,
     body: DoneIn,
     p: Principal = Depends(require("inbox.read")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     item = _open_item(db, p, item_id)
     item.status, item.resolved_at, item.resolved_by = "done", datetime.now(UTC), p.user.id
@@ -299,7 +301,7 @@ def dismiss(
     item_id: uuid.UUID,
     body: DismissIn,
     p: Principal = Depends(require("inbox.read")),
-    db: Db = Depends(get_db),
+    db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     item = _open_item(db, p, item_id)
     item.status, item.resolved_at, item.resolved_by = "dismissed", datetime.now(UTC), p.user.id
@@ -311,7 +313,9 @@ def dismiss(
 
 @router.get("/inbox/{item_id}/events")
 def events(
-    item_id: uuid.UUID, p: Principal = Depends(require("inbox.read")), db: Db = Depends(get_db)
+    item_id: uuid.UUID,
+    p: Principal = Depends(require("inbox.read")),
+    db: Db = Depends(get_db, scope="function"),
 ) -> list[dict[str, Any]]:
     item = db.get(InboxItem, item_id)
     visible = item is not None and (item.role in p.roles or "inbox.view_all" in p.capabilities)
@@ -336,7 +340,9 @@ def events(
 
 
 @router.get("/desk")
-def desk(p: Principal = Depends(require("desk.read")), db: Db = Depends(get_db)) -> dict[str, Any]:
+def desk(
+    p: Principal = Depends(require("desk.read")), db: Db = Depends(get_db, scope="function")
+) -> dict[str, Any]:
     """Back-office work areas with counts, the first thing the back-office sees."""
     rows = db.execute(
         select(InboxItem.type, func.count(), func.count().filter(EFFECTIVE == "urgent"))
