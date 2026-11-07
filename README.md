@@ -40,6 +40,38 @@ docker compose -f deploy/compose/docker-compose.yml --env-file deploy/compose/.e
 
 If you lose the authenticator, use a recovery code. If you lose those too, another manager resets the user; there is no self-service reset. After repeated failures the account is locked for a growing delay.
 
+## Add an SSO user (Google Workspace / Google account)
+
+An SSO user signs in with Google instead of a password and authenticator code. There is no auto-provisioning: **the user must be created first, by a manager, with the same e-mail as the Google account.** The Google e-mail must be verified.
+
+**One-time: register the app with Google**
+
+1. In the [Google Cloud console](https://console.cloud.google.com/) pick or create a project, then *APIs & Services > OAuth consent screen* (choose *Internal* for a Workspace domain) and fill in the app name.
+2. *APIs & Services > Credentials > Create credentials > OAuth client ID*, type **Web application**.
+3. Under *Authorized redirect URIs* add exactly: `https://<your-host>:<HTTPS_PORT>/api/auth/sso/google/callback` (for example `https://ansurance.agency.il:8443/api/auth/sso/google/callback`). Google requires a real host name and HTTPS for anything but `localhost`.
+4. Copy the **Client ID** and **Client secret**.
+
+**One-time: tell ansurance about Google.** In `deploy/compose/.env` add one line (JSON, no line breaks), with your values:
+
+```
+ANS_SSO_PROVIDERS=[{"name":"google","client_id":"<CLIENT_ID>.apps.googleusercontent.com","client_secret":"<CLIENT_SECRET>","authorize_url":"https://accounts.google.com/o/oauth2/v2/auth","token_url":"https://oauth2.googleapis.com/token","jwks_url":"https://www.googleapis.com/oauth2/v3/certs","issuer":"https://accounts.google.com","redirect_uri":"https://<your-host>:<HTTPS_PORT>/api/auth/sso/google/callback"}]
+```
+
+Then `make up` to apply it. `redirect_uri` must match the one registered with Google character for character.
+
+**Create the user** (as a signed-in manager on the *Users* tab, choosing sign-in *SSO only*, or from the server):
+
+```
+docker compose -f deploy/compose/docker-compose.yml --env-file deploy/compose/.env exec api \
+  python -m app.cli create-user --email anna@agency.il --name "Anna" --role agent --sso
+```
+
+No password, authenticator or recovery codes are created for an SSO user.
+
+**Sign in:** the user opens `https://<your-host>:<HTTPS_PORT>/api/auth/sso/google/start`, signs in with Google, and is sent back to ansurance. The first sign-in links the Google account to the user. Afterwards, open `https://<your-host>:<HTTPS_PORT>/`: the session is already active. (The login page has no "Sign in with Google" button yet, and the callback shows a short JSON reply instead of redirecting to the app. Both are small front-end changes still to do.)
+
+If sign-in fails, the reply says why: `unknown_user` (no SSO user with that verified Google e-mail, or the user is inactive), `unverified_email`, `bad_state` or `state_expired` (start again; the sign-in must finish within 10 minutes), `token_exchange_failed` (wrong client secret or redirect URI). Every success and failure is in the audit log. To make a Google user the admin, create it with `--role manager --sso`.
+
 Processes: every flow runs as a pipeline of stages with checklists (locked or parallel order, finalized by the owner role, complete when all stages are final), with an editable diagram per process. See [docs/PROCESSES.md](docs/PROCESSES.md) and the Processes tab in the mock. The reference process is Exit to retirement planning.
 
 Highlights: four roles (Agent, Back-office, Marketing, Manager), each with its own home screen, tabs and Inbox; the back-office Desk (get the ID and register, fill templates, post/email/labels, answer other insurers, tax work); a client file, a client app preview and light theme by default; automatic digitizing, classification and portfolio attribution of incoming fax, email and WhatsApp (an ID scan goes straight to the folder of the ID's owner); a "Notify client" channel for targeted, consent-checked upsell and regulatory notices; coexistence with existing Israeli agency systems; real-time Hebrew/Arabic/Russian/French translation with subtitles, including phone calls; light and dark theme, language switcher, role switcher, "Show me" tour and a "Lens" for long lists.

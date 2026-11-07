@@ -12,6 +12,7 @@ x-api-env: &api-env
   ANS_CLAMD_HOST: clamav
   ANS_LOG_LEVEL: ${ANS_LOG_LEVEL:-INFO}
   ANS_PASSWORD_MIN_LENGTH: ${ANS_PASSWORD_MIN_LENGTH:-8}
+  ANS_SSO_PROVIDERS: ${ANS_SSO_PROVIDERS:-[]}
 
 services:
   proxy:
