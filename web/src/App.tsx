@@ -12,6 +12,7 @@ import { Desk } from "./pages/Desk";
 import { Inbox } from "./pages/Inbox";
 import { IntakeReview } from "./pages/IntakeReview";
 import { MyWork } from "./pages/MyWork";
+import { LiveCall } from "./pages/LiveCall";
 import { Overview } from "./pages/Overview";
 import { Tax } from "./pages/Tax";
 import { Today } from "./pages/Today";
@@ -19,7 +20,7 @@ import { Login } from "./pages/Login";
 import { LANGS, LANG_NAMES, type Lang } from "./i18n";
 import { useUi } from "./ui";
 
-type Tab = "excel" | "integrations" | "settings" | "today" | "complaints" | "commissions" | "tax" | "overview" | "inbox" | "desk" | "intake" | "mywork" | "clients" | "campaigns";
+type Tab = "livecall" | "excel" | "integrations" | "settings" | "today" | "complaints" | "commissions" | "tax" | "overview" | "inbox" | "desk" | "intake" | "mywork" | "clients" | "campaigns";
 
 export function App() {
   const { api, me, setMe, tr, lang, setLang, theme, setTheme } = useUi();
@@ -53,6 +54,7 @@ export function App() {
     ...(has("complaint.write") ? (["complaints"] as Tab[]) : []),
     ...(has("commission.manage") ? (["commissions"] as Tab[]) : []),
     ...(has("tax.read") ? (["tax"] as Tab[]) : []),
+    ...(me.roles.includes("agent") && has("client.read") ? (["livecall"] as Tab[]) : []),
     ...(has("excel.use") ? (["excel"] as Tab[]) : []),
     ...(has("import.run") ? (["integrations"] as Tab[]) : []),
     "settings",
@@ -87,7 +89,7 @@ export function App() {
           {tr("logout")}
         </button>
       </header>
-      {tab === "excel" ? <ExcelJoin /> : tab === "integrations" ? <Integrations /> : tab === "settings" ? <Settings /> : tab === "today" ? <Today onOpenClient={openClient} /> : tab === "complaints" ? <Complaints /> : tab === "commissions" ? <Commissions /> : tab === "tax" ? <Tax /> : tab === "overview" ? <Overview /> : tab === "inbox" ? <Inbox /> : tab === "desk" ? <Desk /> : tab === "intake" ? <IntakeReview /> : tab === "mywork" ? <MyWork onOpenClient={openClient} /> : tab === "campaigns" ? <Campaigns /> : open ? <ClientFile clientId={open} onBack={() => setOpen(null)} /> : <Clients onOpen={setOpen} />}
+      {tab === "livecall" ? <LiveCall /> : tab === "excel" ? <ExcelJoin /> : tab === "integrations" ? <Integrations /> : tab === "settings" ? <Settings /> : tab === "today" ? <Today onOpenClient={openClient} /> : tab === "complaints" ? <Complaints /> : tab === "commissions" ? <Commissions /> : tab === "tax" ? <Tax /> : tab === "overview" ? <Overview /> : tab === "inbox" ? <Inbox /> : tab === "desk" ? <Desk /> : tab === "intake" ? <IntakeReview /> : tab === "mywork" ? <MyWork onOpenClient={openClient} /> : tab === "campaigns" ? <Campaigns /> : open ? <ClientFile clientId={open} onBack={() => setOpen(null)} /> : <Clients onOpen={setOpen} />}
     </div>
   );
 }

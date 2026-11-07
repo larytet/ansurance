@@ -11,7 +11,7 @@ the mock yet.
 
 | Role | Mock | App | Difference |
 |---|---|---|---|
-| Agent | Today, Processes, Inbox, Client file, WhatsApp, Live call, Pension, Client app preview, Clients, Settings | Today, Inbox, My work, Clients, Campaigns, Complaints, Settings | WhatsApp, Pension and the client preview are **sections of the client file** instead of tabs (the conversation belongs to one client). **Live call is missing** (needs a speech vendor). Campaigns and Complaints are extra: REQUIREMENTS F10 lets agents write campaigns and F8 lets anyone log a complaint, but the mock's agent has neither |
+| Agent | Today, Processes, Inbox, Client file, WhatsApp, Live call, Pension, Client app preview, Clients, Settings | Today, Inbox, My work, Clients, Campaigns, Complaints, Settings | WhatsApp, Pension and the client preview are **sections of the client file** instead of tabs (the conversation belongs to one client). **Live call is a text panel** (lines are typed or pasted; no speech recognition, which needs a vendor). Campaigns and Complaints are extra: REQUIREMENTS F10 lets agents write campaigns and F8 lets anyone log a complaint, but the mock's agent has neither |
 | Back-office | Desk, Processes, Inbox, Client file, Intake, Pension, WhatsApp, Excel, Integrations, Clients, Settings | Inbox, Desk, Scans, My work, Clients, Complaints, Commissions, Tax, Excel, Integrations, Settings | Same pattern for Pension and WhatsApp. Commissions, Tax and Complaints are extra (F7, F15, F8 have no tab in the mock) |
 | Marketing | Marketing, Processes, Inbox, WhatsApp, Excel, Clients, Settings | Inbox, My work, Campaigns, Excel, Settings | **No WhatsApp tab** (marketing sees replies and opt-outs through the Inbox, not a conversation view). **No Clients (preferences) tab**: marketing only has the restricted contact list, which has no screen yet |
 | Manager | Overview, Processes, Inbox, Desk, Marketing, Client file, Client app preview, Integrations, Trust, Clients, Settings | Overview, Inbox, Desk, Scans, My work, Clients, Campaigns, Complaints, Commissions, Tax, Excel, Integrations, Settings | Trust is a block on the Overview, not a tab. Client preview is a button on the client file. Extra tabs as above |
@@ -25,7 +25,7 @@ the mock yet.
 | Inbox | ported | the Lens and "open in work area" jump are not ported |
 | Client file | ported | no add-sheets for activities, tasks or meetings (APIs do not exist either) |
 | WhatsApp | on the client file | no inline translation of incoming messages |
-| Live call | **not built** | needs a speech-translation vendor |
+| Live call | text panel with translation, flags and a stated limit | no speech recognition or live subtitles from audio |
 | Pension (Mislaka) | authorizations and lookup request on the client file | the portfolio view needs the clearing-house adapter |
 | Client app preview | button on the client file creating the link, and the client's own page | the page is plain; it has no per-product detail tabs |
 | Intake | ported (review and unassigned queues) | wrong-client correction and the metrics view are not ported |
@@ -39,6 +39,6 @@ the mock yet.
 
 The reachable functions match the requirements per role. Differences are mostly placement
 (sections of the client file instead of tabs) and a set of tabs the mock never had because the
-mock predates F7, F8 and F15. Open items: Live call, the marketing role's WhatsApp and
+mock predates F7, F8 and F15. Open items: speech recognition for Live call, the marketing role's WhatsApp and
 preferences views, and the review of copy and layout with the agency, which this document
 cannot replace.

@@ -68,5 +68,6 @@ export const ru: Record<Key, string> = {
   "gap.no_declaration": "Нет декларации", "gap.foreign_residency_without_form": "Иностранное резидентство без дополнительной формы",
   owner: "Ответственный", uploadStatement: "Или загрузите выписку файлом Excel", importFile: "Импортировать файл",
   clientView: "Вид клиента (только чтение)", issueLink: "Создать ссылку для клиента", openPreview: "Посмотреть, что видит клиент", linkExpires: "Действует до", linkOnce: "Показывается один раз: скопируйте сейчас.",
+  livecall: "Живой звонок", liveCall: "Живой звонок", liveCallNote: "Машинный перевод набранных или вставленных строк (распознавания речи пока нет). Оба текста сохраняются в хронологии клиента.", callerLanguage: "Язык звонящего", agentLanguage: "Ваш язык", callClient: "Найти клиента (необязательно)", caller: "Звонящий", agent: "Агент", checkWithPerson: "Проверить с человеком", addLine: "Добавить строку", speaker: "Говорящий", lineText: "Что было сказано",
   openClient: "Открыть досье клиента", pendingApproval: "Ожидает руководителя", noWork: "Для вашей роли работы нет.", stage: "Этап",
 };

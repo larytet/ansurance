@@ -68,5 +68,6 @@ export const ar: Record<Key, string> = {
   "gap.no_declaration": "لا يوجد إقرار", "gap.foreign_residency_without_form": "إقامة أجنبية دون النموذج الإضافي",
   owner: "المسؤول", uploadStatement: "أو ارفع الكشف كملف إكسل", importFile: "استيراد الملف",
   clientView: "عرض العميل (للقراءة فقط)", issueLink: "إنشاء رابط للعميل", openPreview: "معاينة ما يراه العميل", linkExpires: "ينتهي", linkOnce: "يُعرض مرة واحدة: انسخه الآن.",
+  livecall: "مكالمة مباشرة", liveCall: "مكالمة مباشرة", liveCallNote: "ترجمة آلية لسطور مكتوبة أو ملصوقة (بلا تعرّف على الكلام بعد). يُحفظ النصان في السجل الزمني للعميل.", callerLanguage: "لغة المتصل", agentLanguage: "لغتك", callClient: "ابحث عن العميل (اختياري)", caller: "المتصل", agent: "الوكيل", checkWithPerson: "يُراجَع مع شخص", addLine: "إضافة السطر", speaker: "المتحدث", lineText: "ما قيل",
   openClient: "فتح ملف العميل", pendingApproval: "بانتظار المدير", noWork: "لا يوجد عمل بانتظار دورك.", stage: "المرحلة",
 };

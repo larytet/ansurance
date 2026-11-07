@@ -68,5 +68,6 @@ export const fr: Record<Key, string> = {
   "gap.no_declaration": "Aucune déclaration", "gap.foreign_residency_without_form": "Résidence étrangère sans le formulaire supplémentaire",
   owner: "Responsable", uploadStatement: "Ou téléversez le relevé en fichier Excel", importFile: "Importer le fichier",
   clientView: "Vue du client (lecture seule)", issueLink: "Créer un lien pour le client", openPreview: "Voir ce que voit le client", linkExpires: "Expire le", linkOnce: "Affiché une seule fois : copiez-le maintenant.",
+  livecall: "Appel en direct", liveCall: "Appel en direct", liveCallNote: "Traduction automatique de lignes saisies ou collées (pas encore de reconnaissance vocale). Les deux textes sont conservés dans la chronologie du client.", callerLanguage: "Langue de l'appelant", agentLanguage: "Votre langue", callClient: "Trouver le client (facultatif)", caller: "Appelant", agent: "Agent", checkWithPerson: "À vérifier avec une personne", addLine: "Ajouter la ligne", speaker: "Intervenant", lineText: "Ce qui a été dit",
   openClient: "Ouvrir le dossier du client", pendingApproval: "En attente du responsable", noWork: "Rien n'attend votre rôle.", stage: "Étape",
 };

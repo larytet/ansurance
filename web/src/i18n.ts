@@ -71,6 +71,7 @@ const en = {
     "gap.no_declaration": "No declaration", "gap.foreign_residency_without_form": "Foreign residency without the extra form",
     owner: "Owner", uploadStatement: "Or upload the statement as an Excel file", importFile: "Import the file",
     clientView: "Client view (read-only)", issueLink: "Create a link for the client", openPreview: "Preview what the client sees", linkExpires: "Expires", linkOnce: "Shown once: copy it now.",
+    livecall: "Live call", liveCall: "Live call", liveCallNote: "Machine translation of typed or pasted lines (no speech recognition yet). Both texts are saved in the client's timeline.", callerLanguage: "Caller's language", agentLanguage: "Your language", callClient: "Find the client (optional)", caller: "Caller", agent: "Agent", checkWithPerson: "Check with a person", addLine: "Add the line", speaker: "Speaker", lineText: "What was said",
     openClient: "Open the client file", pendingApproval: "Waiting for the manager", noWork: "Nothing is waiting for your role.", stage: "Stage",
 } as const;
 
@@ -139,6 +140,7 @@ const he = {
     "gap.no_declaration": "אין הצהרה", "gap.foreign_residency_without_form": "תושבות זרה ללא הטופס הנוסף",
     owner: "אחראי", uploadStatement: "או העלאת הדוח כקובץ אקסל", importFile: "ייבוא הקובץ",
     clientView: "תצוגת לקוח (לקריאה בלבד)", issueLink: "יצירת קישור ללקוח", openPreview: "תצוגה מקדימה של מה שהלקוח רואה", linkExpires: "בתוקף עד", linkOnce: "מוצג פעם אחת: העתיקו עכשיו.",
+    livecall: "שיחה חיה", liveCall: "שיחה חיה", liveCallNote: "תרגום מכונה של שורות שהוקלדו או הודבקו (עדיין בלי זיהוי דיבור). שני הנוסחים נשמרים בציר הזמן של הלקוח.", callerLanguage: "שפת המתקשר", agentLanguage: "השפה שלך", callClient: "חיפוש הלקוח (לא חובה)", caller: "מתקשר", agent: "סוכן", checkWithPerson: "לבדוק מול אדם", addLine: "הוספת השורה", speaker: "דובר", lineText: "מה נאמר",
     openClient: "פתיחת תיק לקוח", pendingApproval: "ממתין למנהל", noWork: "אין עבודה הממתינה לתפקיד שלך.", stage: "שלב",
 } as const;
 
