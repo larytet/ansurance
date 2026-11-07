@@ -1,9 +1,10 @@
 import { type FormEvent, useState } from "react";
 import { ApiError } from "../api";
+import { LANGS, LANG_NAMES, type Lang } from "../i18n";
 import { useUi } from "../ui";
 
 export function Login() {
-  const { api, setMe, tr } = useUi();
+  const { api, setMe, tr, lang, setLang } = useUi();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [code, setCode] = useState("");
@@ -26,6 +27,9 @@ export function Login() {
 
   return (
     <main className="login">
+      <select value={lang} onChange={(e) => setLang(e.target.value as Lang)} aria-label={tr("language")} className="login-lang">
+        {LANGS.map((l) => <option key={l} value={l}>{LANG_NAMES[l]}</option>)}
+      </select>
       <h1>{tr("app")}</h1>
       <form onSubmit={submit}>
         <label>

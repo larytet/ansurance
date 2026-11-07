@@ -30,3 +30,6 @@ button.link { border:0; background:none; color:var(--accent); padding:0; text-de
 .trust .ok { color: #1b7f4c; }
 .trust .bad { color: #b42318; font-weight: 600; }
 .campaigns li, .work li { margin: 0.5rem 0; }
+
+.login { position: relative; }
+.login-lang { position: absolute; inset-block-start: 0; inset-inline-end: 0; }

@@ -196,3 +196,21 @@ describe("Clients", () => {
     expect(await screen.findByText("לא נמצאו לקוחות.")).toBeInTheDocument();
   });
 });
+
+describe("sign-in page language", () => {
+  it("lets the user choose the language before signing in, flips the direction and remembers it", async () => {
+    localStorage.clear();
+    const s = fakeServer(); // not signed in: /api/auth/me is 404
+    mount(s.fetcher);
+    const pick = await screen.findByRole("combobox", { name: "שפה" });
+    expect(document.documentElement.dir).toBe("rtl");
+    expect(screen.getByRole("button", { name: "כניסה" })).toBeInTheDocument();
+    await userEvent.selectOptions(pick, "ru");
+    expect(await screen.findByRole("button", { name: "Войти" })).toBeInTheDocument();
+    expect(document.documentElement.dir).toBe("ltr");
+    await userEvent.selectOptions(screen.getByRole("combobox", { name: "Язык" }), "ar");
+    expect(await screen.findByRole("button", { name: "تسجيل الدخول" })).toBeInTheDocument();
+    expect(document.documentElement.dir).toBe("rtl");
+    expect(localStorage.getItem("lang")).toBe("ar");
+  });
+});
