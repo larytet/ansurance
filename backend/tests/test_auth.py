@@ -248,3 +248,9 @@ def test_forwarded_header_is_ignored_when_the_sender_is_not_a_trusted_proxy(
     assert _fail(c, "u9@agency.il", "198.51.100.77") == 429  # still one client: no evasion
     ips = {r[0] for r in db.execute(text("SELECT DISTINCT ip FROM login_event"))}
     assert not any(ip.startswith("198.51.100.") for ip in ips)
+
+
+def test_password_min_length_is_configurable() -> None:
+    assert check_policy("abcd-efg9") is None  # default minimum is 8
+    assert check_policy("abc-ef9") is not None  # 7 characters
+    assert check_policy("abcd-efg9", min_length=12) is not None

@@ -165,6 +165,7 @@ def create_user(
     body: UserIn,
     p: Principal = Depends(require("user.manage")),
     db: Db = Depends(get_db, scope="function"),
+    settings: Settings = Depends(get_settings_dep),
 ) -> dict[str, Any]:
     bad = [r for r in body.roles if r not in ROLES]
     if bad or not body.roles:
@@ -172,7 +173,7 @@ def create_user(
     if body.auth_mode not in ("local", "sso"):
         raise HTTPException(422, "auth_mode")
     if body.auth_mode == "local":
-        reason = check_policy(body.password or "", body.email)
+        reason = check_policy(body.password or "", body.email, settings.password_min_length)
         if reason:
             raise HTTPException(422, f"weak_password: {reason}")
     try:

@@ -4,7 +4,7 @@ from enum import StrEnum
 from functools import lru_cache
 from urllib.parse import quote
 
-from pydantic import BaseModel, SecretStr, model_validator
+from pydantic import BaseModel, Field, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -61,6 +61,7 @@ class Settings(BaseSettings):
     session_absolute_hours: int = 12
     cookie_secure: bool = True
     # lockout: after N failures lock for 2^(n-N) minutes (max 60); per-IP failure ceiling
+    password_min_length: int = Field(default=8, ge=8)  # ANS_PASSWORD_MIN_LENGTH
     lockout_threshold: int = 5
     ip_failure_limit: int = 20
     ip_failure_window_minutes: int = 15

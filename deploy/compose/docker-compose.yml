@@ -11,6 +11,7 @@ x-api-env: &api-env
   ANS_S3_REGION: us-east-1
   ANS_CLAMD_HOST: clamav
   ANS_LOG_LEVEL: ${ANS_LOG_LEVEL:-INFO}
+  ANS_PASSWORD_MIN_LENGTH: ${ANS_PASSWORD_MIN_LENGTH:-8}
 
 services:
   proxy:

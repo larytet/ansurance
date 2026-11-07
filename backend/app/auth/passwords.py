@@ -7,6 +7,9 @@ _hasher = PasswordHasher()  # argon2id defaults (RFC 9106 low-memory profile)
 
 _COMMON = {
     "password",
+    "12345678",
+    "qwertyui",
+    "11111111",
     "password1",
     "123456789012",
     "qwertyuiop12",
@@ -17,7 +20,7 @@ _COMMON = {
     "changeme1234",
     "passw0rd1234",
 }
-MIN_LENGTH = 12
+DEFAULT_MIN_LENGTH = 8  # the deployed value is the `password_min_length` setting
 
 
 def hash_password(password: str) -> str:
@@ -32,10 +35,12 @@ def verify_password(stored: str | None, password: str) -> bool:
         return False
 
 
-def check_policy(password: str, email: str = "") -> str | None:
+def check_policy(
+    password: str, email: str = "", min_length: int = DEFAULT_MIN_LENGTH
+) -> str | None:
     """Return a reason the password is unacceptable, or None."""
-    if len(password) < MIN_LENGTH:
-        return f"at least {MIN_LENGTH} characters"
+    if len(password) < min_length:
+        return f"at least {min_length} characters"
     low = password.casefold()
     if low in _COMMON or (email and low.startswith(email.split("@")[0].casefold())):
         return "too common or based on the e-mail"

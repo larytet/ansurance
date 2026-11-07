@@ -30,7 +30,8 @@ def create_user(argv: list[str]) -> int:
     password = None
     if not args.sso:
         password = args.password or getpass.getpass("Password: ")
-        if (reason := check_policy(password, args.email)) is not None:
+        min_len = get_settings().password_min_length
+        if (reason := check_policy(password, args.email, min_len)) is not None:
             print(f"password rejected: {reason}", file=sys.stderr)
             return 2
     maker = sessionmaker(make_engine(get_settings()))
