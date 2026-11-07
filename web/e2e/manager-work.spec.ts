@@ -113,8 +113,11 @@ test("an agent's Today shows the renewal that is due", async ({ page }) => {
   const renew = new Date(Date.now() + 4 * 86400_000).toISOString().slice(0, 10);
   await api(page, "POST", `/api/clients/${client.json.id}/policies`, { insurer: "Migdal", policy_number: `D-${stamp}`, product: "car", premium_ils: "900", renewal_date: renew });
   await page.getByRole("button", { name: "היום" }).click();
-  const li = page.locator("li", { hasText: `Due ${stamp}` });
+  // the new client is also a lead (status lead) and appears in the leads list: pick the renewal row
+  const li = page.locator("li", { hasText: `Due ${stamp}` }).filter({ hasText: "car" });
   await expect(li).toBeVisible();
   await expect(li).toHaveClass(/attention/);
   await expect(li).toContainText("10 ימים");
+  await expect(page.getByRole("heading", { name: /^לידים \(\d+\)$/ })).toBeVisible();
+  await expect(page.locator("li", { hasText: `Due ${stamp}` }).filter({ hasNotText: "car" })).toBeVisible();
 });

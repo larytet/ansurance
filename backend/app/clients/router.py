@@ -3,7 +3,7 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
-from sqlalchemy import or_, select, text
+from sqlalchemy import case, func, or_, select, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session as Db
 
@@ -38,6 +38,35 @@ class PolicyIn(BaseModel):
 class FamilyIn(BaseModel):
     member_id: uuid.UUID
     relation: str
+
+
+def phone_digits(phone: str | None) -> str:
+    """Digits only, with the Israeli country code folded into the leading zero, so that
+    +972-50-111-2222 and 050-111-2222 are the same number. Empty when there is no number."""
+    d = "".join(ch for ch in (phone or "") if ch.isdigit())
+    if d.startswith("972"):
+        d = "0" + d[3:]
+    return d if len(d) >= 7 else ""
+
+
+def _phone_matches(db: Db, p: Principal, c: Client) -> dict[str, Any]:
+    """F1: the same phone on another client is a warning, not a refusal (a family shares one).
+    Names only for clients this user may see; for the rest only the fact that one exists."""
+    want = phone_digits(c.phone)
+    if not want:
+        return {"phone_matches": [], "phone_shared_with_other_agent": False}
+    digits = func.regexp_replace(Client.phone, r"\D", "", "g")
+    folded = case((digits.like("972%"), "0" + func.substr(digits, 4)), else_=digits)
+    rows = db.scalars(
+        select(Client).where(Client.id != c.id, Client.phone.is_not(None), folded == want)
+    )
+    seen, hidden = [], False
+    for o in rows:
+        if "client.read_all" in p.capabilities or o.agent_id == p.user.id:
+            seen.append({"id": str(o.id), "name": o.name})
+        else:
+            hidden = True
+    return {"phone_matches": seen, "phone_shared_with_other_agent": hidden}
 
 
 def _client_dict(c: Client) -> dict[str, Any]:
@@ -87,17 +116,20 @@ def create_client(
         db.rollback()
         raise HTTPException(409, "duplicate_id_number") from e
     chain.append(db, str(p.user.id), "client.create", f"client:{c.id}", {})
-    return _client_dict(c)
+    return {**_client_dict(c), **_phone_matches(db, p, c)}
 
 
 @router.get("/clients")
 def search_clients(
     request: Request,
     q: str = "",
+    status: str | None = None,
     p: Principal = Depends(require("client.read")),
     db: Db = Depends(get_db, scope="function"),
 ) -> list[dict[str, Any]]:
     stmt = select(Client).where(visible(p))
+    if status is not None:
+        stmt = stmt.where(Client.status == status)
     for tok in normalize(q).split():
         conds = [Client.search_text.ilike(f"%{tok}%")]
         sk = skeleton(tok)

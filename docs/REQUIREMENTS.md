@@ -70,7 +70,7 @@ Each flow lists trigger, steps, actors, outputs and regulatory hooks.
 
 - Trigger: inbound lead (phone, WhatsApp, email, walk-in) or referral.
 - Steps:
-  1. Agent creates the lead; duplicate check on ID number (9 digits, Luhn check digit validated) and phone.
+  1. Agent creates the lead; duplicate check on ID number (9 digits, Luhn check digit validated), which refuses a second client with the same ID, and on phone, which only warns (a family shares one number): numbers are compared by their digits with +972 read as a leading 0, and a match on another agent's client says only that one exists, never whose.
   2. Collect ID card plus the paper addendum (Sefach), proof of address if needed. Client may send photos over WhatsApp or email; they route through the intake pipeline (F6). The back-office steps of getting the ID and registering the client are F11.
   3. KYC form completed: identity, beneficiary, controlling shareholder for corporate clients, source of funds for large or unusual products.
   4. Client signs a mandate/representation letter and a consent for data lookup (section F5). Marketing consent (per channel, yes or no) is asked separately and stored in the consent registry, because F10 depends on it.

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { type Counts } from "../api";
+import { type ClientRow, type Counts } from "../api";
 import { type Key } from "../i18n";
 import { useUi } from "../ui";
 import { TodayTasks } from "./Tasks";
@@ -10,7 +10,9 @@ export function Today({ onOpenClient }: { onOpenClient: (id: string) => void }) 
   const { api, tr, me } = useUi();
   const [renewals, setRenewals] = useState<Renewal[] | null>(null);
   const [counts, setCounts] = useState<Counts | null>(null);
+  const [leads, setLeads] = useState<ClientRow[]>([]);
   const [error, setError] = useState(false);
+  useEffect(() => { api.get<ClientRow[]>("/api/clients?status=lead").then(setLeads).catch(() => setLeads([])); }, [api]);
   useEffect(() => {
     Promise.all([api.get<Renewal[]>("/api/renewals?within=60"), api.counts()])
       .then(([r, c]) => { setRenewals(r); setCounts(c); })
@@ -29,6 +31,11 @@ export function Today({ onOpenClient }: { onOpenClient: (id: string) => void }) 
             {tr(`stage.${r.stage}` as Key)} ({r.days} {tr("days")})
           </li>
         ))}
+      </ul>
+      <h2>{tr("leads")} ({leads.length})</h2>
+      {leads.length === 0 && <p>{tr("noLeads")}</p>}
+      <ul className="work">
+        {leads.map((c) => <li key={c.id}><button className="link" onClick={() => onOpenClient(c.id)}><bdi>{c.name}</bdi></button> · {c.preferred_language}</li>)}
       </ul>
       {me?.capabilities.includes("task.write") && <TodayTasks onOpenClient={onOpenClient} />}
     </section>

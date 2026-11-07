@@ -20,7 +20,7 @@ the mock yet.
 
 | Mock screen | App | Gap |
 |---|---|---|
-| Today | ported, with tasks | no leads, claims or birthdays list yet |
+| Today | ported, with tasks and leads | no claims or birthdays list yet (the data model has no birth date) |
 | Processes | "My work" list, pipeline on the client file | the diagram view and the definition editor are not ported |
 | Inbox | ported | the Lens and "open in work area" jump are not ported |
 | Client file | ported | tasks and meetings are built; no add-sheets for activities, employment or related clients (APIs do not exist) |
