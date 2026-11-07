@@ -36,10 +36,10 @@ The rules that hold in both are: WhatsApp, Pension and the client app preview be
 
 | Role | Tabs in the mock | Tabs in the web app |
 |---|---|---|
-| Agent | Today, Processes, Inbox, Client file, WhatsApp, Live call, Pension, Client app preview, Clients (preferences), Settings | Today, Inbox, My work, Clients, Campaigns, Complaints, Settings |
-| Back-office | Desk, Processes, Inbox, Client file, Intake, Pension, WhatsApp, Excel (join), Integrations, Clients (preferences), Settings | Inbox, Desk, Scans, My work, Clients, Complaints, Commissions, Tax, Excel, Integrations, Settings |
-| Marketing | Campaigns, Processes, Inbox, WhatsApp, Excel (join), Clients (preferences), Settings | Inbox, My work, Campaigns, Excel, Settings |
-| Manager | Overview, Processes, Inbox, Desk, Campaigns, Client file, Client app preview, Integrations, Trust (audit), Clients (preferences), Settings | Overview, Inbox, Desk, Scans, My work, Clients, Campaigns, Complaints, Commissions, Tax, Excel, Integrations, Users, Settings |
+| Agent | Today, Processes, Inbox, Client file, WhatsApp, Live call, Pension, Client app preview, Clients (preferences), Settings | Today, Inbox, My work, Processes, Clients, Campaigns, Complaints, Settings |
+| Back-office | Desk, Processes, Inbox, Client file, Intake, Pension, WhatsApp, Excel (join), Integrations, Clients (preferences), Settings | Inbox, Desk, Scans, My work, Processes, Clients, Complaints, Commissions, Tax, Excel, Integrations, Settings |
+| Marketing | Campaigns, Processes, Inbox, WhatsApp, Excel (join), Clients (preferences), Settings | Inbox, My work, Processes, Contacts, Campaigns, Excel, Settings |
+| Manager | Overview, Processes, Inbox, Desk, Campaigns, Client file, Client app preview, Integrations, Trust (audit), Clients (preferences), Settings | Overview, Inbox, Desk, Scans, My work, Processes, Clients, Campaigns, Complaints, Commissions, Tax, Excel, Integrations, Users, Settings |
 
 Open differences, each tracked as a milestone in [STATUS.md](../STATUS.md): the Inbox Lens, the process diagram view and definition editor, the marketing role's WhatsApp and preferences views, and the client file's add-sheets for activities, employment and related clients (the mock has them, the application has no API for them; tasks and meetings are built, and a lead is a client with the status lead).
 The Users tab is not in the mock because the mock has no user administration: see F16.

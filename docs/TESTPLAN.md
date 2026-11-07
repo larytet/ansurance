@@ -227,6 +227,16 @@ The Playwright test for these screens is T-M13-5.
 
 Not covered: editing a definition in the UI (the API creates a new version; there is no editor screen).
 
+### M15 Contacts for marketing (the role's Clients view in the mock)
+
+| ID | Test | Type |
+|---|---|---|
+| T-M15-1 | The list shows contact details and consent per channel, says what is not shown, and never calls the full client API (`Contacts.test.tsx`) | Auto, Vitest |
+| T-M15-2 | Filter by name in any script and by who opted in to a channel; the tab belongs to the role without `client.read` only | Auto, Vitest |
+| T-M15-3 | The view reports "no consent" as `none`, which the screen must show as "No consent recorded" (the unit test first used null and missed this) | Auto, Vitest and Playwright |
+| T-M15-4 | Real browser: an agent creates a client with a phone; marketing signs in, has no Clients tab, finds the contact with phone and consent, and gets 403 from the full client API (`web/e2e/marketing.spec.ts`) | Auto, Playwright |
+| T-M15-5 | Marketing reads only the `marketing_contact` view (P-3, `test_clients.py`, `test_consent.py`) | Auto |
+
 ## 4. Scripted penetration tests (security suite)
 
 Run against a `demo` stack in CI (fast subset) and against `dev` before each release (full). Within the AWS penetration testing policy (no denial of service). Each test states the expected defence.
@@ -291,3 +301,4 @@ Run against a `demo` stack in CI (fast subset) and against `dev` before each rel
 | M12 | 2026-11-07 | T-M12-1..6: 8 backend tests (chips and date order, delegation, refusals, meetings and the service contact date, scope per role, overdue Inbox item once) and 4 web tests; 596 fast backend tests; 87 web unit tests | 0 | Migration 0015 (tables `task` and `meeting`, capability `task.write`). Browser test for these screens: `agent-day.spec.ts` (see M13). The slow suite was not re-run after M12 |
 | M13 | 2026-11-07 | T-M13-1..5: 6 backend tests (digits comparison, warning not refusal, nothing leaks across agents, duplicate ID still refused, leads list scope, roles), 4 web tests, and the browser test `agent-day.spec.ts`; all 6 Playwright tests pass on the live stack rebuilt with `make up` (schema 0015); backend fast suite result in STATUS.md | 0 | The existing Today browser test needed a narrower locator because a new client is now also a lead on Today |
 | M14 | 2026-11-07 | T-M14-1..4: 6 web tests (96 in total), the path-contract test, and `processes.spec.ts`; all 7 Playwright tests pass on the live stack rebuilt with `make up` | 0 | The diagram is drawn in the browser from the definition (no diagram library added, so nothing new to pin); the Mermaid source can be opened in Mermaid Live only by following a link that says so. First browser run read the dropdown before the definitions loaded (test race, fixed) |
+| M15 | 2026-11-07 | T-M15-1..5: 3 web tests (99 in total), `marketing.spec.ts`, and the existing backend tests of the marketing view; all 8 Playwright tests pass on the live stack rebuilt with `make up` | 0 | Defect found by the first browser run: the back end sends `none` for no consent, the screen looked up a translation for it and showed blanks; the unit test had used null. Fixed, and the unit test now uses the real value |
