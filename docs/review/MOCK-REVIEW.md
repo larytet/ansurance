@@ -20,10 +20,10 @@ the mock yet.
 
 | Mock screen | App | Gap |
 |---|---|---|
-| Today | ported | no tasks or claims list yet |
+| Today | ported, with tasks | no leads, claims or birthdays list yet |
 | Processes | "My work" list, pipeline on the client file | the diagram view and the definition editor are not ported |
 | Inbox | ported | the Lens and "open in work area" jump are not ported |
-| Client file | ported | no add-sheets for activities, tasks or meetings (APIs do not exist either) |
+| Client file | ported | tasks and meetings are built; no add-sheets for activities, employment or related clients (APIs do not exist) |
 | WhatsApp | on the client file | no inline translation of incoming messages |
 | Live call | text panel with translation, flags and a stated limit | no speech recognition or live subtitles from audio |
 | Pension (Mislaka) | authorizations and lookup request on the client file | the portfolio view needs the clearing-house adapter |

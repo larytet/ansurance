@@ -41,6 +41,7 @@ CAPABILITIES = [
     "commission.manage",
     "tax.write",
     "tax.read",
+    "task.write",
 ]
 
 _COMMON = [
@@ -65,6 +66,7 @@ ROLE_CAPABILITIES: dict[str, list[str]] = {
         "flow.write",
         "campaign.write",
         "complaint.write",
+        "task.write",
         *_COMMON,
     ],
     "backoffice": [
@@ -87,6 +89,7 @@ ROLE_CAPABILITIES: dict[str, list[str]] = {
         "commission.manage",
         "tax.write",
         "tax.read",
+        "task.write",
         *_COMMON,
     ],
     "marketing": ["client.read_min", "excel.use", "campaign.write", *_COMMON],

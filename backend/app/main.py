@@ -42,6 +42,7 @@ from app.manager.router import router as manager_router
 from app.messaging.router import router as messaging_router
 from app.portal.router import router as portal_router
 from app.processes.router import router as processes_router
+from app.tasks.router import router as tasks_router
 from app.tax.router import router as tax_router
 from app.translation.router import router as translation_router
 
@@ -177,6 +178,7 @@ def create_app(
     app.include_router(campaigns_router)
     app.include_router(manager_router)
     app.include_router(tax_router)
+    app.include_router(tasks_router)
     app.include_router(translation_router)
     app.include_router(portal_router)
     app.include_router(esign_hook)

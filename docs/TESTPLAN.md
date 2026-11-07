@@ -191,15 +191,20 @@ Vitest with a fake API, and Playwright against the live stack (`make e2e-web`).
 | T-M11-9 | No audit entry, log line or later response contains a password, secret or recovery code | Auto |
 | T-M11-10 | Users page: edit roles, reset, deactivate, with confirmation and the one-time setup shown after a reset | Auto, Vitest |
 
-### M12 Leads, tasks and meetings (agent Today and client file)
+### M12 Tasks and meetings (agent Today and client file)
+
+A lead already exists as a client with the status `lead` (F1), so this milestone adds tasks and meetings only.
 
 | ID | Test | Type |
 |---|---|---|
-| T-M12-1 | An agent creates, completes and delegates a task; Today shows today, overdue, next, done and delegated | Auto |
-| T-M12-2 | A lead is created with a duplicate check on ID and phone, and converts into a client file through F1 | Auto |
-| T-M12-3 | A meeting is recorded on the client file with a summary; the two-year service contact due date moves | Auto |
-| T-M12-4 | Agent scope: an agent sees only own tasks, leads and meetings; the manager sees all | Auto |
-| T-M12-5 | An overdue task raises one Inbox item, not one per day | Auto |
+| T-M12-1 | An agent creates, completes, reopens and delegates a task; the five Today chips (today, overdue, next, done, delegated) show the right rows in date order | Auto |
+| T-M12-2 | Delegation to an unknown or inactive user is refused; the people list has names only and skips inactive users; bad view, empty text and a missing CSRF token are refused | Auto |
+| T-M12-3 | A meeting is recorded on the client file with a summary; the service contact date is 24 months after the newest meeting and moves when a newer one is added; newest first; unknown kind refused; audited | Auto |
+| T-M12-4 | Agent scope: an agent sees only own tasks, cannot attach one to another agent's client, read or change another agent's meetings or tasks, or look at another person's list; the manager can; marketing and the accountant have no tasks | Auto |
+| T-M12-5 | An overdue task raises one Inbox item, not one per day; a finished task raises none; a task that becomes late later raises its own | Auto |
+| T-M12-6 | Today tasks and client meetings screens, delegation, CSRF, hidden for a role without `task.write` (`Tasks.test.tsx`) | Auto, Vitest |
+
+Open: the duplicate check on a lead's phone number (F1 asks for ID and phone; only the ID is checked today), and the Playwright test for these screens.
 
 ## 4. Scripted penetration tests (security suite)
 
@@ -262,3 +267,4 @@ Run against a `demo` stack in CI (fast subset) and against `dev` before each rel
 | Last screens and mock review | 2026-11-07 | 1 backend test (user list for choosing an owner: no secrets, manager only) and 7 web tests (owner choice sent with the CSRF token and hidden from agents who never fetch the user list, statement upload enabled only when complete and sending the fields, server reason shown, client link created with a new-tab preview, hidden without the right, error shown); tab sets per role compared mechanically between the mock and the running app | 0 | Findings: the structural comparison found one missing function (a way to create the client's link) which was added; it also lists gaps that remain (Live call, marketing WhatsApp and preferences, Mislaka portfolio view). Limits: this is not a visual, copy or usability review and nobody at the agency has seen it |
 | Live call panel | 2026-11-07 | 4 web tests (agents only; caller line translated with flags, notice and the client id sent; agent reply translated the other way and no server call when both languages are the same; provider failure shown and the text kept) | 0 | Limits: no speech recognition, so this is not a replacement for live subtitles; uses the fake translation provider in tests and the demo profile |
 | M11 | 2026-11-07 | T-M11-1..9: 17 backend tests (roles and name, role change on the next request, deactivate and reactivate, authenticator reset, set password, own password change with wrong password and wrong code counted, last manager protected, only `user.manage`, SSO users, over-posting ignored, no secret in the audit or the list) and the web-contract test; 587 fast backend tests; 83 web unit tests (T-M11-10) | 0 | Defect found by the contract test: the Users page called `/api/auth/users` (route is `/api/users`). P-21 to P-23 are covered by the role, session and own-password tests above, not yet by the scripted suite. The Playwright test `users.spec.ts` was not run because the live stack still has the old image |
+| M12 | 2026-11-07 | T-M12-1..6: 8 backend tests (chips and date order, delegation, refusals, meetings and the service contact date, scope per role, overdue Inbox item once) and 4 web tests; 596 fast backend tests; 87 web unit tests | 0 | Migration 0015 (tables `task` and `meeting`, capability `task.write`). Not run: the slow suite and a Playwright test for these screens (the live stack runs the old image). Not built: the duplicate check on a lead's phone number |

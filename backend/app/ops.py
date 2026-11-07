@@ -90,6 +90,9 @@ def run_daily(
     from app.tax import service as tax
 
     report["tax"] = tax.tick(db, settings, now)
+    from app.tasks import service as tasks
+
+    report["task_items"] = tasks.overdue_tick(db, now.date())
     set_info(db, "ops.daily_last", now.isoformat())
     return report
 

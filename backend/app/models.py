@@ -839,6 +839,39 @@ class TaxDeadline(Base):
     done_by: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("user_account.id"))
 
 
+class Task(Base):
+    """An agent's or clerk's to-do, optionally about one client. Delegating changes the owner
+    and records who delegated it; the creator never changes."""
+
+    __tablename__ = "task"
+    __table_args__ = (Index("ix_task_owner_open", "owner_id", "done_at", "due_on"),)
+    id: Mapped[uuid.UUID] = _pk()
+    text: Mapped[str] = mapped_column(String(200), nullable=False)
+    due_on: Mapped[date] = mapped_column(Date, nullable=False)
+    client_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("client.id"), index=True)
+    owner_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("user_account.id"), nullable=False)
+    created_by: Mapped[uuid.UUID] = mapped_column(ForeignKey("user_account.id"), nullable=False)
+    delegated_by: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("user_account.id"))
+    created_at: Mapped[datetime] = _now()
+    done_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class Meeting(Base):
+    """A meeting with a client, kept on the client file with its summary."""
+
+    __tablename__ = "meeting"
+    id: Mapped[uuid.UUID] = _pk()
+    client_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("client.id"), nullable=False, index=True
+    )
+    kind: Mapped[str] = mapped_column(String(10), nullable=False)
+    held_on: Mapped[date] = mapped_column(Date, nullable=False)
+    subject: Mapped[str] = mapped_column(String(200), nullable=False)
+    summary: Mapped[str | None] = mapped_column(Text)
+    created_by: Mapped[uuid.UUID] = mapped_column(ForeignKey("user_account.id"), nullable=False)
+    created_at: Mapped[datetime] = _now()
+
+
 class TranslationRecord(Base):
     """Original and translation kept side by side in the client timeline (REQUIREMENTS 5)."""
 

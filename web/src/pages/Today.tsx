@@ -2,11 +2,12 @@ import { useEffect, useState } from "react";
 import { type Counts } from "../api";
 import { type Key } from "../i18n";
 import { useUi } from "../ui";
+import { TodayTasks } from "./Tasks";
 
 interface Renewal { policy_id: string; client_id: string; client: string; product: string; renewal_date: string; days: number; stage: string }
 
 export function Today({ onOpenClient }: { onOpenClient: (id: string) => void }) {
-  const { api, tr } = useUi();
+  const { api, tr, me } = useUi();
   const [renewals, setRenewals] = useState<Renewal[] | null>(null);
   const [counts, setCounts] = useState<Counts | null>(null);
   const [error, setError] = useState(false);
@@ -29,6 +30,7 @@ export function Today({ onOpenClient }: { onOpenClient: (id: string) => void }) 
           </li>
         ))}
       </ul>
+      {me?.capabilities.includes("task.write") && <TodayTasks onOpenClient={onOpenClient} />}
     </section>
   );
 }

@@ -7,6 +7,7 @@ import { useUi } from "../ui";
 import { ClientLink } from "./ClientLink";
 import { Messages } from "./Messages";
 import { Pension } from "./Pension";
+import { ClientMeetings } from "./Tasks";
 
 const CHANNELS = ["whatsapp", "email", "sms"] as const;
 const DOC_TYPES = [
@@ -172,6 +173,7 @@ export function ClientFile({ clientId, onBack }: { clientId: string; onBack: () 
       {can("client.read") && <ClientLink clientId={clientId} />}
       {can("client.read") && <Messages clientId={clientId} />}
 
+      {me?.capabilities.includes("task.write") && <ClientMeetings clientId={clientId} />}
       {procs && (
         <>
           <h3>{tr("processes")}</h3>
