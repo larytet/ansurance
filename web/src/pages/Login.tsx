@@ -31,18 +31,18 @@ export function Login() {
         {LANGS.map((l) => <option key={l} value={l}>{LANG_NAMES[l]}</option>)}
       </select>
       <h1>{tr("app")}</h1>
-      <form onSubmit={submit}>
+      <form onSubmit={submit} method="post" action="/api/auth/login">
         <label>
           {tr("email")}
-          <input type="email" autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          <input type="email" id="username" name="username" autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} required />
         </label>
         <label>
           {tr("password")}
-          <input type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+          <input type="password" id="password" name="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
         </label>
         <label>
           {tr("code")}
-          <input inputMode="numeric" autoComplete="one-time-code" value={code} onChange={(e) => setCode(e.target.value)} required />
+          <input inputMode="numeric" id="code" name="code" autoComplete="one-time-code" value={code} onChange={(e) => setCode(e.target.value)} required />
         </label>
         {error && <p role="alert">{error}</p>}
         <button type="submit" disabled={busy}>
