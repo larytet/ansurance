@@ -38,7 +38,7 @@ docker compose -f deploy/compose/docker-compose.yml --env-file deploy/compose/.e
 4. Sign in: e-mail, password, and in the **authenticator or recovery code** field the current 6-digit code from the app (or one unused recovery code).
 5. As manager you can then create the other users (agent, back-office, marketing) with the same command and `--role` (or through the API, `POST /api/v1/users`). Add `--sso` for a user who signs in only through Microsoft 365 or Google.
 
-If you lose the authenticator, use a recovery code. If you lose those too, another manager resets the user; there is no self-service reset. After repeated failures the account is locked for a growing delay.
+If you lose the authenticator, use a recovery code. If you lose those too, run the same `create-user` command again with the same e-mail: it **overwrites** the existing user (name, roles, a new password, a new authenticator secret and new recovery codes; the old codes stop working; any lockout is cleared). There is no self-service reset. After repeated failures the account is locked for a growing delay.
 
 ## Add an SSO user (Google Workspace / Google account)
 

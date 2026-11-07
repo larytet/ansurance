@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 
 import pyotp
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session as Db
 
 from app.audit import chain
@@ -71,6 +71,42 @@ def create_user(
         extra["recovery_codes"] = codes
     db.flush()
     return user, extra
+
+
+def overwrite_user(
+    db: Db,
+    user: User,
+    display_name: str,
+    roles: list[str],
+    password: str | None,
+    auth_mode: str,
+) -> dict[str, object]:
+    """Replace an existing user's name, roles and credentials (operator action from the CLI).
+    A local user gets a new password, a new authenticator secret and 10 new recovery codes (the
+    old ones stop working); lockouts are cleared and the user is reactivated."""
+    user.display_name, user.auth_mode, user.active = display_name, auth_mode, True
+    user.failed_logins, user.locked_until, user.totp_last_counter = 0, None, 0
+    db.execute(delete(UserRole).where(UserRole.user_id == user.id))
+    db.execute(delete(RecoveryCode).where(RecoveryCode.user_id == user.id))
+    for r in roles:
+        db.add(UserRole(user_id=user.id, role=r))
+    extra: dict[str, object] = {}
+    if auth_mode == "local":
+        if password is None:
+            raise AuthError("password_required", 400)
+        user.password_hash = hash_password(password)
+        user.totp_secret = pyotp.random_base32()
+        extra["totp_uri"] = pyotp.TOTP(user.totp_secret).provisioning_uri(
+            name=user.email, issuer_name="ansurance"
+        )
+        codes = [secrets.token_hex(5) for _ in range(10)]
+        for c in codes:
+            db.add(RecoveryCode(user_id=user.id, code_hash=_sha(c)))
+        extra["recovery_codes"] = codes
+    else:
+        user.password_hash = user.totp_secret = None
+    db.flush()
+    return extra
 
 
 def _event(

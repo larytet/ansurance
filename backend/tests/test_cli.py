@@ -89,3 +89,39 @@ def test_reconcile_command_reports_and_signals_missing_objects(
         )
     assert cli.reconcile_blobs() == 1  # a row whose object is gone is data loss: exit 1
     assert "sha256/aa/missing" in capsys.readouterr().out
+
+
+def test_create_user_again_overwrites_the_existing_user(
+    fresh_db: Engine,
+    pg_url: str,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    monkeypatch.setenv("ANS_PROFILE", "demo")
+    monkeypatch.setenv("ANS_DATABASE_URL", pg_url)
+    from app.config import get_settings
+
+    get_settings.cache_clear()
+    base = ["--email", "m@agency.il", "--name", "M"]
+    assert cli.create_user([*base, "--role", "agent", "--password", "a-fine-password-1"]) == 0
+    with fresh_db.connect() as c:
+        old = c.execute(text("SELECT totp_secret FROM user_account")).scalar_one()
+    capsys.readouterr()
+    rc = cli.create_user(
+        [*base[:2], "--name", "New", "--role", "manager", "--password", "another-fine-pw-2"]
+    )
+    out = capsys.readouterr().out
+    assert rc == 0 and "overwrote existing user" in out and "otpauth://" in out
+    assert out.count("\n  ") == 10
+    with fresh_db.connect() as c:
+        assert c.execute(text("SELECT count(*) FROM user_account")).scalar_one() == 1
+        assert c.execute(text("SELECT totp_secret FROM user_account")).scalar_one() != old
+        assert c.execute(text("SELECT display_name FROM user_account")).scalar_one() == "New"
+        assert c.execute(text("SELECT role FROM user_role")).scalars().all() == ["manager"]
+        assert c.execute(text("SELECT count(*) FROM recovery_code")).scalar_one() == 10
+        assert (
+            c.execute(
+                text("SELECT count(*) FROM audit_entry WHERE action='user.overwrite'")
+            ).scalar_one()
+            == 1
+        )

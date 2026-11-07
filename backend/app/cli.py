@@ -8,6 +8,7 @@ import argparse
 import getpass
 import sys
 
+from sqlalchemy import select
 from sqlalchemy.orm import sessionmaker
 
 from app.audit import chain
@@ -16,6 +17,7 @@ from app.auth.passwords import check_policy
 from app.capabilities import ROLES
 from app.config import get_settings
 from app.db import make_engine
+from app.models import User
 
 
 def create_user(argv: list[str]) -> int:
@@ -36,14 +38,19 @@ def create_user(argv: list[str]) -> int:
             return 2
     maker = sessionmaker(make_engine(get_settings()))
     with maker() as db:
-        user, extra = auth.create_user(
-            db, args.email, args.name, args.role, password, "sso" if args.sso else "local"
-        )
-        chain.append(
-            db, "operator", "user.create", f"user:{user.id}", {"roles": args.role, "via": "cli"}
-        )
+        email = args.email.strip().lower()
+        existing = db.scalar(select(User).where(User.email == email))
+        mode = "sso" if args.sso else "local"
+        if existing is None:
+            user, extra = auth.create_user(db, args.email, args.name, args.role, password, mode)
+            action = "user.create"
+        else:  # onboarding again replaces the user: new password, authenticator, codes, roles
+            extra = auth.overwrite_user(db, existing, args.name, args.role, password, mode)
+            user, action = existing, "user.overwrite"
+        chain.append(db, "operator", action, f"user:{user.id}", {"roles": args.role, "via": "cli"})
         db.commit()
-    print(f"created {args.email} ({', '.join(args.role)})")
+    verb = "created" if action == "user.create" else "overwrote existing user"
+    print(f"{verb} {args.email} ({', '.join(args.role)})")
     if "totp_uri" in extra:
         print(f"TOTP URI (add to an authenticator app): {extra['totp_uri']}")
         print("Recovery codes (shown once):", *extra["recovery_codes"], sep="\n  ")  # type: ignore[misc]
