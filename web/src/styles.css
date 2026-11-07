@@ -33,3 +33,6 @@ button.link { border:0; background:none; color:var(--accent); padding:0; text-de
 
 .login { position: relative; }
 .login-lang { position: absolute; inset-block-start: 0; inset-inline-end: 0; }
+.qr { width: 14rem; max-width: 100%; background: #fff; padding: .25rem; } .qr svg { width: 100%; height: auto; display: block; }
+a.button { display: inline-block; padding: .5rem .9rem; border: 1px solid currentColor; border-radius: .4rem; text-decoration: none; }
+.setup-key { font-size: 1.1rem; letter-spacing: .08em; word-break: break-all; } .recovery { columns: 2; list-style: none; padding: 0; }

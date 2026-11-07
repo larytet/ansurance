@@ -7,6 +7,7 @@ export const LANGS: readonly Lang[] = ["he", "en", "ar", "ru", "fr"];
 export const LANG_NAMES: Record<Lang, string> = { he: "עברית", en: "English", ar: "العربية", ru: "Русский", fr: "Français" };
 
 const en = {
+    users: "Users", addUser: "Add a user", displayName: "Name", signInMode: "Sign-in", modeLocal: "Password and authenticator", modeSso: "SSO only", createUser: "Create user", userCreated: "User created.", authSetup: "Authenticator setup", authSetupNote: "Set up the authenticator app for this user now. The recovery codes are shown only once.", scanQr: "Scan with the authenticator app", qrLabel: "QR code for the authenticator app", onPhone: "Already on your phone?", openInApp: "Open in authenticator app", setupKey: "Or type this setup key", copy: "Copy", copied: "Copied", recoveryCodes: "Recovery codes", recoveryNote: "Store these safely. Each works once if the authenticator is lost.", savedIt: "I have saved them",
     app: "ansurance", email: "E-mail", password: "Password", code: "Authenticator or recovery code",
     login: "Sign in", logout: "Sign out", loginFailed: "Sign-in failed. Check the details and try again.",
     locked: "Too many attempts. Try again later.", loading: "Loading…",
@@ -76,6 +77,7 @@ const en = {
 } as const;
 
 const he = {
+    users: "משתמשים", addUser: "הוספת משתמש", displayName: "שם", signInMode: "כניסה", modeLocal: "סיסמה ואפליקציית אימות", modeSso: "SSO בלבד", createUser: "יצירת משתמש", userCreated: "המשתמש נוצר.", authSetup: "הגדרת אפליקציית אימות", authSetupNote: "הגדירו עכשיו את אפליקציית האימות של המשתמש. קודי השחזור מוצגים פעם אחת בלבד.", scanQr: "סרקו באפליקציית האימות", qrLabel: "קוד QR לאפליקציית האימות", onPhone: "כבר בטלפון?", openInApp: "פתיחה באפליקציית האימות", setupKey: "או הקלידו מפתח הגדרה זה", copy: "העתקה", copied: "הועתק", recoveryCodes: "קודי שחזור", recoveryNote: "שמרו אותם במקום בטוח. כל קוד עובד פעם אחת אם אפליקציית האימות אבדה.", savedIt: "שמרתי אותם",
     app: "ansurance", email: "דוא״ל", password: "סיסמה", code: "קוד מאמת או קוד שחזור",
     login: "כניסה", logout: "יציאה", loginFailed: "הכניסה נכשלה. בדקו את הפרטים ונסו שוב.",
     locked: "יותר מדי ניסיונות. נסו שוב מאוחר יותר.", loading: "טוען…",

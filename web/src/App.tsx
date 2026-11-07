@@ -16,11 +16,12 @@ import { LiveCall } from "./pages/LiveCall";
 import { Overview } from "./pages/Overview";
 import { Tax } from "./pages/Tax";
 import { Today } from "./pages/Today";
+import { Users } from "./pages/Users";
 import { Login } from "./pages/Login";
 import { LANGS, LANG_NAMES, type Lang } from "./i18n";
 import { useUi } from "./ui";
 
-type Tab = "livecall" | "excel" | "integrations" | "settings" | "today" | "complaints" | "commissions" | "tax" | "overview" | "inbox" | "desk" | "intake" | "mywork" | "clients" | "campaigns";
+type Tab = "livecall" | "excel" | "integrations" | "settings" | "today" | "complaints" | "commissions" | "tax" | "overview" | "inbox" | "desk" | "intake" | "mywork" | "clients" | "campaigns" | "users";
 
 export function App() {
   const { api, me, setMe, tr, lang, setLang, theme, setTheme } = useUi();
@@ -57,6 +58,7 @@ export function App() {
     ...(me.roles.includes("agent") && has("client.read") ? (["livecall"] as Tab[]) : []),
     ...(has("excel.use") ? (["excel"] as Tab[]) : []),
     ...(has("import.run") ? (["integrations"] as Tab[]) : []),
+    ...(has("user.manage") ? (["users"] as Tab[]) : []),
     "settings",
   ];
   const openClient = (id: string) => { setTab("clients"); setOpen(id); };
@@ -89,7 +91,7 @@ export function App() {
           {tr("logout")}
         </button>
       </header>
-      {tab === "livecall" ? <LiveCall /> : tab === "excel" ? <ExcelJoin /> : tab === "integrations" ? <Integrations /> : tab === "settings" ? <Settings /> : tab === "today" ? <Today onOpenClient={openClient} /> : tab === "complaints" ? <Complaints /> : tab === "commissions" ? <Commissions /> : tab === "tax" ? <Tax /> : tab === "overview" ? <Overview /> : tab === "inbox" ? <Inbox /> : tab === "desk" ? <Desk /> : tab === "intake" ? <IntakeReview /> : tab === "mywork" ? <MyWork onOpenClient={openClient} /> : tab === "campaigns" ? <Campaigns /> : open ? <ClientFile clientId={open} onBack={() => setOpen(null)} /> : <Clients onOpen={setOpen} />}
+      {tab === "livecall" ? <LiveCall /> : tab === "excel" ? <ExcelJoin /> : tab === "integrations" ? <Integrations /> : tab === "users" ? <Users /> : tab === "settings" ? <Settings /> : tab === "today" ? <Today onOpenClient={openClient} /> : tab === "complaints" ? <Complaints /> : tab === "commissions" ? <Commissions /> : tab === "tax" ? <Tax /> : tab === "overview" ? <Overview /> : tab === "inbox" ? <Inbox /> : tab === "desk" ? <Desk /> : tab === "intake" ? <IntakeReview /> : tab === "mywork" ? <MyWork onOpenClient={openClient} /> : tab === "campaigns" ? <Campaigns /> : open ? <ClientFile clientId={open} onBack={() => setOpen(null)} /> : <Clients onOpen={setOpen} />}
     </div>
   );
 }

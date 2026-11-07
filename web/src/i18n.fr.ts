@@ -1,6 +1,7 @@
 import type { Key } from "./i18n";
 
 export const fr: Record<Key, string> = {
+  users: "Utilisateurs", addUser: "Ajouter un utilisateur", displayName: "Nom", signInMode: "Connexion", modeLocal: "Mot de passe et application d'authentification", modeSso: "SSO uniquement", createUser: "Créer l'utilisateur", userCreated: "Utilisateur créé.", authSetup: "Configuration de l'authentificateur", authSetupNote: "Configurez dès maintenant l'application d'authentification de cet utilisateur. Les codes de récupération ne sont affichés qu'une fois.", scanQr: "Scannez avec l'application d'authentification", qrLabel: "QR code pour l'application d'authentification", onPhone: "Déjà sur votre téléphone ?", openInApp: "Ouvrir dans l'application d'authentification", setupKey: "Ou saisissez cette clé de configuration", copy: "Copier", copied: "Copié", recoveryCodes: "Codes de récupération", recoveryNote: "Conservez-les en lieu sûr. Chaque code ne sert qu'une fois si l'authentificateur est perdu.", savedIt: "Je les ai enregistrés",
   app: "ansurance", email: "E-mail", password: "Mot de passe", code: "Code d'authentification ou code de récupération",
   login: "Se connecter", logout: "Se déconnecter", loginFailed: "Échec de la connexion. Vérifiez les informations et réessayez.",
   locked: "Trop de tentatives. Réessayez plus tard.", loading: "Chargement…",

@@ -1,6 +1,7 @@
 import type { Key } from "./i18n";
 
 export const ar: Record<Key, string> = {
+  users: "المستخدمون", addUser: "إضافة مستخدم", displayName: "الاسم", signInMode: "تسجيل الدخول", modeLocal: "كلمة المرور وتطبيق المصادقة", modeSso: "SSO فقط", createUser: "إنشاء المستخدم", userCreated: "تم إنشاء المستخدم.", authSetup: "إعداد تطبيق المصادقة", authSetupNote: "أعدّوا تطبيق المصادقة لهذا المستخدم الآن. تظهر رموز الاسترداد مرة واحدة فقط.", scanQr: "امسحوا الرمز بتطبيق المصادقة", qrLabel: "رمز QR لتطبيق المصادقة", onPhone: "على الهاتف بالفعل؟", openInApp: "فتح في تطبيق المصادقة", setupKey: "أو اكتبوا مفتاح الإعداد هذا", copy: "نسخ", copied: "تم النسخ", recoveryCodes: "رموز الاسترداد", recoveryNote: "احفظوها في مكان آمن. كل رمز يعمل مرة واحدة إذا فُقد تطبيق المصادقة.", savedIt: "لقد حفظتها",
   app: "ansurance", email: "البريد الإلكتروني", password: "كلمة المرور", code: "رمز المصادقة أو رمز الاسترداد",
   login: "تسجيل الدخول", logout: "تسجيل الخروج", loginFailed: "فشل تسجيل الدخول. تحقق من البيانات وحاول مرة أخرى.",
   locked: "محاولات كثيرة جداً. حاول لاحقاً.", loading: "جارٍ التحميل…",
