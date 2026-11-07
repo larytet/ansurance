@@ -66,5 +66,7 @@ export const ar: Record<Key, string> = {
   markIsrael: "تعليم: مقيم في إسرائيل", markReceived: "تعليم: وصل النموذج",
   "dl.commission_invoice": "فاتورة العمولات", "dl.withholding_cert": "شهادات الخصم من المصدر", "dl.vat_report": "تقرير ضريبة القيمة المضافة", "dl.accountant_package": "حزمة المحاسب", "dl.other": "أخرى",
   "gap.no_declaration": "لا يوجد إقرار", "gap.foreign_residency_without_form": "إقامة أجنبية دون النموذج الإضافي",
+  owner: "المسؤول", uploadStatement: "أو ارفع الكشف كملف إكسل", importFile: "استيراد الملف",
+  clientView: "عرض العميل (للقراءة فقط)", issueLink: "إنشاء رابط للعميل", openPreview: "معاينة ما يراه العميل", linkExpires: "ينتهي", linkOnce: "يُعرض مرة واحدة: انسخه الآن.",
   openClient: "فتح ملف العميل", pendingApproval: "بانتظار المدير", noWork: "لا يوجد عمل بانتظار دورك.", stage: "المرحلة",
 };

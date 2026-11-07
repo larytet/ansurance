@@ -4,6 +4,7 @@ import {
 } from "../api";
 import { type Key } from "../i18n";
 import { useUi } from "../ui";
+import { ClientLink } from "./ClientLink";
 import { Messages } from "./Messages";
 import { Pension } from "./Pension";
 
@@ -168,6 +169,7 @@ export function ClientFile({ clientId, onBack }: { clientId: string; onBack: () 
       )}
 
       {can("client.read") && <Pension clientId={clientId} />}
+      {can("client.read") && <ClientLink clientId={clientId} />}
       {can("client.read") && <Messages clientId={clientId} />}
 
       {procs && (

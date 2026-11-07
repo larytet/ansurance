@@ -163,3 +163,38 @@ describe("Integrations, Settings and Excel join", () => {
     vi.restoreAllMocks();
   });
 });
+
+describe("client view link (the mock's client app preview)", () => {
+  const CLIENT = { id: "c1", id_number: "123456782", name: "Dana Levi", name_translit_he: "", name_translit_lat: "", preferred_language: "he", status: "active", phone: null, email: null, family: [] };
+  const open = async (caps: string[], ...extra: Handler[]) => {
+    const s = server(["agent"], caps, (_m, p) => (p.startsWith("/api/clients?") ? { json: [CLIENT] } : undefined), (_m, p) => (p === "/api/clients/c1" ? { json: CLIENT } : undefined), ...extra);
+    mount(s.fetcher);
+    await userEvent.click(await screen.findByRole("button", { name: "לקוחות" }));
+    await userEvent.click(await screen.findByRole("button", { name: "Dana Levi" }));
+    return s;
+  };
+
+  it("creates the link, shows it once with its expiry and opens the preview in a new tab", async () => {
+    const s = await open(["client.read", "flow.write"], (m, p) => (m === "POST" && p === "/api/clients/c1/portal-link" ? { status: 201, json: { id: "l1", token: "tok123", expires_at: "2026-11-14T10:00:00Z" } } : undefined));
+    await userEvent.click(await screen.findByRole("button", { name: "יצירת קישור ללקוח" }));
+    const status = await screen.findByRole("status");
+    const link = within(status).getByRole("link", { name: "תצוגה מקדימה של מה שהלקוח רואה" });
+    expect(link).toHaveAttribute("href", `${window.location.origin}/portal#tok123`);
+    expect(link).toHaveAttribute("target", "_blank");
+    expect(link).toHaveAttribute("rel", "noopener noreferrer");
+    expect(status).toHaveTextContent("בתוקף עד 2026-11-14");
+    expect(s.calls.find((c) => c.method === "POST" && c.path === "/api/clients/c1/portal-link")?.csrf).toBe("tok");
+  });
+
+  it("is not offered without the right to issue links", async () => {
+    await open(["client.read"]);
+    await screen.findByText("אין הודעות.");
+    expect(screen.queryByRole("button", { name: "יצירת קישור ללקוח" })).toBeNull();
+  });
+
+  it("shows the server's reason when the link cannot be created", async () => {
+    await open(["client.read", "flow.write"], (m, p) => (m === "POST" && p === "/api/clients/c1/portal-link" ? { status: 404, json: { detail: "not_found" } } : undefined));
+    await userEvent.click(await screen.findByRole("button", { name: "יצירת קישור ללקוח" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("not_found");
+  });
+});

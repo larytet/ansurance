@@ -66,5 +66,7 @@ export const ru: Record<Key, string> = {
   markIsrael: "Отметить: резидент Израиля", markReceived: "Отметить: форма получена",
   "dl.commission_invoice": "Счёт на комиссионные", "dl.withholding_cert": "Справки об удержании налога", "dl.vat_report": "Отчёт по НДС", "dl.accountant_package": "Пакет для бухгалтера", "dl.other": "Другое",
   "gap.no_declaration": "Нет декларации", "gap.foreign_residency_without_form": "Иностранное резидентство без дополнительной формы",
+  owner: "Ответственный", uploadStatement: "Или загрузите выписку файлом Excel", importFile: "Импортировать файл",
+  clientView: "Вид клиента (только чтение)", issueLink: "Создать ссылку для клиента", openPreview: "Посмотреть, что видит клиент", linkExpires: "Действует до", linkOnce: "Показывается один раз: скопируйте сейчас.",
   openClient: "Открыть досье клиента", pendingApproval: "Ожидает руководителя", noWork: "Для вашей роли работы нет.", stage: "Этап",
 };

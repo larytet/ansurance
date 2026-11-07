@@ -69,6 +69,8 @@ const en = {
     markIsrael: "Mark: resident in Israel", markReceived: "Mark: form received",
     "dl.commission_invoice": "Commission invoice", "dl.withholding_cert": "Withholding certificates", "dl.vat_report": "VAT report", "dl.accountant_package": "Package for the accountant", "dl.other": "Other",
     "gap.no_declaration": "No declaration", "gap.foreign_residency_without_form": "Foreign residency without the extra form",
+    owner: "Owner", uploadStatement: "Or upload the statement as an Excel file", importFile: "Import the file",
+    clientView: "Client view (read-only)", issueLink: "Create a link for the client", openPreview: "Preview what the client sees", linkExpires: "Expires", linkOnce: "Shown once: copy it now.",
     openClient: "Open the client file", pendingApproval: "Waiting for the manager", noWork: "Nothing is waiting for your role.", stage: "Stage",
 } as const;
 
@@ -135,6 +137,8 @@ const he = {
     markIsrael: "סימון: תושב ישראל", markReceived: "סימון: הטופס התקבל",
     "dl.commission_invoice": "חשבונית עמלות", "dl.withholding_cert": "אישורי ניכוי במקור", "dl.vat_report": "דוח מע״מ", "dl.accountant_package": "חבילה לרואה החשבון", "dl.other": "אחר",
     "gap.no_declaration": "אין הצהרה", "gap.foreign_residency_without_form": "תושבות זרה ללא הטופס הנוסף",
+    owner: "אחראי", uploadStatement: "או העלאת הדוח כקובץ אקסל", importFile: "ייבוא הקובץ",
+    clientView: "תצוגת לקוח (לקריאה בלבד)", issueLink: "יצירת קישור ללקוח", openPreview: "תצוגה מקדימה של מה שהלקוח רואה", linkExpires: "בתוקף עד", linkOnce: "מוצג פעם אחת: העתיקו עכשיו.",
     openClient: "פתיחת תיק לקוח", pendingApproval: "ממתין למנהל", noWork: "אין עבודה הממתינה לתפקיד שלך.", stage: "שלב",
 } as const;
 

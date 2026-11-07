@@ -66,5 +66,7 @@ export const fr: Record<Key, string> = {
   markIsrael: "Marquer : résident d'Israël", markReceived: "Marquer : formulaire reçu",
   "dl.commission_invoice": "Facture de commissions", "dl.withholding_cert": "Attestations de retenue à la source", "dl.vat_report": "Déclaration de TVA", "dl.accountant_package": "Dossier pour le comptable", "dl.other": "Autre",
   "gap.no_declaration": "Aucune déclaration", "gap.foreign_residency_without_form": "Résidence étrangère sans le formulaire supplémentaire",
+  owner: "Responsable", uploadStatement: "Ou téléversez le relevé en fichier Excel", importFile: "Importer le fichier",
+  clientView: "Vue du client (lecture seule)", issueLink: "Créer un lien pour le client", openPreview: "Voir ce que voit le client", linkExpires: "Expire le", linkOnce: "Affiché une seule fois : copiez-le maintenant.",
   openClient: "Ouvrir le dossier du client", pendingApproval: "En attente du responsable", noWork: "Rien n'attend votre rôle.", stage: "Étape",
 };

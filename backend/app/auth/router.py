@@ -138,6 +138,28 @@ def revoke_session(
     return {"status": "revoked"}
 
 
+@router.get("/users")
+def list_users(
+    p: Principal = Depends(require("user.manage")),
+    db: Db = Depends(get_db, scope="function"),
+) -> list[dict[str, Any]]:
+    """For choosing an owner (a complaint, a claim). No password, secret or session data."""
+    from sqlalchemy import select
+
+    from app.models import User
+
+    return [
+        {
+            "id": str(u.id),
+            "name": u.display_name,
+            "email": u.email,
+            "roles": auth.roles_of(db, u.id),
+            "active": u.active,
+        }
+        for u in db.scalars(select(User).order_by(User.display_name))
+    ]
+
+
 @router.post("/users", status_code=201)
 def create_user(
     body: UserIn,

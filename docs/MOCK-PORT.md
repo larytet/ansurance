@@ -1,5 +1,7 @@
 # Porting the mock to the real web app
 
+A structural comparison of tabs per role and screens is in [review/MOCK-REVIEW.md](review/MOCK-REVIEW.md) (with screenshots). It is not a visual or copy review.
+
 The mock (`index.html`) stays as the visual and behavioural reference. Each screen is ported
 to the React and TypeScript app in `web/`, backed by the real API, and checked against the
 mock. States: **not started**, **ported** (works against the API, unit and browser tests),
@@ -18,7 +20,7 @@ mock. States: **not started**, **ported** (works against the API, unit and brows
 | Processes: pipeline, My work, diagrams | all | ported (My work list) | pipeline per client is on the client file; diagrams and the definition editor still to add |
 | Campaigns | marketing, manager, agent | ported (create, preview with exclusions, approve, start, server reason shown) | translation review (per language, saved as reviewed by a person) and results with the exclusions are ported; consent registry is on the client file |
 | Manager overview, Trust (audit verify) | manager | ported | ten counts with attention marks, chain verification; compliance, complaints and commission screens still to add |
-| Complaints, Compliance, Commissions, Tax, Client app (the client's page at `/portal#token`) | manager, back-office, agent, accountant, client | ported | complaint assignment and statement file upload still to add; tax deadlines and residency are ported |
+| Complaints, Compliance, Commissions, Tax, Client app (the client's page at `/portal#token`) | manager, back-office, agent, accountant, client | ported | complaint assignment (manager chooses an owner from the users) and statement file upload are ported; tax deadlines and residency are ported |
 | Pension (authorizations and lookup request, on the client file) | agent, back-office, manager | ported | the portfolio view itself needs the clearing-house adapter, which does not exist |
 | WhatsApp (conversation and send on the client file, with the consent gate's reason shown) | agent, back-office, manager | ported | inline translation of incoming messages still to add |
 | Excel join | back-office, marketing, manager | ported (upload, join, download, summary) | |

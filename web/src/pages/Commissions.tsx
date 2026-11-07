@@ -30,6 +30,31 @@ export function Commissions() {
     void run(async () => { setPayout(null); setSt(await api.post<Statement>("/api/commissions/statements", { insurer: form.insurer, period: form.period, declared_total: form.total, lines })); });
   }
 
+  const [file, setFile] = useState<File | null>(null);
+  async function upload(e: FormEvent) {
+    e.preventDefault();
+    if (!file) return;
+    const body = new FormData();
+    body.append("file", file);
+    body.append("insurer", form.insurer);
+    body.append("period", form.period);
+    body.append("declared_total", form.total);
+    setMessage("");
+    const r = await fetch("/api/commissions/statements/xlsx", { method: "POST", credentials: "same-origin", headers: { "x-csrf-token": api.csrf }, body });
+    if (!r.ok) {
+      let code = r.statusText;
+      try {
+        const j = (await r.json()) as { detail?: unknown };
+        if (typeof j.detail === "string") code = j.detail;
+        else if (j.detail && typeof j.detail === "object" && "error" in j.detail) code = String((j.detail as { error: string }).error);
+      } catch { /* not JSON */ }
+      setMessage(code);
+      return;
+    }
+    setPayout(null);
+    setSt((await r.json()) as Statement);
+  }
+
   return (
     <section aria-label={tr("commissions")}>
       {message && <p role="alert">{message}</p>}
@@ -40,6 +65,10 @@ export function Commissions() {
         <label>{tr("declaredTotal")} <input value={form.total} onChange={(e) => setForm({ ...form, total: e.target.value })} required inputMode="decimal" /></label>
         <label>{tr("statementLines")} <textarea value={form.lines} onChange={(e) => setForm({ ...form, lines: e.target.value })} required /></label>
         <button type="submit">{tr("importStatement")}</button>
+      </form>
+      <form onSubmit={(e) => void upload(e)} aria-label={tr("importFile")}>
+        <label>{tr("uploadStatement")} <input type="file" accept=".xlsx" onChange={(e) => setFile(e.target.files?.[0] ?? null)} /></label>
+        <button type="submit" disabled={!file || !form.insurer || !form.period || !form.total}>{tr("importFile")}</button>
       </form>
       {st && (
         <div>

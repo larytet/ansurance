@@ -3,7 +3,8 @@ import { ApiError } from "../api";
 import { type Key } from "../i18n";
 import { useUi } from "../ui";
 
-interface Complaint { id: string; kind: string; text: string; status: string; overdue: boolean; due_at: string; response: string }
+interface Person { id: string; name: string; roles: string[] }
+interface Complaint { owner_id: string | null; id: string; kind: string; text: string; status: string; overdue: boolean; due_at: string; response: string }
 
 export function Complaints() {
   const { api, tr, me } = useUi();
@@ -12,6 +13,10 @@ export function Complaints() {
   const [form, setForm] = useState({ kind: "complaint", text: "" });
   const [answering, setAnswering] = useState<{ id: string; text: string } | null>(null);
   const canExport = me?.capabilities.includes("flow.approve") ?? false;
+  const [people, setPeople] = useState<Person[]>([]);
+  useEffect(() => {
+    if (canExport) api.get<Person[]>("/api/users").then(setPeople).catch(() => setPeople([]));
+  }, [api, canExport]);
 
   const load = useCallback(() => api.get<Complaint[]>("/api/complaints").then(setRows).catch(() => setMessage(tr("error"))), [api, tr]);
   useEffect(() => { void load(); }, [load]);
@@ -41,6 +46,12 @@ export function Complaints() {
           <li key={c.id} className={c.overdue ? "attention" : undefined}>
             <strong>{tr(`kind.${c.kind}` as Key)}</strong> · <bdi>{c.text}</bdi> ·{" "}
             {c.status === "answered" ? tr("answered") : c.overdue ? tr("overdue") : c.due_at.slice(0, 10)}
+            {canExport && c.status !== "answered" && (
+              <select aria-label={`${tr("owner")} ${c.id}`} value={c.owner_id ?? ""} onChange={(e) => void run(() => api.put(`/api/complaints/${c.id}/owner`, { owner_id: e.target.value }))}>
+                <option value="" disabled>{tr("owner")}</option>
+                {people.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}
+              </select>
+            )}
             {c.status !== "answered" && (answering?.id === c.id ? (
               <form onSubmit={(e) => { e.preventDefault(); void run(async () => { await api.post(`/api/complaints/${c.id}/respond`, { response: answering.text }); setAnswering(null); }); }}>
                 <label>{tr("responseText")} <input value={answering.text} onChange={(e) => setAnswering({ id: c.id, text: e.target.value })} required minLength={3} /></label>
