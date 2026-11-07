@@ -31,14 +31,18 @@ Four roles. The back-office role is the one the product is built around (see F11
 | Marketing | 1 | Campaigns, segments, consent registry, unsubscribe handling, campaign results | Contact details, language, consent status and segment flags only; no documents, KYC, health or claim data **[verify with counsel: data minimization under Amendment 13]** | Campaigns |
 | Manager | 1 | Oversight, approvals, compliance, commissions, licences, tax deadlines | Everything, including audit log and commission statements | Overview: what waits for a decision today and what is slipping |
 
-Tabs per role (the mock implements exactly this):
+Tabs per role. The mock (`index.html`) and the web app differ in placement, and [review/MOCK-REVIEW.md](review/MOCK-REVIEW.md) lists every difference.
+The rules that hold in both are: WhatsApp, Pension and the client app preview belong to one client, so the app shows them as sections of the client file; Processes appears as a My work list; Trust appears as a block of the Overview; and the app adds the tabs for F7, F8 and F15 that the mock predates.
 
-| Role | Tabs |
-|---|---|
-| Agent | Today, Inbox, Client file, WhatsApp, Live call, Pension, Client app preview, Clients (preferences), Settings |
-| Back-office | Desk, Inbox, Client file, Intake (fax, email), Pension, WhatsApp, Excel (join), Integrations, Clients (preferences), Settings |
-| Marketing | Campaigns, Inbox, WhatsApp, Excel (join), Clients (preferences), Settings |
-| Manager | Overview, Inbox, Desk, Campaigns, Client file, Client app preview, Integrations, Trust (audit), Clients (preferences), Settings |
+| Role | Tabs in the mock | Tabs in the web app |
+|---|---|---|
+| Agent | Today, Processes, Inbox, Client file, WhatsApp, Live call, Pension, Client app preview, Clients (preferences), Settings | Today, Inbox, My work, Clients, Campaigns, Complaints, Settings |
+| Back-office | Desk, Processes, Inbox, Client file, Intake, Pension, WhatsApp, Excel (join), Integrations, Clients (preferences), Settings | Inbox, Desk, Scans, My work, Clients, Complaints, Commissions, Tax, Excel, Integrations, Settings |
+| Marketing | Campaigns, Processes, Inbox, WhatsApp, Excel (join), Clients (preferences), Settings | Inbox, My work, Campaigns, Excel, Settings |
+| Manager | Overview, Processes, Inbox, Desk, Campaigns, Client file, Client app preview, Integrations, Trust (audit), Clients (preferences), Settings | Overview, Inbox, Desk, Scans, My work, Clients, Campaigns, Complaints, Commissions, Tax, Excel, Integrations, Users, Settings |
+
+Open differences, each tracked as a milestone in [STATUS.md](../STATUS.md): the Inbox Lens, the process diagram view and definition editor, the marketing role's WhatsApp and preferences views, and tasks, leads and meetings on the client file (the mock has them, the application has no API for them).
+The Users tab is not in the mock because the mock has no user administration: see F16.
 
 Other roles considered (not separate roles in v1):
 
@@ -248,6 +252,23 @@ Principle: the agency supplies documents and keeps deadlines; tax advice and fil
 - Outputs: certificates filed to the client, sent letters, tasks, a read-only yearly package for the accountant.
 - Acceptance: for every tax year the manager can see, per client and product, whether the certificate was requested, received and sent; an agency tax deadline cannot pass without an Inbox item for the manager.
 
+### F16. User administration and sign-in (manager)
+
+The mock has no screen for this, but a system with real people needs it, and the agency should not need a technician to run it.
+Diagrams: [FLOWS.md](FLOWS.md#sign-in) and [FLOWS.md](FLOWS.md#user-lifecycle).
+
+- Trigger: someone joins or leaves the agency, loses their authenticator or forgets a password, or a person's job changes.
+- Steps:
+  1. The manager adds a user: e-mail, name, one or more roles, and local or SSO sign-in. A local user gets a password that passes the policy, an authenticator secret and 10 recovery codes. An SSO user gets a record only.
+  2. The authenticator setup (QR code, open-in-app link, setup key) and the recovery codes are shown once, to the manager, to hand over.
+  3. The user signs in. After five failures the account locks with a growing delay, and one address is limited separately.
+  4. The manager can change roles and name, reset the authenticator (new secret, new recovery codes), set a new password, and deactivate or reactivate the user.
+  5. A user can change their own password with the current password and a code, and can see and revoke their own sessions.
+  6. Resetting an authenticator, setting a password or deactivating a user revokes every session of that user at once.
+- Outputs: users, roles, audit entries for every step (who did it to whom, never a secret).
+- Acceptance: a deactivated user cannot sign in and any open session stops working on the next request; a deactivated user's name stays on past work and audit entries; the manager cannot deactivate or remove the manager role from the last active manager; no response or log line after the one-time setup contains a secret or a recovery code.
+- Not in v1: invitation by e-mail with a one-time link, so the manager never sees the secret. The agency decides after using the manager-hands-over step for a while. Passkeys are a later option.
+
 ### 3.1 Processes: stages and checklists
 
 Every flow above is also run as a **process**, in the way banks and financial institutions run controlled procedures.
@@ -258,6 +279,7 @@ Every flow above is also run as a **process**, in the way banks and financial in
 - The process is **complete** only when every stage is final. Starting a stage and finalizing it are written to the audit chain.
 - Each role has a **My work** list (stages waiting for it), and every screen that belongs to a process shows a banner with the pipeline and a link to open it.
 - Each process has an **editable diagram**: a Mermaid source generated from the definition, opened in Mermaid Live (edit, export SVG or PNG) or imported into draw.io. The sources are in [`docs/processes/`](processes/) and the checklists are listed in [PROCESSES.md](PROCESSES.md).
+- The platform flows that are not business processes (sign-in, user lifecycle, the send gate, incoming document routing) are drawn in [FLOWS.md](FLOWS.md).
 - A process definition is data (stages, roles, dependencies, checks). A later phase lets a manager edit or create definitions in the UI (a closed step vocabulary, versioned, with running cases keeping the version they started with).
 
 | Process | Flow | Process | Flow |

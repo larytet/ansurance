@@ -1,6 +1,6 @@
 # ansurance - Test Plan
 
-Version 0.1 (2026-11-06). Covers [PLATFORM-REQUIREMENTS.md](PLATFORM-REQUIREMENTS.md) and [DESIGN.md](DESIGN.md). Results per milestone are in the **Results** table at the end and in [STATUS.md](../STATUS.md). Rule: a milestone is done only when all its tests (section 3) pass and this file shows it.
+Version 0.2 (2026-11-07). Covers [PLATFORM-REQUIREMENTS.md](PLATFORM-REQUIREMENTS.md) and [DESIGN.md](DESIGN.md). Results per milestone are in the **Results** table at the end and in [STATUS.md](../STATUS.md). Rule: a milestone is done only when all its tests (section 3) pass and this file shows it.
 
 ## 1. Test layers
 
@@ -126,9 +126,80 @@ IDs are `T-<milestone>-<n>`. "Auto" means automated in CI.
 | T-M7-4 | Upgrade and rollback by image tag | Scripted |
 | T-M7-5 | Alerts fire for stale backup, queue age, failing verify | Auto |
 
-### M8 to M10
+### M8 Messaging and integrations
 
-Test cases are added to this file at the start of each milestone (adapter fakes, WhatsApp consent gate, mailbox ingestion, import round trip, flows F1 to F5, campaigns, commissions, translation, per-role tab sets).
+Fake adapters only: no real provider, mailbox or agency system was reachable.
+
+| ID | Test | Type |
+|---|---|---|
+| T-M8-1 | WhatsApp webhook: valid signature accepted, forged or replayed refused, verification handshake answered (`test_whatsapp.py`) | Auto |
+| T-M8-2 | Consent gate at queue time and again at delivery; opt-out words recorded; status callbacks and retries (`test_whatsapp.py`) | Auto |
+| T-M8-3 | Mailbox ingestion by IMAP, deduplicated by Message-ID (`test_mailbox.py`) | Auto |
+| T-M8-4 | Agency sync: dry run, existing system wins for policy data, user-entered contact data kept, file-drop cursor (`test_agency_sync.py`) | Auto |
+| T-M8-5 | Excel join and export round trip (`test_excel.py`) | Auto |
+| T-M8-6 | Every external call recorded in `adapter_call`; integration status shows no secret (`test_integrations_status.py`) | Auto |
+| T-M8-7 | SMTP delivery against a local server: consent re-check at send, temporary and permanent refusal told apart, advertisement label and List-Unsubscribe (`test_email.py`) | Auto |
+
+### M9 Flows F1 to F5 and e-signature
+
+| ID | Test | Type |
+|---|---|---|
+| T-M9-1 | F1: no activation without ID, KYC and signed consent; flagged cases need the manager and raise a task; an expired mandate does not count (`test_flows.py`) | Auto |
+| T-M9-2 | F2: a policy needs advice, a signed application and a renewal date; a policy added by hand shows what is missing | Auto |
+| T-M9-3 | F3: renewal queue stages and agent scope, required outcomes, cancellation to the manager, leaks list, one daily item per stage | Auto |
+| T-M9-4 | F4: owner, timeline and checklist, reassignment keeps an owner, rejection opens a complaint, late insurer reminded once per period | Auto |
+| T-M9-5 | F5: no lookup without all three valid authorizations; expiry within six months flagged with a re-sign action; month-end arithmetic | Auto |
+| T-M9-6 | E-signature: signed form filed and audited; forged and replayed webhooks refused; declined is not signed; provider outage gives 502 and records nothing; foreign or unscanned documents refused | Auto |
+| T-M9-7 | Every flow endpoint against every role (`test_flow_endpoints_respect_visibility_and_roles`) | Auto, table-driven |
+
+### M10 Campaigns, manager, tax, translation, client view
+
+| ID | Test | Type |
+|---|---|---|
+| T-M10-1 | Campaign: consent as a hard stop at snapshot and per message, 30-day frequency cap, approval for offers, translation reviewed before the first send, throttled batches, advertisement label, replies to the Inbox, results with exclusions (`test_campaigns.py`) | Auto |
+| T-M10-2 | Complaints with SLA and owner, compliance dashboard, Overview counts, commission reconciliation of every line class with totals that tie (`test_manager.py`) | Auto |
+| T-M10-3 | Tax: certificates per client, product and year, one dispatch item per insurer, deadlines that cannot pass without an item, accountant role read-only (`test_tax_portal.py`) | Auto |
+| T-M10-4 | Translation keeps original and translation, flags amounts, dates and coverage words | Auto |
+| T-M10-5 | Client view by unguessable expiring link: own data only, no internal notes, restricted or infected files, or audit | Auto |
+
+### Web front end
+
+Vitest with a fake API, and Playwright against the live stack (`make e2e-web`).
+
+| ID | Test | Type |
+|---|---|---|
+| T-W-1 | Sign-in, wrong password and lockout shown without detail, tabs follow capabilities, language and direction and theme remembered (`App.test.tsx`) | Auto |
+| T-W-2 | Every screen in [MOCK-PORT.md](MOCK-PORT.md) with a fake API: role-limited controls, server reasons shown, no secrets in the page | Auto |
+| T-W-3 | The client's page reads its token from the URL fragment and fails without saying why (`Remaining.test.tsx`) | Auto |
+| T-W-4 | Users page: add a user, show the setup once (`Users.test.tsx`) | Auto |
+| T-W-5 | Live call panel: agents only, both directions translated, nothing sent when the languages match (`LiveCall.test.tsx`) | Auto |
+| T-W-6 | Real browser: sign in, client file with upload and virus scan, Inbox, manager work (`web/e2e`) | Auto, Playwright |
+| T-W-7 | Every tab in the mock exists in the app or is listed in [review/MOCK-REVIEW.md](review/MOCK-REVIEW.md) as a section of the client file | Review at each slice |
+
+### M11 User administration (F16)
+
+| ID | Test | Type |
+|---|---|---|
+| T-M11-1 | A manager changes roles and name; the change is audited and takes effect on the next request | Auto |
+| T-M11-2 | Deactivate: the user cannot sign in, an open session stops at the next request, the name stays on past work | Auto |
+| T-M11-3 | Reactivate: sign-in works again only after the authenticator is reset | Auto |
+| T-M11-4 | Reset the authenticator: old secret and old recovery codes stop working, new ones shown once, all sessions revoked | Auto |
+| T-M11-5 | A manager sets a new password: policy enforced, sessions revoked, lockout cleared | Auto |
+| T-M11-6 | A user changes their own password: wrong current password or wrong code refused and counted as a failure; sessions of other devices revoked | Auto |
+| T-M11-7 | The last active manager cannot be deactivated or lose the manager role | Auto |
+| T-M11-8 | Only `user.manage` may call these endpoints; every role against every endpoint; an SSO user has no password or authenticator to reset | Auto, table-driven |
+| T-M11-9 | No audit entry, log line or later response contains a password, secret or recovery code | Auto |
+| T-M11-10 | Users page: edit roles, reset, deactivate, with confirmation and the one-time setup shown after a reset | Auto, Vitest |
+
+### M12 Leads, tasks and meetings (agent Today and client file)
+
+| ID | Test | Type |
+|---|---|---|
+| T-M12-1 | An agent creates, completes and delegates a task; Today shows today, overdue, next, done and delegated | Auto |
+| T-M12-2 | A lead is created with a duplicate check on ID and phone, and converts into a client file through F1 | Auto |
+| T-M12-3 | A meeting is recorded on the client file with a summary; the two-year service contact due date moves | Auto |
+| T-M12-4 | Agent scope: an agent sees only own tasks, leads and meetings; the manager sees all | Auto |
+| T-M12-5 | An overdue task raises one Inbox item, not one per day | Auto |
 
 ## 4. Scripted penetration tests (security suite)
 
@@ -156,6 +227,9 @@ Run against a `demo` stack in CI (fast subset) and against `dev` before each rel
 | P-18 | Information leakage: error messages, stack traces, headers, log contents (no personal data) | None |
 | P-19 | TLS and header checks (ZAP baseline, testssl) | Pass |
 | P-20 | Dependency and image vulnerabilities | No high or critical unaddressed |
+| P-21 | User administration abuse: a non-manager reaches reset, deactivate, role change or set-password; a manager gives themselves a role by over-posting; the last manager removed | Denied, audited, the last manager kept |
+| P-22 | Session after deactivation or reset: reuse a cookie taken before the change | Rejected on the next request |
+| P-23 | Account takeover through password change: wrong current password, replayed code, CSRF | Refused, counted as a failure |
 
 ## 5. Exit criteria
 
