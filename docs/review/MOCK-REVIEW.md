@@ -22,7 +22,7 @@ the mock yet.
 |---|---|---|
 | Today | ported, with tasks and leads | no claims or birthdays list yet (the data model has no birth date) |
 | Processes | "My work" list, Processes tab with the diagram, pipeline on the client file | the definition editor is not ported |
-| Inbox | ported | the Lens and "open in work area" jump are not ported |
+| Inbox | ported, with the Lens | the "open in work area" jump is not ported; the Lens is not yet on the client timeline or the renewals calendar |
 | Client file | ported | tasks and meetings are built; no add-sheets for activities, employment or related clients (APIs do not exist) |
 | WhatsApp | on the client file | no inline translation of incoming messages |
 | Live call | text panel with translation, flags and a stated limit | no speech recognition or live subtitles from audio |

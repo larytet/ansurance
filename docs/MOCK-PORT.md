@@ -11,7 +11,7 @@ mock. States: **not started**, **ported** (works against the API, unit and brows
 |---|---|---|---|
 | Sign in (not in the mock) | all | ported | Local login with authenticator or recovery code; SSO button to follow |
 | App shell: tabs per role, language (he, en, ar, ru, fr with RTL for he and ar), theme, sign out | all | ported | catalogs for ar, ru and fr are my translations and need a native-speaker review; "follow the system" theme and the role switcher still to add |
-| Inbox | all | ported | counts, urgency filter, load more, done, dismiss with reason, reassign with note; the Lens and the "Open in work area" jump still to add |
+| Inbox | all | ported | counts, urgency filter, load more, done, dismiss with reason, reassign with note; the "Open in work area" jump still to add; the Lens is ported (twenty items in full, the rest squashed) |
 | Clients (search with transliteration, New client or lead with the phone warning) | agent, back-office, manager | ported (list and create) | multi-select, preferences editing, Lens still to add |
 | Client file | agent, back-office, manager | ported | meetings with summary and the service contact date (from the roles with `task.write`); details, policies, documents (upload, download for clean files only, scan status, restricted), consent per channel with source, process pipeline and start; 8 unit tests and a real-browser test (real upload and virus scan) |
 | Today (agent home) | agent | ported (renewals due with stage and urgency, Inbox counts, open the client, tasks with the five chips, add, tick done, delegate) | Inbox preview, claims and birthdays still to add (leads are listed) |

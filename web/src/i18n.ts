@@ -79,6 +79,7 @@ const en = {
     newClient: "New client or lead", createClient: "Create", clientCreated: "Created.", phoneSharedWarning: "Another client already has this phone number. Check that this is not the same person:", phoneSharedOther: "The phone number is already used by a client of another agent.", leads: "Leads", noLeads: "No leads.", invalid_id_number: "That ID number is not valid.", duplicate_id_number: "A client with this ID number already exists.",
     processNote: "Each box is a stage. A stage is locked until the stages that point to it are final. Stages in the same column can run in parallel.", checklists: "Checklists", after: "after", mermaidSource: "Diagram source (Mermaid)", openMermaid: "Edit in Mermaid Live", mermaidNote: "Opens a third-party site with this process definition (no client data).",
     contacts: "Contacts", contactsNote: "Contact details, language and consent only. No documents, claims or health data.", optedInTo: "Opted in to",
+    lens: "Lens: window over the list", of: "of", lensHint: "Drag the lens, scroll over the strip, or use the arrow keys. Click a thin bar to jump. Red is urgent, amber is important.",
 } as const;
 
 const he = {
@@ -154,6 +155,7 @@ const he = {
     newClient: "לקוח או ליד חדש", createClient: "יצירה", clientCreated: "נוצר.", phoneSharedWarning: "ללקוח אחר כבר יש את מספר הטלפון הזה. ודאו שאין כאן אותו אדם:", phoneSharedOther: "מספר הטלפון כבר בשימוש אצל לקוח של סוכן אחר.", leads: "לידים", noLeads: "אין לידים.", invalid_id_number: "מספר הזהות אינו תקין.", duplicate_id_number: "כבר קיים לקוח עם מספר זהות זה.",
     processNote: "כל תיבה היא שלב. שלב נעול עד שהשלבים שמובילים אליו סופיים. שלבים באותה עמודה יכולים לרוץ במקביל.", checklists: "רשימות בדיקה", after: "אחרי", mermaidSource: "מקור התרשים (Mermaid)", openMermaid: "עריכה ב-Mermaid Live", mermaidNote: "פותח אתר של צד שלישי עם הגדרת התהליך (ללא נתוני לקוחות).",
     contacts: "אנשי קשר", contactsNote: "פרטי קשר, שפה והסכמה בלבד. ללא מסמכים, תביעות או מידע רפואי.", optedInTo: "הסכימו לערוץ",
+    lens: "עדשה: חלון על הרשימה", of: "מתוך", lensHint: "גררו את העדשה, גללו מעל הפס או השתמשו בחצים. לחיצה על פס דק מקפיצה אליו. אדום דחוף, כתום חשוב.",
 } as const;
 
 export type Key = keyof typeof en;

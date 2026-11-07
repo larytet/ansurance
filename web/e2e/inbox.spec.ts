@@ -45,10 +45,22 @@ test("sign in, see Inbox items, act on them, switch language, sign out", async (
   await expect(urgent).toBeVisible();
   await expect(page.locator("li.item", { hasText: weeklyTitle })).toHaveCount(0); // not urgent
   await page.getByRole("button", { name: "הכול" }).click();
+  // a long inbox is shown through the Lens: an item outside the window is a thin bar, click it to bring it in
+  const bar = page.locator(`li.squashed button[aria-label="${weeklyTitle}"]`);
+  await expect(page.locator("li.item")).toHaveCount(20); // the full list has loaded: twenty in the lens window
+  const more = page.getByRole("button", { name: "טען עוד" });
+  const present = () => page.locator("li.item, li.squashed", { hasText: weeklyTitle }).or(bar).count();
+  for (let pages = 0; (await present()) === 0 && (await more.count()) > 0 && pages < 20; pages++) await more.click({ timeout: 3000 }).catch(() => undefined); // the button goes away after the last page
+  await expect(page.locator("li.item, li.squashed").filter({ hasText: weeklyTitle }).or(bar)).not.toHaveCount(0);
+  if (await bar.count()) await bar.click();
   const weekly = page.locator("li.item", { hasText: weeklyTitle });
   await weekly.getByRole("button", { name: "בוצע" }).click();
   await expect(weekly).toHaveCount(0);
   await expect(page.getByTestId("count-open")).toHaveText(String(open - 1));
+
+  // the lens moved down to the item above; bring the urgent item back into the window
+  const urgentBar = page.locator(`li.squashed button[aria-label="${kyc}"]`);
+  if (await urgentBar.count()) await urgentBar.click();
 
   // a dismissal needs a reason
   await urgent.getByRole("button", { name: "דחייה" }).click();

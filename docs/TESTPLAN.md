@@ -237,6 +237,17 @@ Not covered: editing a definition in the UI (the API creates a new version; ther
 | T-M15-4 | Real browser: an agent creates a client with a phone; marketing signs in, has no Clients tab, finds the contact with phone and consent, and gets 403 from the full client API (`web/e2e/marketing.spec.ts`) | Auto, Playwright |
 | T-M15-5 | Marketing reads only the `marketing_contact` view (P-3, `test_clients.py`, `test_consent.py`) | Auto |
 
+### M16 Inbox Lens (REQUIREMENTS section 8, rule 5)
+
+| ID | Test | Type |
+|---|---|---|
+| T-M16-1 | Twenty items in full, the rest squashed to bars with their title as the label, the window stated ("1-20 of 45"), bars coloured by urgency (`Lens.test.tsx`) | Auto, Vitest |
+| T-M16-2 | Click a bar to centre its item; arrow and page keys move the window and stop at both ends; a drag follows the pointer and stops on release; scrolling over the strip moves it by one | Auto, Vitest |
+| T-M16-3 | A list of twenty or fewer is complete and shows no strip; the window stays inside the list (`clampStart`) | Auto, Vitest |
+| T-M16-4 | Real browser: thirty new items, twenty in full, keys and a squashed bar move the window, the chosen item is shown in full (`web/e2e/lens.spec.ts`) | Auto, Playwright |
+
+Not covered: the Lens on the client timeline and the renewals calendar (the spec lists them; only the Inbox has it), and the compact density preference (12 rows).
+
 ## 4. Scripted penetration tests (security suite)
 
 Run against a `demo` stack in CI (fast subset) and against `dev` before each release (full). Within the AWS penetration testing policy (no denial of service). Each test states the expected defence.
@@ -302,3 +313,4 @@ Run against a `demo` stack in CI (fast subset) and against `dev` before each rel
 | M13 | 2026-11-07 | T-M13-1..5: 6 backend tests (digits comparison, warning not refusal, nothing leaks across agents, duplicate ID still refused, leads list scope, roles), 4 web tests, and the browser test `agent-day.spec.ts`; all 6 Playwright tests pass on the live stack rebuilt with `make up` (schema 0015); backend fast suite result in STATUS.md | 0 | The existing Today browser test needed a narrower locator because a new client is now also a lead on Today |
 | M14 | 2026-11-07 | T-M14-1..4: 6 web tests (96 in total), the path-contract test, and `processes.spec.ts`; all 7 Playwright tests pass on the live stack rebuilt with `make up` | 0 | The diagram is drawn in the browser from the definition (no diagram library added, so nothing new to pin); the Mermaid source can be opened in Mermaid Live only by following a link that says so. First browser run read the dropdown before the definitions loaded (test race, fixed) |
 | M15 | 2026-11-07 | T-M15-1..5: 3 web tests (99 in total), `marketing.spec.ts`, and the existing backend tests of the marketing view; all 8 Playwright tests pass on the live stack rebuilt with `make up` | 0 | Defect found by the first browser run: the back end sends `none` for no consent, the screen looked up a translation for it and showed blanks; the unit test had used null. Fixed, and the unit test now uses the real value |
+| M16 | 2026-11-07 | T-M16-1..4: 6 web tests (105 in total) and `lens.spec.ts`; all 9 Playwright tests pass on the live stack rebuilt with `make up`. The whole slow suite was run after M15: 50 passed and 5 disaster-recovery tests errored because the restore builds the web image with `tsc` over the whole of `src` and my working tree briefly had a type error in a new test file; after the fix the 5 disaster-recovery tests passed (3 min), so all 55 slow tests pass | 0 | The Lens made the old Inbox browser test wrong in two ways that are now handled in the test: the live manager inbox holds more than one page (50) and more than the twenty-item window. A second finding: a web type error in a test file breaks the restore of a backup, because the restore builds the web image |

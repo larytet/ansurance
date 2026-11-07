@@ -39,3 +39,12 @@ a.button { display: inline-block; padding: .5rem .9rem; border: 1px solid curren
 
 .diagram-box { overflow-x: auto; border: 1px solid currentColor; border-radius: 8px; padding: 0.75rem; margin: 0.5rem 0; }
 .diagram { color: inherit; max-width: none; }
+
+.strip { position:relative; display:flex; height:28px; align-items:stretch; gap:1px; border:1px solid var(--line); border-radius:6px; padding:2px; margin:.5rem 0 0; touch-action:none; overflow:hidden; }
+.strip:focus-visible { outline:2px solid var(--accent); }
+.strip .bar { flex:1 1 0; min-width:1px; background:var(--line); } .strip .bar.urgent { background:var(--urgent); } .strip .bar.important { background:var(--important); }
+.strip .lens { position:absolute; top:1px; bottom:1px; border:2px solid var(--accent); border-radius:4px; opacity:.6; cursor:grab; pointer-events:none; }
+.lensinfo { display:flex; justify-content:space-between; color:var(--muted); font-size:.85rem; margin:.25rem 0 .5rem; }
+.items li.squashed { margin:0 0 2px; border-inline-start:5px solid var(--line); } .items li.squashed.urgent { border-inline-start-color:var(--urgent); } .items li.squashed.important { border-inline-start-color:var(--important); }
+.items li.squashed button { display:block; width:100%; height:8px; padding:0; border-radius:3px; border-color:transparent; background:var(--line); }
+.items li.squashed.urgent button { background:var(--urgent); } .items li.squashed.important button { background:var(--important); }

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { type Counts, type InboxItem } from "../api";
 import { useUi } from "../ui";
+import { LENS_SIZE, LensStrip, clampStart } from "./Lens";
 
 type Pending = { id: string; kind: "dismiss" | "reassign" } | null;
 
@@ -15,6 +16,7 @@ export function Inbox() {
   const [role, setRole] = useState("backoffice");
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [lens, setLens] = useState(0);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -53,6 +55,7 @@ export function Inbox() {
     }
   }
 
+  const start = clampStart(lens, items.length);
   const roles = ["agent", "backoffice", "marketing", "manager"];
   return (
     <section aria-label={tr("inbox")}>
@@ -73,8 +76,15 @@ export function Inbox() {
       {error && <p role="alert">{tr("error")}</p>}
       {loading && <p>{tr("loading")}</p>}
       {!loading && items.length === 0 && <p>{tr("empty")}</p>}
+      {items.length > LENS_SIZE && (
+        <LensStrip urgencies={items.map((i) => i.urgency)} start={start} onChange={setLens} />
+      )}
       <ul className="items">
-        {items.map((it) => (
+        {items.map((it, idx) => idx < start || idx >= start + LENS_SIZE ? (
+          <li key={it.id} className={`squashed ${it.urgency}`} data-urgency={it.urgency}>
+            <button type="button" aria-label={it.title} title={it.title} onClick={() => setLens(clampStart(idx - Math.floor(LENS_SIZE / 2), items.length))} />
+          </li>
+        ) : (
           <li key={it.id} className={`item ${it.urgency}`} data-urgency={it.urgency}>
             <div className="title">{it.title}</div>
             {it.detail && <div className="detail">{it.detail}</div>}
