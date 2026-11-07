@@ -12,6 +12,7 @@ import { Desk } from "./pages/Desk";
 import { Inbox } from "./pages/Inbox";
 import { IntakeReview } from "./pages/IntakeReview";
 import { MyWork } from "./pages/MyWork";
+import { Processes } from "./pages/Processes";
 import { LiveCall } from "./pages/LiveCall";
 import { Overview } from "./pages/Overview";
 import { Tax } from "./pages/Tax";
@@ -21,7 +22,7 @@ import { Login } from "./pages/Login";
 import { LANGS, LANG_NAMES, type Lang } from "./i18n";
 import { useUi } from "./ui";
 
-type Tab = "livecall" | "excel" | "integrations" | "settings" | "today" | "complaints" | "commissions" | "tax" | "overview" | "inbox" | "desk" | "intake" | "mywork" | "clients" | "campaigns" | "users";
+type Tab = "processes" | "livecall" | "excel" | "integrations" | "settings" | "today" | "complaints" | "commissions" | "tax" | "overview" | "inbox" | "desk" | "intake" | "mywork" | "clients" | "campaigns" | "users";
 
 export function App() {
   const { api, me, setMe, tr, lang, setLang, theme, setTheme } = useUi();
@@ -49,7 +50,7 @@ export function App() {
     "inbox",
     ...(has("desk.read") ? (["desk"] as Tab[]) : []),
     ...(has("intake.review") ? (["intake"] as Tab[]) : []),
-    ...(has("process.read") ? (["mywork"] as Tab[]) : []),
+    ...(has("process.read") ? (["mywork", "processes"] as Tab[]) : []),
     ...(has("client.read") ? (["clients"] as Tab[]) : []),
     ...(has("campaign.write") ? (["campaigns"] as Tab[]) : []),
     ...(has("complaint.write") ? (["complaints"] as Tab[]) : []),
@@ -91,7 +92,7 @@ export function App() {
           {tr("logout")}
         </button>
       </header>
-      {tab === "livecall" ? <LiveCall /> : tab === "excel" ? <ExcelJoin /> : tab === "integrations" ? <Integrations /> : tab === "users" ? <Users /> : tab === "settings" ? <Settings /> : tab === "today" ? <Today onOpenClient={openClient} /> : tab === "complaints" ? <Complaints /> : tab === "commissions" ? <Commissions /> : tab === "tax" ? <Tax /> : tab === "overview" ? <Overview /> : tab === "inbox" ? <Inbox /> : tab === "desk" ? <Desk /> : tab === "intake" ? <IntakeReview /> : tab === "mywork" ? <MyWork onOpenClient={openClient} /> : tab === "campaigns" ? <Campaigns /> : open ? <ClientFile clientId={open} onBack={() => setOpen(null)} /> : <Clients onOpen={setOpen} />}
+      {tab === "livecall" ? <LiveCall /> : tab === "excel" ? <ExcelJoin /> : tab === "integrations" ? <Integrations /> : tab === "users" ? <Users /> : tab === "settings" ? <Settings /> : tab === "today" ? <Today onOpenClient={openClient} /> : tab === "complaints" ? <Complaints /> : tab === "commissions" ? <Commissions /> : tab === "tax" ? <Tax /> : tab === "overview" ? <Overview /> : tab === "inbox" ? <Inbox /> : tab === "desk" ? <Desk /> : tab === "intake" ? <IntakeReview /> : tab === "processes" ? <Processes /> : tab === "mywork" ? <MyWork onOpenClient={openClient} /> : tab === "campaigns" ? <Campaigns /> : open ? <ClientFile clientId={open} onBack={() => setOpen(null)} /> : <Clients onOpen={setOpen} />}
     </div>
   );
 }

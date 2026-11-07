@@ -216,6 +216,17 @@ The Playwright test for these screens is T-M13-5.
 | T-M13-4 | New client form: CSRF, phone warning with links, the other-agent notice, a refused ID explained, not offered without `client.write`; leads on Today (`Tasks.test.tsx`) | Auto, Vitest |
 | T-M13-5 | Real browser: two clients with one phone written two ways, the warning, the leads list, a task added and finished, a meeting recorded (`web/e2e/agent-day.spec.ts`) | Auto, Playwright |
 
+### M14 Process diagram view (Processes tab)
+
+| ID | Test | Type |
+|---|---|---|
+| T-M14-1 | Layers: a stage sits one column right of its deepest dependency, parallel stages share a column, a cycle does not loop (`Processes.test.tsx`) | Auto, Vitest |
+| T-M14-2 | The screen draws every stage and every dependency, lists the checklists with heading lines, shows the Mermaid source and a link that names the third-party site, switches to the Hebrew names, and is hidden without `process.read` | Auto, Vitest |
+| T-M14-3 | Real browser: all 18 seeded definitions draw; the reference process has 10 stages, at least 9 dependencies and stages that share a column; the Mermaid source and link are present (`web/e2e/processes.spec.ts`) | Auto, Playwright |
+| T-M14-4 | Every path the screen calls is served by the back end (`test_web_contract.py`) | Auto |
+
+Not covered: editing a definition in the UI (the API creates a new version; there is no editor screen).
+
 ## 4. Scripted penetration tests (security suite)
 
 Run against a `demo` stack in CI (fast subset) and against `dev` before each release (full). Within the AWS penetration testing policy (no denial of service). Each test states the expected defence.
@@ -279,3 +290,4 @@ Run against a `demo` stack in CI (fast subset) and against `dev` before each rel
 | M11 | 2026-11-07 | T-M11-1..9: 17 backend tests (roles and name, role change on the next request, deactivate and reactivate, authenticator reset, set password, own password change with wrong password and wrong code counted, last manager protected, only `user.manage`, SSO users, over-posting ignored, no secret in the audit or the list) and the web-contract test; 587 fast backend tests; 83 web unit tests (T-M11-10) | 0 | Defect found by the contract test: the Users page called `/api/auth/users` (route is `/api/users`). P-21 to P-23 are covered by the role, session and own-password tests above, not yet by the scripted suite. The Playwright test `users.spec.ts` passes on the rebuilt live stack (2026-11-07) |
 | M12 | 2026-11-07 | T-M12-1..6: 8 backend tests (chips and date order, delegation, refusals, meetings and the service contact date, scope per role, overdue Inbox item once) and 4 web tests; 596 fast backend tests; 87 web unit tests | 0 | Migration 0015 (tables `task` and `meeting`, capability `task.write`). Browser test for these screens: `agent-day.spec.ts` (see M13). The slow suite was not re-run after M12 |
 | M13 | 2026-11-07 | T-M13-1..5: 6 backend tests (digits comparison, warning not refusal, nothing leaks across agents, duplicate ID still refused, leads list scope, roles), 4 web tests, and the browser test `agent-day.spec.ts`; all 6 Playwright tests pass on the live stack rebuilt with `make up` (schema 0015); backend fast suite result in STATUS.md | 0 | The existing Today browser test needed a narrower locator because a new client is now also a lead on Today |
+| M14 | 2026-11-07 | T-M14-1..4: 6 web tests (96 in total), the path-contract test, and `processes.spec.ts`; all 7 Playwright tests pass on the live stack rebuilt with `make up` | 0 | The diagram is drawn in the browser from the definition (no diagram library added, so nothing new to pin); the Mermaid source can be opened in Mermaid Live only by following a link that says so. First browser run read the dropdown before the definitions loaded (test race, fixed) |

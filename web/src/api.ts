@@ -215,6 +215,11 @@ export class Api {
     return (await r.json()) as T;
   }
 
+  async getText(path: string): Promise<string> {
+    const r = await this.fetcher(path, { credentials: "same-origin" });
+    if (!r.ok) throw new ApiError(r.status, r.statusText);
+    return r.text();
+  }
   get = <T,>(path: string) => this.call<T>("GET", path);
   post = <T,>(path: string, body?: unknown) => this.call<T>("POST", path, body);
   put = <T,>(path: string, body?: unknown) => this.call<T>("PUT", path, body);

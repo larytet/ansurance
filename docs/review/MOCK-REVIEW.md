@@ -21,7 +21,7 @@ the mock yet.
 | Mock screen | App | Gap |
 |---|---|---|
 | Today | ported, with tasks and leads | no claims or birthdays list yet (the data model has no birth date) |
-| Processes | "My work" list, pipeline on the client file | the diagram view and the definition editor are not ported |
+| Processes | "My work" list, Processes tab with the diagram, pipeline on the client file | the definition editor is not ported |
 | Inbox | ported | the Lens and "open in work area" jump are not ported |
 | Client file | ported | tasks and meetings are built; no add-sheets for activities, employment or related clients (APIs do not exist) |
 | WhatsApp | on the client file | no inline translation of incoming messages |
