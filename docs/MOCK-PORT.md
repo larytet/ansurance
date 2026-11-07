@@ -25,7 +25,8 @@ mock. States: **not started**, **ported** (works against the API, unit and brows
 | WhatsApp (conversation and send on the client file, with the consent gate's reason shown) | agent, back-office, manager | ported | inline translation of incoming messages still to add |
 | Excel join | back-office, marketing, manager | ported (upload, join, download, summary) | |
 | Integrations (state, calls in 24 hours, last error, syncs) | manager, back-office | ported | |
-| System settings (account, language, theme, permissions) | all | ported | editing roles and approvals is by command line and API |
+| System settings (account, language, theme, permissions, change your own password) | all | ported | a user changes their own password with the current password and a code (local users only) |
+| Users (not in the mock; F16) | manager | ported | add a user with the authenticator setup shown once; edit roles; reset the authenticator; set a password; deactivate and reactivate, each with a confirmation |
 | Live call | agent | ported as a text panel (typed or pasted lines translated, both texts kept in the client timeline, risky passages flagged) | **no speech recognition**: live subtitles from audio need a speech vendor |
 
 Slices 3 to 7 (Overview, Trust, Compliance, My work, Campaigns, Desk, Scans, Today, Complaints, Commissions, Tax, the client's page) have 24 unit tests and 2 real-browser tests on the live stack with a fake API and no real-browser test yet.

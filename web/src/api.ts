@@ -6,6 +6,7 @@ export interface Me {
   name: string;
   roles: string[];
   capabilities: string[];
+  auth_mode: "local" | "sso";
   csrf: string;
 }
 
@@ -217,6 +218,7 @@ export class Api {
   get = <T,>(path: string) => this.call<T>("GET", path);
   post = <T,>(path: string, body?: unknown) => this.call<T>("POST", path, body);
   put = <T,>(path: string, body?: unknown) => this.call<T>("PUT", path, body);
+  patch = <T,>(path: string, body?: unknown) => this.call<T>("PATCH", path, body);
 
   async login(email: string, password: string, code: string): Promise<Me> {
     const r = await this.call<{ csrf: string }>("POST", "/api/auth/login", { email, password, code });

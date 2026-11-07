@@ -74,6 +74,7 @@ const en = {
     clientView: "Client view (read-only)", issueLink: "Create a link for the client", openPreview: "Preview what the client sees", linkExpires: "Expires", linkOnce: "Shown once: copy it now.",
     livecall: "Live call", liveCall: "Live call", liveCallNote: "Machine translation of typed or pasted lines (no speech recognition yet). Both texts are saved in the client's timeline.", callerLanguage: "Caller's language", agentLanguage: "Your language", callClient: "Find the client (optional)", caller: "Caller", agent: "Agent", checkWithPerson: "Check with a person", addLine: "Add the line", speaker: "Speaker", lineText: "What was said",
     openClient: "Open the client file", pendingApproval: "Waiting for the manager", noWork: "Nothing is waiting for your role.", stage: "Stage",
+    editRoles: "Edit roles", save: "Save", deactivate: "Deactivate", reactivate: "Reactivate", resetAuth: "Reset authenticator", setPassword: "Set password", inactive: "Inactive", confirmAction: "Confirm", userUpdated: "User updated.", passwordSet: "Password set. The user was signed out everywhere.", resetNote: "The old authenticator and recovery codes stop working and the user is signed out everywhere.", reactivateNote: "A new authenticator is issued when a user is reactivated.", changePassword: "Change password", currentPassword: "Current password", newPassword: "New password", authCode: "Code from the authenticator, or a recovery code", passwordChanged: "Password changed. Your other devices were signed out.", last_manager: "At least one active manager must remain.",
 } as const;
 
 const he = {
@@ -144,6 +145,7 @@ const he = {
     clientView: "תצוגת לקוח (לקריאה בלבד)", issueLink: "יצירת קישור ללקוח", openPreview: "תצוגה מקדימה של מה שהלקוח רואה", linkExpires: "בתוקף עד", linkOnce: "מוצג פעם אחת: העתיקו עכשיו.",
     livecall: "שיחה חיה", liveCall: "שיחה חיה", liveCallNote: "תרגום מכונה של שורות שהוקלדו או הודבקו (עדיין בלי זיהוי דיבור). שני הנוסחים נשמרים בציר הזמן של הלקוח.", callerLanguage: "שפת המתקשר", agentLanguage: "השפה שלך", callClient: "חיפוש הלקוח (לא חובה)", caller: "מתקשר", agent: "סוכן", checkWithPerson: "לבדוק מול אדם", addLine: "הוספת השורה", speaker: "דובר", lineText: "מה נאמר",
     openClient: "פתיחת תיק לקוח", pendingApproval: "ממתין למנהל", noWork: "אין עבודה הממתינה לתפקיד שלך.", stage: "שלב",
+    editRoles: "עריכת תפקידים", save: "שמירה", deactivate: "השבתה", reactivate: "הפעלה מחדש", resetAuth: "איפוס אפליקציית אימות", setPassword: "קביעת סיסמה", inactive: "מושבת", confirmAction: "אישור", userUpdated: "המשתמש עודכן.", passwordSet: "הסיסמה נקבעה. המשתמש נותק מכל המכשירים.", resetNote: "אפליקציית האימות וקודי השחזור הישנים יפסיקו לעבוד והמשתמש יתנתק מכל המכשירים.", reactivateNote: "בהפעלה מחדש יונפקו למשתמש אפליקציית אימות וקודי שחזור חדשים.", changePassword: "שינוי סיסמה", currentPassword: "סיסמה נוכחית", newPassword: "סיסמה חדשה", authCode: "קוד מאפליקציית האימות, או קוד שחזור", passwordChanged: "הסיסמה שונתה. המכשירים האחרים שלכם נותקו.", last_manager: "חייב להישאר לפחות מנהל פעיל אחד.",
 } as const;
 
 export type Key = keyof typeof en;

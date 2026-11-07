@@ -1,3 +1,4 @@
+import uuid
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
@@ -19,7 +20,7 @@ from app.deps import (
     get_settings_dep,
     require,
 )
-from app.models import Session
+from app.models import Session, User
 
 router = APIRouter(prefix="/api")
 
@@ -36,6 +37,22 @@ class UserIn(BaseModel):
     roles: list[str]
     auth_mode: str = "local"
     password: str | None = None
+
+
+class UserPatch(BaseModel):
+    display_name: str | None = None
+    roles: list[str] | None = None
+    active: bool | None = None
+
+
+class PasswordIn(BaseModel):
+    password: str
+
+
+class OwnPasswordIn(BaseModel):
+    current_password: str
+    code: str
+    new_password: str
 
 
 def _set_cookie(resp: Response, settings: Settings, token: str) -> None:
@@ -60,6 +77,7 @@ def _me(p: Principal) -> dict[str, Any]:
         "email": p.user.email,
         "name": p.user.display_name,
         "roles": p.roles,
+        "auth_mode": p.user.auth_mode,
         "capabilities": sorted(p.capabilities),
     }
 
@@ -144,10 +162,6 @@ def list_users(
     db: Db = Depends(get_db, scope="function"),
 ) -> list[dict[str, Any]]:
     """For choosing an owner (a complaint, a claim). No password, secret or session data."""
-    from sqlalchemy import select
-
-    from app.models import User
-
     return [
         {
             "id": str(u.id),
@@ -155,6 +169,7 @@ def list_users(
             "email": u.email,
             "roles": auth.roles_of(db, u.id),
             "active": u.active,
+            "auth_mode": u.auth_mode,
         }
         for u in db.scalars(select(User).order_by(User.display_name))
     ]
@@ -191,6 +206,109 @@ def create_user(
         {"roles": body.roles, "auth_mode": body.auth_mode},
     )
     return {"id": str(user.id), **extra}
+
+
+def _target(db: Db, user_id: str) -> User:
+    try:
+        u = db.get(User, uuid.UUID(user_id))
+    except ValueError:
+        u = None
+    if u is None:
+        raise HTTPException(404, "not_found")
+    return u
+
+
+@router.patch("/users/{user_id}")
+def update_user(
+    user_id: str,
+    body: UserPatch,
+    p: Principal = Depends(require("user.manage")),
+    db: Db = Depends(get_db, scope="function"),
+) -> dict[str, Any]:
+    u = _target(db, user_id)
+    if body.roles is not None:
+        bad = [r for r in body.roles if r not in ROLES]
+        if bad or not body.roles:
+            raise HTTPException(422, f"unknown or missing roles: {bad}")
+    try:
+        extra = auth.update_user(db, str(p.user.id), u, body.display_name, body.roles, body.active)
+    except auth.AuthError as e:
+        db.rollback()
+        raise HTTPException(e.status, e.code) from e
+    chain.append(
+        db,
+        str(p.user.id),
+        "user.update",
+        f"user:{u.id}",
+        {
+            "roles": body.roles,
+            "active": body.active,
+            "renamed": body.display_name is not None,
+        },
+    )
+    return {"id": str(u.id), **extra}
+
+
+@router.post("/users/{user_id}/reset-authenticator")
+def reset_authenticator(
+    user_id: str,
+    p: Principal = Depends(require("user.manage")),
+    db: Db = Depends(get_db, scope="function"),
+) -> dict[str, Any]:
+    u = _target(db, user_id)
+    try:
+        extra = auth.reset_authenticator(db, str(p.user.id), u)
+    except auth.AuthError as e:
+        raise HTTPException(e.status, e.code) from e
+    chain.append(db, str(p.user.id), "user.reset_authenticator", f"user:{u.id}", {})
+    return {"id": str(u.id), **extra}
+
+
+@router.post("/users/{user_id}/password")
+def set_user_password(
+    user_id: str,
+    body: PasswordIn,
+    p: Principal = Depends(require("user.manage")),
+    db: Db = Depends(get_db, scope="function"),
+    settings: Settings = Depends(get_settings_dep),
+) -> dict[str, str]:
+    u = _target(db, user_id)
+    reason = check_policy(body.password, u.email, settings.password_min_length)
+    if reason:
+        raise HTTPException(422, f"weak_password: {reason}")
+    try:
+        auth.set_password(db, str(p.user.id), u, body.password)
+    except auth.AuthError as e:
+        raise HTTPException(e.status, e.code) from e
+    chain.append(db, str(p.user.id), "user.set_password", f"user:{u.id}", {})
+    return {"status": "changed"}
+
+
+@router.post("/auth/password")
+def change_own_password(
+    body: OwnPasswordIn,
+    request: Request,
+    p: Principal = Depends(current_principal),
+    db: Db = Depends(get_db, scope="function"),
+    settings: Settings = Depends(get_settings_dep),
+) -> dict[str, str]:
+    reason = check_policy(body.new_password, p.user.email, settings.password_min_length)
+    if reason:
+        raise HTTPException(422, f"weak_password: {reason}")
+    try:
+        auth.change_own_password(
+            db,
+            settings,
+            p.user,
+            body.current_password,
+            body.code,
+            body.new_password,
+            p.session_id,
+            _client_ip(request),
+        )
+    except auth.AuthError as e:
+        raise HTTPException(e.status, e.code) from e
+    return {"status": "changed"}
 
 
 @router.get("/auth/sso/{provider}/start")

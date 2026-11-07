@@ -381,7 +381,7 @@ def test_user_list_for_choosing_an_owner_has_no_secrets_and_is_for_the_manager(e
     m, _ = env.who("manager")
     rows = m.get("/api/users").json()
     assert sorted(r["roles"][0] for r in rows) == ["agent", "backoffice", "manager"]
-    assert set(rows[0]) == {"id", "name", "email", "roles", "active"}
+    assert set(rows[0]) == {"id", "name", "email", "roles", "active", "auth_mode"}
     assert (
         "password" not in m.get("/api/users").text.lower()
         and "totp" not in m.get("/api/users").text.lower()

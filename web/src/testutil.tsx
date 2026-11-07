@@ -30,7 +30,7 @@ export function fakeServer(...handlers: Handler[]) {
 }
 
 export const ME = (roles: string[], caps: string[] = ["client.read"]) => ({
-  id: "u1", email: "ann@agency.il", name: "Ann", roles, capabilities: caps, csrf: "tok",
+  id: "u1", email: "ann@agency.il", name: "Ann", roles, capabilities: caps, auth_mode: "local" as const, csrf: "tok",
 });
 
 export function mount(fetcher: typeof fetch) {

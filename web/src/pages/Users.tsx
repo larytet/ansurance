@@ -4,9 +4,9 @@ import { ApiError } from "../api";
 import { type Key } from "../i18n";
 import { useUi } from "../ui";
 
-const ROLES = ["agent", "backoffice", "marketing", "manager"] as const;
+const ROLES = ["agent", "backoffice", "marketing", "accountant", "manager"] as const;
 
-interface UserRow { id: string; name: string; email: string; roles: string[]; active: boolean }
+interface UserRow { id: string; name: string; email: string; roles: string[]; active: boolean; auth_mode: "local" | "sso" }
 interface Created { totp_uri?: string; recovery_codes?: string[] }
 
 /** The shared secret inside an otpauth:// URI, shown as a typed-in fallback. */
@@ -59,6 +59,73 @@ export function TotpSetup({ name, uri, codes, onDone }: { name: string; uri: str
   );
 }
 
+type Pending = "roles" | "deactivate" | "reactivate" | "reset" | "password" | null;
+
+function UserActions({ u, onChanged, onSetup }: { u: UserRow; onChanged: () => void; onSetup: (name: string, extra: Created) => void }) {
+  const { api, tr } = useUi();
+  const [pending, setPending] = useState<Pending>(null);
+  const [roles, setRoles] = useState<string[]>(u.roles);
+  const [password, setPassword] = useState("");
+  const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const local = u.auth_mode === "local";
+
+  async function run(done: string, call: () => Promise<Created>) {
+    setMsg(null);
+    try {
+      const extra = await call();
+      setPending(null);
+      setPassword("");
+      onChanged();
+      if (extra.totp_uri) onSetup(u.name, extra);
+      else setMsg({ ok: true, text: done });
+    } catch (err) {
+      const code = err instanceof ApiError ? err.code : "error";
+      setMsg({ ok: false, text: code === "last_manager" ? tr("last_manager") : code });
+    }
+  }
+  const cancel = <button type="button" onClick={() => setPending(null)}>{tr("cancel")}</button>;
+  return (
+    <td>
+      {pending === null && (
+        <span className="row-actions">
+          <button type="button" onClick={() => { setRoles(u.roles); setPending("roles"); }}>{tr("editRoles")}</button>{" "}
+          {u.active && local && <button type="button" onClick={() => setPending("reset")}>{tr("resetAuth")}</button>}{" "}
+          {u.active && local && <button type="button" onClick={() => setPending("password")}>{tr("setPassword")}</button>}{" "}
+          <button type="button" onClick={() => setPending(u.active ? "deactivate" : "reactivate")}>{u.active ? tr("deactivate") : tr("reactivate")}</button>
+        </span>
+      )}
+      {pending === "roles" && (
+        <fieldset>
+          <legend>{tr("editRoles")}: <bdi>{u.name}</bdi></legend>
+          {ROLES.map((r) => (
+            <label key={r}>
+              <input type="checkbox" checked={roles.includes(r)} onChange={(e) => setRoles(e.target.checked ? [...roles, r] : roles.filter((x) => x !== r))} />{" "}
+              {tr(`role.${r}` as Key)}
+            </label>
+          ))}
+          <button type="button" disabled={roles.length === 0} onClick={() => run(tr("userUpdated"), () => api.patch<Created>(`/api/users/${u.id}`, { roles }))}>{tr("save")}</button> {cancel}
+        </fieldset>
+      )}
+      {pending === "password" && (
+        <form onSubmit={(e) => { e.preventDefault(); void run(tr("passwordSet"), async () => { await api.post(`/api/users/${u.id}/password`, { password }); return {}; }); }}>
+          <label>{tr("newPassword")} <input type="password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} required /></label>{" "}
+          <button type="submit">{tr("save")}</button> {cancel}
+        </form>
+      )}
+      {pending === "reset" && (
+        <span><p>{tr("resetNote")}</p><button type="button" onClick={() => run("", () => api.post<Created>(`/api/users/${u.id}/reset-authenticator`))}>{tr("confirmAction")}: {tr("resetAuth")}</button> {cancel}</span>
+      )}
+      {pending === "deactivate" && (
+        <span><button type="button" onClick={() => run(tr("userUpdated"), () => api.patch<Created>(`/api/users/${u.id}`, { active: false }))}>{tr("confirmAction")}: {tr("deactivate")}</button> {cancel}</span>
+      )}
+      {pending === "reactivate" && (
+        <span><p>{tr("reactivateNote")}</p><button type="button" onClick={() => run(tr("userUpdated"), () => api.patch<Created>(`/api/users/${u.id}`, { active: true }))}>{tr("confirmAction")}: {tr("reactivate")}</button> {cancel}</span>
+      )}
+      {msg && <p role={msg.ok ? "status" : "alert"}>{msg.text}</p>}
+    </td>
+  );
+}
+
 export function Users() {
   const { api, me, tr } = useUi();
   const [rows, setRows] = useState<UserRow[]>([]);
@@ -70,7 +137,7 @@ export function Users() {
   const [error, setError] = useState<string | null>(null);
   const [created, setCreated] = useState<{ name: string; extra: Created } | null>(null);
 
-  const load = useCallback(() => { api.get<UserRow[]>("/api/auth/users").then(setRows).catch(() => undefined); }, [api]);
+  const load = useCallback(() => { api.get<UserRow[]>("/api/users").then(setRows).catch(() => undefined); }, [api]);
   useEffect(load, [load]);
   if (!me) return null;
 
@@ -78,7 +145,7 @@ export function Users() {
     e.preventDefault();
     setError(null);
     try {
-      const extra = await api.post<Created>("/api/auth/users", {
+      const extra = await api.post<Created>("/api/users", {
         email: email.trim(), display_name: name.trim(), roles, auth_mode: mode, password: mode === "local" ? password : null,
       });
       setCreated({ name: name.trim(), extra });
@@ -124,7 +191,12 @@ export function Users() {
       <table>
         <tbody>
           {rows.map((u) => (
-            <tr key={u.id}><td><bdi>{u.name}</bdi></td><td dir="ltr">{u.email}</td><td>{u.roles.map((r) => tr(`role.${r}` as Key)).join(", ")}</td></tr>
+            <tr key={u.id}>
+              <td><bdi>{u.name}</bdi>{!u.active && <> <em>({tr("inactive")})</em></>}</td>
+              <td dir="ltr">{u.email}</td>
+              <td>{u.roles.map((r) => tr(`role.${r}` as Key)).join(", ")}</td>
+              <UserActions u={u} onChanged={load} onSetup={(n, extra) => setCreated({ name: n, extra })} />
+            </tr>
           ))}
         </tbody>
       </table>
