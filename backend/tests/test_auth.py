@@ -254,3 +254,9 @@ def test_password_min_length_is_configurable() -> None:
     assert check_policy("abcd-efg9") is None  # default minimum is 8
     assert check_policy("abc-ef9") is not None  # 7 characters
     assert check_policy("abcd-efg9", min_length=12) is not None
+
+
+def test_short_email_names_do_not_block_ordinary_passwords() -> None:
+    assert check_policy("another-pass-9", "a@a.com") is None  # starts with "a", name is 1 letter
+    assert check_policy("alice-and-more-1", "alice@x.il") == "based on the e-mail"
+    assert check_policy("password") == "too common"

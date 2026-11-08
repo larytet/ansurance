@@ -42,8 +42,11 @@ def check_policy(
     if len(password) < min_length:
         return f"at least {min_length} characters"
     low = password.casefold()
-    if low in _COMMON or (email and low.startswith(email.split("@")[0].casefold())):
-        return "too common or based on the e-mail"
+    local = email.split("@")[0].casefold()
+    if low in _COMMON:
+        return "too common"
+    if len(local) >= 4 and low.startswith(local):  # a 1-3 letter name would reject too much
+        return "based on the e-mail"
     if len(set(password)) < 5:
         return "too repetitive"
     return None
