@@ -109,7 +109,16 @@ def main() -> int:
         data={"doc_type": "policy"},
     )
     check(up.status_code == 201 and up.json()["scan_status"] == "clean", "upload scanned clean")
-    dl = agent.get(f"/api/documents/{up.json()['id']}/content")
+    doc = up.json()["id"]
+    check(
+        agent.get(f"/api/documents/{doc}/content?acknowledge=true").status_code == 403,
+        "an agent cannot download the original",
+    )
+    check(
+        mgr.get(f"/api/documents/{doc}/content").status_code == 409,
+        "the original download needs the acknowledgement",
+    )
+    dl = mgr.get(f"/api/documents/{doc}/content?acknowledge=true")
     check(dl.status_code == 200 and dl.content == pdf, "download returns the exact bytes")
     gone = agent.delete(f"/api/documents/{up.json()['id']}")
     check(gone.status_code in (404, 405), "documents cannot be deleted")
