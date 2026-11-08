@@ -3,13 +3,14 @@
 import pytest
 from sqlalchemy.orm import Session
 
-from app.intake import digitize
 from app.intake.attribute import attribute, evidence_score
 from app.intake.classify import classify
 from app.intake.extract import IdHit, find_ids, policy_tokens
 from app.intake.ocr import Word, result_from_text
 from app.models import Client, Insurer, Policy
+from app.sandbox.client import split_on_blank_pages
 from app.text import build_search
+from sandbox import pages as pages_mod
 from tests.intake_data import samples as S
 
 
@@ -226,34 +227,35 @@ def test_threshold_is_configurable(db: Session, people: dict[str, Client]) -> No
     assert att(db, [IdHit("123456782", 0.75)], threshold=0.90).route == "filed"
 
 
-# ---- digitize -------------------------------------------------------------------------------
+# ---- digitize (runs in the sandbox program; here called directly) ------------------------
 def test_render_pages_from_pdf_tiff_png_and_unknown() -> None:
     pages = [S.render(["a"]), S.render(["b"])]
-    assert len(digitize.render_pages(S.pdf(pages), "application/pdf")) == 2
-    assert len(digitize.render_pages(S.tiff(pages), "image/tiff")) == 2
-    assert len(digitize.render_pages(S.png(pages[0]), "image/png")) == 1
-    assert digitize.render_pages(b"x", "text/plain") == []
+    assert len(pages_mod.render_pages(S.pdf(pages), "application/pdf")) == 2
+    assert len(pages_mod.render_pages(S.tiff(pages), "image/tiff")) == 2
+    assert len(pages_mod.render_pages(S.png(pages[0]), "image/png")) == 1
+    assert pages_mod.render_pages(b"x", "text/plain") == []
 
 
 def test_blank_detection_and_splitting() -> None:
     a, b = S.render(S.id_card("123456782")), S.render(S.invoice("000000026"))
-    assert digitize.is_blank(S.blank()) and not digitize.is_blank(a)
-    groups = digitize.split_on_blank_pages([a, S.blank(), b, b, S.blank(), S.blank(), a])
+    assert pages_mod.is_blank(S.blank()) and not pages_mod.is_blank(a)
+    blanks = [pages_mod.is_blank(p) for p in [a, S.blank(), b, b, S.blank(), S.blank(), a]]
+    groups = split_on_blank_pages(blanks)
     assert [(g.first, g.last) for g in groups] == [(1, 1), (3, 4), (7, 7)]
-    assert [(g.first, g.last) for g in digitize.split_on_blank_pages([a, b])] == [(1, 2)]
-    assert [(g.first, g.last) for g in digitize.split_on_blank_pages([S.blank()])] == [(1, 1)]
+    assert [(g.first, g.last) for g in split_on_blank_pages([False, False])] == [(1, 2)]
+    assert [(g.first, g.last) for g in split_on_blank_pages([True])] == [(1, 1)]
 
 
 def test_deskew_and_crop() -> None:
     import numpy as np
 
     img = S.render(S.id_card("123456782"), skew=4.0)
-    angle = digitize.deskew_angle(np.array(img))
+    angle = pages_mod.deskew_angle(np.array(img))
     assert abs(abs(angle) - 4.0) < 1.5
-    cleaned = digitize.clean(img)
+    cleaned = pages_mod.clean(img)
     assert cleaned.width < img.width and cleaned.height < img.height  # margins are cut
-    straight = digitize.clean(S.render(S.id_card("123456782")))
-    assert abs(digitize.deskew_angle(np.array(straight))) < 1.0
+    straight = pages_mod.clean(S.render(S.id_card("123456782")))
+    assert abs(pages_mod.deskew_angle(np.array(straight))) < 1.0
 
 
 def test_result_helper_and_unused_imports() -> None:

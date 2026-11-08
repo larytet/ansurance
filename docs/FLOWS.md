@@ -94,16 +94,20 @@ flowchart TD
 
 ## Incoming document
 
-Implemented in `backend/app/intake`.
+Implemented in `backend/app/intake`, with the file parsing in `backend/sandbox` (DESIGN 8.1).
 An item is filed automatically only when the evidence names exactly one client.
 A name alone is never enough, and the sender only breaks a tie.
+The worker never opens the file: it hands the bytes to the sandbox and checks what comes back.
 
 ```mermaid
 flowchart TD
     A[Fax drop folder, e-mail, WhatsApp media, upload] --> B[Virus scan]
     B -->|Infected or scan failed| Q[Quarantine, nobody can open it]
-    B -->|Clean| C[Render pages, de-skew, crop, de-noise, split on blank pages]
-    C --> D[OCR and classify the document type]
+    B -->|Clean| C[Sandbox container: render pages, de-skew, crop, de-noise, find blank pages]
+    C -->|Over a limit, unreadable, timeout, crash, bad output| M[Back-office review with the reason, nothing shown]
+    C -->|Page images| C2[Output checked: only PNG and JSON, sizes, no links]
+    C2 --> C3[Split on blank pages]
+    C3 --> D[Sandbox container: OCR and classify the document type]
     D --> E[Extract ID number and policy number]
     E --> F{Evidence points to one client?}
     F -->|Yes, ID or policy match| G[Filed to the client, task if a human decision is needed]
@@ -114,4 +118,8 @@ flowchart TD
     J --> G
     G --> K{Wrong client found later?}
     K -->|Yes| L[Correction moves it, counts as a misfile, feeds the classifier]
+    G --> V[Page images stored; users see only these]
+    V --> O{Original needed?}
+    O -->|Capability, warning accepted| P[Download of the original, audited]
+    O -->|No capability or warning not accepted| R[Refused]
 ```

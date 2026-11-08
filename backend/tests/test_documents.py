@@ -63,16 +63,16 @@ def upload(
 
 # T-M2-1 -------------------------------------------------------------------------------------
 def test_upload_download_roundtrip(env: Env, db: Session) -> None:
-    c, hdr, _ = who(env, db, "agent")
+    c, hdr, _ = who(env, db, "backoffice")
     cid = client_for(c, hdr)
     r = upload(c, hdr, cid)
     assert r.status_code == 201, r.text
     doc = r.json()
     assert doc["sha256"] == hashlib.sha256(PDF).hexdigest() and doc["scan_status"] == "clean"
     assert doc["media_type"] == "application/pdf" and doc["size"] == len(PDF)
-    dl = c.get(f"/api/documents/{doc['id']}/content")
+    dl = c.get(f"/api/documents/{doc['id']}/content?acknowledge=true")
     assert dl.status_code == 200 and dl.content == PDF
-    assert dl.headers["content-type"] == "application/pdf"
+    assert dl.headers["content-type"] == "application/octet-stream"  # never a type to open
     assert dl.headers["x-content-type-options"] == "nosniff"
     assert "attachment" in dl.headers["content-disposition"]
     assert "sandbox" in dl.headers["content-security-policy"]
@@ -140,12 +140,12 @@ def test_no_http_route_deletes_or_replaces_a_document(env: Env, db: Session) -> 
 
 # T-M2-4 -------------------------------------------------------------------------------------
 def test_infected_file_is_quarantined_kept_and_never_served(env: Env, db: Session) -> None:
-    c, hdr, _ = who(env, db, "agent")
+    c, hdr, _ = who(env, db, "manager")
     cid = client_for(c, hdr)
     r = upload(c, hdr, cid, b"%PDF-1.4 " + EICAR)
     assert r.status_code == 201 and r.json()["scan_status"] == "infected"
     assert len(list(env.store.iter_keys())) == 1  # stays in originals, flagged
-    dl = c.get(f"/api/documents/{r.json()['id']}/content")
+    dl = c.get(f"/api/documents/{r.json()['id']}/content?acknowledge=true")
     assert dl.status_code == 409 and dl.json()["detail"] == "scan_infected"
     actions = {x[0] for x in db.execute(text("SELECT action FROM audit_entry"))}
     assert {"document.quarantine", "document.download_refused"} <= actions
@@ -155,11 +155,11 @@ def test_infected_file_is_quarantined_kept_and_never_served(env: Env, db: Sessio
 
 
 def test_scanner_outage_fails_closed(env: Env, db: Session) -> None:
-    c, hdr, _ = who(env, db, "agent")
+    c, hdr, _ = who(env, db, "manager")
     env.av.available = False
     r = upload(c, hdr, client_for(c, hdr))
     assert r.status_code == 201 and r.json()["scan_status"] == "pending"
-    assert c.get(f"/api/documents/{r.json()['id']}/content").status_code == 409
+    assert c.get(f"/api/documents/{r.json()['id']}/content?acknowledge=true").status_code == 409
 
 
 # T-M2-5 / P-4: restricted documents ------------------------------------------------------------
@@ -193,7 +193,8 @@ def test_other_agents_and_marketing_cannot_reach_a_clients_documents(env: Env, d
     cid = client_for(c1, h1)
     doc = upload(c1, h1, cid, doc_type="medical_report").json()
     assert c2.get(f"/api/documents/{doc['id']}").status_code == 404
-    assert c2.get(f"/api/documents/{doc['id']}/content").status_code == 404
+    assert c2.get(f"/api/documents/{doc['id']}/content?acknowledge=true").status_code == 403
+    assert c2.get(f"/api/documents/{doc['id']}/pages").status_code == 404
     assert c2.get(f"/api/clients/{cid}/documents").status_code == 404
     assert upload(c2, h2, cid).status_code == 404
     assert cm.get(f"/api/documents/{doc['id']}/content").status_code == 403
@@ -207,17 +208,17 @@ def test_backoffice_and_manager_can_read_restricted(env: Env, db: Session) -> No
     doc = upload(c1, h1, cid, doc_type="medical_report").json()
     for role in ("backoffice", "manager"):
         c, _, _ = who(env, db, role)
-        assert c.get(f"/api/documents/{doc['id']}/content").content == PDF
+        assert c.get(f"/api/documents/{doc['id']}/content?acknowledge=true").content == PDF
         assert len(c.get(f"/api/clients/{cid}/documents").json()) == 1
 
 
 # T-M2-6 -------------------------------------------------------------------------------------
 def test_downloads_listing_and_uploads_are_audited(env: Env, db: Session) -> None:
-    c, hdr, a = who(env, db, "agent")
+    c, hdr, a = who(env, db, "manager")
     cid = client_for(c, hdr)
     doc = upload(c, hdr, cid).json()
     c.get(f"/api/clients/{cid}/documents")
-    c.get(f"/api/documents/{doc['id']}/content")
+    c.get(f"/api/documents/{doc['id']}/content?acknowledge=true")
     # upload and download are written in the request; the listing is a read, audited later
     sync = [
         r[0]
@@ -280,10 +281,10 @@ def test_filename_sanitised(name: str, expected: str) -> None:
 
 
 def test_hebrew_filename_survives_and_downloads(env: Env, db: Session) -> None:
-    c, hdr, _ = who(env, db, "agent")
+    c, hdr, _ = who(env, db, "manager")
     doc = upload(c, hdr, client_for(c, hdr), name="פוליסה.pdf").json()
     assert doc["filename"] == "פוליסה.pdf"
-    dl = c.get(f"/api/documents/{doc['id']}/content")
+    dl = c.get(f"/api/documents/{doc['id']}/content?acknowledge=true")
     assert "UTF-8''%D7%A4" in dl.headers["content-disposition"]
 
 
@@ -340,11 +341,11 @@ def test_reconcile_reports_orphans_and_missing_and_deletes_nothing(env: Env, db:
 
 # integrity ------------------------------------------------------------------------------------
 def test_tampered_object_is_detected_on_download(env: Env, db: Session) -> None:
-    c, hdr, _ = who(env, db, "agent")
+    c, hdr, _ = who(env, db, "manager")
     doc = upload(c, hdr, client_for(c, hdr)).json()
     key = db.execute(text("SELECT key FROM blob")).scalar_one()
     env.store._objects[key] = b"swapped"  # noqa: SLF001
-    r = c.get(f"/api/documents/{doc['id']}/content")
+    r = c.get(f"/api/documents/{doc['id']}/content?acknowledge=true")
     assert r.status_code == 500 and r.json()["detail"] == "integrity_check_failed"
     assert (
         db.execute(

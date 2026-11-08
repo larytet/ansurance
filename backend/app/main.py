@@ -29,7 +29,7 @@ from app.documents.router import router as documents_router
 from app.flows.router import hook as esign_hook
 from app.flows.router import router as flows_router
 from app.inbox.router import router as inbox_router
-from app.intake.context import IntakeContext
+from app.intake.context import IntakeContext, make_sandbox
 from app.intake.router import router as intake_router
 from app.integrations.calls import require_approved
 from app.integrations.mailbox import ImapMailbox, Mailbox
@@ -164,7 +164,9 @@ def create_app(
     )
     app.state.esign = esign if esign is not None else make_esign(settings)
     app.state.antivirus = antivirus or make_antivirus(settings)
-    app.state.intake = intake or IntakeContext(settings, app.state.blobs, app.state.antivirus, None)
+    app.state.intake = intake or IntakeContext(
+        settings, app.state.blobs, app.state.antivirus, None, make_sandbox(settings)
+    )
     app.include_router(clients_router)
     app.include_router(documents_router)
     app.include_router(inbox_router)

@@ -1,4 +1,8 @@
-"""Render pages from PDF, TIFF and images, clean them up, split multi-page faxes."""
+"""Render pages from PDF, TIFF and images and clean them up. Runs only inside the sandbox.
+
+Nothing here may be imported by the API or the worker: this is the code that reads
+untrusted files (pdfium, Pillow, OpenCV), and it must stay behind the container boundary.
+"""
 
 import io
 from dataclasses import dataclass
@@ -8,23 +12,52 @@ import numpy as np
 import pypdfium2 as pdfium
 from PIL import Image, ImageSequence
 
-MAX_PAGES = 200
+from sandbox.limits import MAX_PAGES, MAX_PIXELS, MAX_TOTAL_PIXELS, LimitExceeded
+
+Image.MAX_IMAGE_PIXELS = MAX_PIXELS  # Pillow refuses anything much larger on its own
 
 
-def render_pages(data: bytes, media_type: str, dpi: int = 200) -> list[Image.Image]:
+def render_pages(
+    data: bytes,
+    media_type: str,
+    dpi: int = 200,
+    max_pages: int = MAX_PAGES,
+    max_pixels: int = MAX_PIXELS,
+    max_total_pixels: int = MAX_TOTAL_PIXELS,
+) -> list[Image.Image]:
+    """Every page as grey scale. Over a limit raises LimitExceeded; it never truncates,
+    because a silently shortened document would be filed as if it were whole."""
+    total = 0
+
+    def admit(width: float, height: float) -> None:
+        nonlocal total
+        pixels = int(width) * int(height)
+        total += pixels
+        if pixels > max_pixels or total > max_total_pixels:
+            raise LimitExceeded("too_many_pixels")
+
     if media_type == "application/pdf":
         pdf = pdfium.PdfDocument(data)
         try:
-            n = min(len(pdf), MAX_PAGES)
-            return [pdf[i].render(scale=dpi / 72).to_pil().convert("L") for i in range(n)]
+            if len(pdf) > max_pages:
+                raise LimitExceeded("too_many_pages")
+            out = []
+            for i in range(len(pdf)):
+                w, h = pdf[i].get_size()  # points: known before anything is rendered
+                admit(w * dpi / 72, h * dpi / 72)
+                out.append(pdf[i].render(scale=dpi / 72).to_pil().convert("L"))
+            return out
         finally:
             pdf.close()
     if media_type in ("image/png", "image/jpeg", "image/tiff"):
-        img = Image.open(io.BytesIO(data))
-        return [
-            f.convert("L")
-            for _, f in zip(range(MAX_PAGES), ImageSequence.Iterator(img), strict=False)
-        ]
+        img = Image.open(io.BytesIO(data))  # header only: the size is known before decoding
+        if getattr(img, "n_frames", 1) > max_pages:
+            raise LimitExceeded("too_many_pages")
+        out = []
+        for frame in ImageSequence.Iterator(img):
+            admit(*frame.size)
+            out.append(frame.convert("L"))
+        return out
     return []
 
 

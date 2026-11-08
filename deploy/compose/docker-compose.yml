@@ -11,6 +11,7 @@ x-api-env: &api-env
   ANS_S3_REGION: us-east-1
   ANS_CLAMD_HOST: clamav
   ANS_LOG_LEVEL: ${ANS_LOG_LEVEL:-INFO}
+  ANS_SANDBOX_URL: http://sandbox:8080
   ANS_PASSWORD_MIN_LENGTH: ${ANS_PASSWORD_MIN_LENGTH:-8}
   ANS_SSO_PROVIDERS: ${ANS_SSO_PROVIDERS:-[]}
 
@@ -73,10 +74,40 @@ services:
       ANS_FAX_DIR: /fax
       ANS_OCR_LANGS: ${ANS_OCR_LANGS:-heb+ara+rus+fra+eng}
     command: ["python", "-m", "app.jobs.worker"]
+    networks: [default, sandbox_net]
     volumes:
       - faxdrop:/fax
     depends_on:
       api: { condition: service_healthy }
+      sandbox: { condition: service_healthy }
+
+  sandbox:
+    # The only place that reads an untrusted PDF or image (DESIGN 8.1). No secrets, no route
+    # out (an internal network the worker also joins), a read-only root, a work directory in
+    # memory, no capabilities, and limits on memory, processes and CPU. It exits after ten
+    # files and is restarted, so nothing a file did to it outlives a small batch.
+    build:
+      context: ../../backend
+      dockerfile: sandbox/Dockerfile
+    restart: always
+    networks: [sandbox_net]
+    user: "10002:10002"
+    read_only: true
+    tmpfs:
+      - /work:size=1g,mode=1777
+      - /tmp:size=64m,mode=1777
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: 3g
+    memswap_limit: 3g
+    pids_limit: 128
+    cpus: 2
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8080/health').status==200 else 1)"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
 
   # ---- optional: docker compose --profile observability up -d ----------------------------
   prometheus:
@@ -219,6 +250,10 @@ services:
       timeout: 10s
       retries: 40
       start_period: 60s
+
+networks:
+  sandbox_net:
+    internal: true  # no route to the outside: a hostile file cannot call out
 
 volumes:
   promdata:

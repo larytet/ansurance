@@ -34,6 +34,7 @@ from app.models import (
 )
 from app.text import build_search
 from tests.conftest import Account, login, make_account
+from tests.sandbox_inline import InlineSandbox
 
 SECRET = "app-secret-123"
 
@@ -237,7 +238,9 @@ class Env:
         )
         self.engine, self.db = engine, db
         self.fake = wa.FakeWhatsApp()
-        self.intake = IntakeContext(self.settings, FakeBlobStore(), FakeAntivirus(), FakeOcr())
+        self.intake = IntakeContext(
+            self.settings, FakeBlobStore(), FakeAntivirus(), FakeOcr(), InlineSandbox()
+        )
         self.app = create_app(self.settings, engine, whatsapp=self.fake, intake=self.intake)
         self.handlers = make_delivery_handlers(self.settings, self.fake)
         self.users: dict[str, tuple[TestClient, dict[str, str], Account]] = {}

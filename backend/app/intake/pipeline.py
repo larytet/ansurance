@@ -21,6 +21,7 @@ from sqlalchemy.orm import Session as Db
 from app.adapters.antivirus import ScannerUnavailable
 from app.audit import chain
 from app.blob.base import BlobRef
+from app.documents import render
 from app.documents.service import (
     CHANNELS,
     DOC_TYPES,
@@ -29,7 +30,6 @@ from app.documents.service import (
     safe_filename,
     sniff_media_type,
 )
-from app.intake import digitize
 from app.intake.attribute import Attribution, attribute
 from app.intake.classify import classify
 from app.intake.context import IntakeContext
@@ -45,6 +45,7 @@ from app.models import (
     IntakeItem,
     User,
 )
+from app.sandbox.client import SandboxRejected, split_on_blank_pages
 
 log = logging.getLogger("ansurance.intake")
 
@@ -197,16 +198,37 @@ def _stage_scan(db: Db, ctx: IntakeContext, item: IntakeItem) -> None:
     _touch(item, "scanned")
 
 
+def _to_manual_review(db: Db, item: IntakeItem, reason: str) -> None:
+    """The sandbox refused the file or broke a rule: a person decides, nothing is shown."""
+    inbox = InboxItem(
+        type="review",
+        role="backoffice",
+        urgency="important",
+        title="Review: file could not be processed safely: " + (item.filename or "file"),
+        detail=f"Refused by the sandbox ({reason}) via {item.channel}. Nothing is shown.",
+    )
+    db.add(inbox)
+    db.flush()
+    item.inbox_item_id, item.route, item.route_reason = inbox.id, "review", f"sandbox: {reason}"
+    _touch(item, "review")
+    chain.append(db, "system", "intake.sandbox_refused", f"intake:{item.id}", {"reason": reason})
+
+
 def _stage_digitize(db: Db, ctx: IntakeContext, item: IntakeItem) -> None:
     blob = db.get(Blob, item.blob_id)
     assert blob is not None  # noqa: S101
-    pages = digitize.render_pages(
-        ctx.blobs.get(_blob_ref(blob)), blob.media_type, ctx.settings.render_dpi
-    )
+    try:
+        rendered = ctx.sandbox.render(
+            ctx.blobs.get(_blob_ref(blob)), blob.media_type, ctx.settings.render_dpi
+        )
+    except SandboxRejected as e:
+        _to_manual_review(db, item, e.reason)
+        return
+    pages = rendered.pages
     if item.page_from is not None and item.page_to is not None:
         pages = pages[item.page_from - 1 : item.page_to]
     elif len(pages) > 1:
-        groups = digitize.split_on_blank_pages(pages)
+        groups = split_on_blank_pages(rendered.blank)
         if len(groups) > 1:  # several documents in one fax: one item each
             for g in groups:
                 child = IntakeItem(
@@ -236,14 +258,13 @@ def _stage_digitize(db: Db, ctx: IntakeContext, item: IntakeItem) -> None:
         return
     if ctx.ocr is None:
         raise RuntimeError("this process has no OCR engine configured")
-    cleaned = [digitize.clean(p) for p in pages]
-    ocr = ctx.ocr.recognize(cleaned)
+    ocr = ctx.ocr.recognize(pages)
     ids = {h.id_number: h.conf for h in find_ids(ocr.words)}
     tokens = policy_tokens(ocr.words)
     second = False
     if _identifiers_are_shaky(ids, ctx.settings.second_pass_below):
         latin = getattr(ctx.ocr, "recognize_latin", None)
-        extra = latin(cleaned) if callable(latin) else None
+        extra = latin(pages) if callable(latin) else None
         if extra is not None:
             second = True
             # two independent readings that agree on a check-digit-valid number are stronger
@@ -382,6 +403,7 @@ def file_document(
     db.flush()
     item.document_id, item.chosen_client_id = doc.id, client.id
     _touch(item, "filed")
+    render.enqueue(db, item.blob_id)
     for member_id in item.entities.get("family", []):
         mid = uuid.UUID(str(member_id))
         exists = db.scalar(

@@ -24,6 +24,7 @@ from app.models import Client, Document, FamilyLink, InboxItem, Insurer, IntakeI
 from app.text import build_search
 from tests.conftest import Account, login, make_account
 from tests.intake_data import samples as S
+from tests.sandbox_inline import InlineSandbox
 
 DAVID, NOA, KID, UNKNOWN = "123456782", "000000026", "000000034", "340000019"
 
@@ -46,7 +47,7 @@ class Env:
         self.settings = settings.model_copy(update={"fax_dir": str(tmp)})
         self.engine, self.db, self.tmp = engine, db, tmp
         self.blobs, self.av, self.fake_ocr = FakeBlobStore(), FakeAntivirus(), FakeOcr()
-        self.ctx = IntakeContext(self.settings, self.blobs, self.av, self.fake_ocr)
+        self.ctx = IntakeContext(self.settings, self.blobs, self.av, self.fake_ocr, InlineSandbox())
         self.handlers = make_handlers(self.ctx)
         self.app = create_app(
             self.settings, engine, blobs=self.blobs, antivirus=self.av, intake=self.ctx
@@ -289,7 +290,7 @@ def test_a_crash_midway_resumes_without_repeating_or_duplicating(
     env: Env, world: dict[str, Any]
 ) -> None:
     class Flaky(FakeOcr):
-        def recognize(self, pages: list[Image.Image]) -> OcrResult:
+        def recognize(self, pages: list[bytes]) -> OcrResult:
             self.calls += 1
             if self.calls == 1:
                 raise RuntimeError("worker killed during OCR")
@@ -335,8 +336,12 @@ def test_the_same_scan_twice_stores_one_original(env: Env, world: dict[str, Any]
     a = env.run(scan(), f"תעודת זהות {DAVID}")
     b = env.run(scan(), f"תעודת זהות {DAVID}")
     assert a.blob_id == b.blob_id and a.id != b.id
-    assert env.db.execute(text("SELECT count(*) FROM blob")).scalar_one() == 1
-    assert len(list(env.blobs.iter_keys())) == 1  # T-M5-7: never duplicated, never deleted
+    # T-M5-7: the original is never duplicated or deleted; the page image the sandbox made
+    # from it is a second, derived object (and also stored once)
+    originals = "SELECT count(*) FROM blob WHERE scan_detail IS DISTINCT FROM 'derived'"
+    assert env.db.execute(text(originals)).scalar_one() == 1
+    assert env.db.execute(text("SELECT count(*) FROM blob")).scalar_one() == 2
+    assert len(list(env.blobs.iter_keys())) == 2
 
 
 # ---- channels ---------------------------------------------------------------------------------
@@ -575,7 +580,7 @@ class TwoPassOcr(FakeOcr):
         super().__init__(primary)
         self.latin, self.latin_calls = latin, 0
 
-    def recognize_latin(self, pages: list[Image.Image]) -> OcrResult | None:
+    def recognize_latin(self, pages: list[bytes]) -> OcrResult | None:
         self.latin_calls += 1
         return self.latin
 

@@ -1,16 +1,14 @@
-"""OCR adapter. Tesseract (local, no data leaves the machine) and a deterministic fake."""
+"""OCR types, the engine contract, a sandboxed engine and a deterministic fake.
 
-import csv
-import io
-import os
-import subprocess  # noqa: S404  (runs the local tesseract binary with fixed arguments)
-import tempfile
+Tesseract itself runs only inside the sandbox (`backend/sandbox/tess.py`): it reads image
+files, so it is a parser of untrusted input like any other.
+"""
+
 from dataclasses import dataclass, field
-from functools import lru_cache
-from pathlib import Path
-from typing import Protocol
+from typing import TYPE_CHECKING, Protocol
 
-from PIL import Image
+if TYPE_CHECKING:
+    from app.sandbox.client import Sandbox
 
 
 @dataclass(frozen=True)
@@ -32,78 +30,29 @@ class OcrResult:
 
 
 class OcrEngine(Protocol):
-    def recognize(self, pages: list[Image.Image]) -> OcrResult: ...
+    def recognize(self, pages: list[bytes]) -> OcrResult: ...
 
 
 class OcrUnavailable(Exception):
     pass
 
 
-@lru_cache(maxsize=1)
-def installed_languages() -> frozenset[str]:
-    try:
-        out = subprocess.run(  # noqa: S603, S607
-            ["tesseract", "--list-langs"], capture_output=True, text=True, timeout=20, check=True
-        ).stdout
-    except (OSError, subprocess.SubprocessError) as e:
-        raise OcrUnavailable(str(e)) from e
-    return frozenset(line.strip() for line in out.splitlines()[1:] if line.strip())
+class SandboxOcr:
+    """Sends page images (PNG) to the sandbox and reads back words and confidences."""
 
+    def __init__(self, sandbox: "Sandbox", langs: str = "heb+ara+rus+fra+eng") -> None:
+        self.sandbox, self.langs = sandbox, langs
 
-class TesseractOcr:
-    """Runs `tesseract` per page and reads word confidences from its TSV output."""
+    def recognize(self, pages: list[bytes]) -> OcrResult:
+        res = self.sandbox.ocr(pages, self.langs)
+        if res is None:
+            raise OcrUnavailable("sandbox returned no text")
+        return res
 
-    def __init__(self, langs: str = "heb+ara+rus+fra+eng", psm: int = 6) -> None:
-        have = installed_languages()
-        chosen = [lang for lang in langs.split("+") if lang in have]
-        if not chosen:
-            raise OcrUnavailable(f"none of {langs} is installed (have {sorted(have)})")
-        self.langs, self.psm = "+".join(chosen), psm
-        self.missing = [lang for lang in langs.split("+") if lang not in have]
-
-    def recognize(self, pages: list[Image.Image]) -> OcrResult:
-        return self._run(pages, self.langs)
-
-    def recognize_latin(self, pages: list[Image.Image]) -> OcrResult | None:
+    def recognize_latin(self, pages: list[bytes]) -> OcrResult | None:
         """Second opinion with the English model only: it reads Latin tokens inside Hebrew
         sentences (policy numbers, IDs) that the mixed model can mangle."""
-        return self._run(pages, "eng") if "eng" in installed_languages() else None
-
-    def _run(self, pages: list[Image.Image], langs: str) -> OcrResult:
-        words: list[Word] = []
-        lines: list[str] = []
-        for n, img in enumerate(pages, start=1):
-            with tempfile.TemporaryDirectory() as d:
-                src = Path(d) / "page.png"
-                img.save(src)
-                proc = subprocess.run(  # noqa: S603, S607
-                    ["tesseract", str(src), "-", "-l", langs, "--psm", str(self.psm), "tsv"],
-                    capture_output=True,
-                    text=True,
-                    timeout=180,
-                    check=False,
-                    env={**os.environ, "OMP_THREAD_LIMIT": "1"},
-                )
-            if proc.returncode != 0:
-                raise OcrUnavailable(proc.stderr.strip()[:300])
-            cur_line, cur_key = [], None
-            for row in csv.DictReader(
-                io.StringIO(proc.stdout), delimiter="\t", quoting=csv.QUOTE_NONE
-            ):
-                text = (row.get("text") or "").strip()
-                if row.get("level") != "5" or not text:
-                    continue
-                conf = max(float(row["conf"]), 0.0) / 100.0
-                words.append(Word(text, conf, n))
-                key = (row["block_num"], row["par_num"], row["line_num"])
-                if cur_key not in (None, key):
-                    lines.append(" ".join(cur_line))
-                    cur_line = []
-                cur_key = key
-                cur_line.append(text)
-            if cur_line:
-                lines.append(" ".join(cur_line))
-        return OcrResult("\n".join(lines), words, len(pages))
+        return self.sandbox.ocr(pages, "eng")
 
 
 class FakeOcr:
@@ -112,7 +61,7 @@ class FakeOcr:
     def __init__(self, *results: OcrResult) -> None:
         self._results, self.calls = list(results), 0
 
-    def recognize(self, pages: list[Image.Image]) -> OcrResult:
+    def recognize(self, pages: list[bytes]) -> OcrResult:
         self.calls += 1
         res = self._results[min(self.calls - 1, len(self._results) - 1)]
         return res

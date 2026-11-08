@@ -52,7 +52,7 @@ pins:
 	cd backend && uv run python ../scripts/check_pins.py
 
 lint: pins
-	cd backend && uv run ruff check . && uv run ruff format --check . && uv run mypy app
+	cd backend && uv run ruff check . && uv run ruff format --check . && uv run mypy app sandbox
 	cd web && npm run lint && npm run typecheck
 
 test-backend:

@@ -19,6 +19,7 @@ from app.integrations.mailbox_poll import poll
 from app.main import make_mailbox
 from app.models import AdapterCall, Client, InboundMessage, InboxItem, IntakeItem, MailSeen, User
 from app.text import build_search
+from tests.sandbox_inline import InlineSandbox
 
 PNG = b"\x89PNG\r\n\x1a\n" + b"\x00" * 64
 
@@ -46,7 +47,7 @@ def mail(
 
 @pytest.fixture
 def ctx(settings: Settings, fresh_db: Engine) -> IntakeContext:
-    return IntakeContext(settings, FakeBlobStore(), FakeAntivirus(), FakeOcr())
+    return IntakeContext(settings, FakeBlobStore(), FakeAntivirus(), FakeOcr(), InlineSandbox())
 
 
 def client(db: Session, email_addr: str = "david@x.il", agent: User | None = None) -> Client:

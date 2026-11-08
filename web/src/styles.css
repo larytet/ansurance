@@ -60,3 +60,7 @@ a.button { display: inline-block; padding: .5rem .9rem; border: 1px solid curren
 .pe-node.role-agent { border-inline-start:6px solid var(--accent); } .pe-node.role-backoffice { border-inline-start:6px solid var(--important); } .pe-node.role-manager { border-inline-start:6px solid var(--urgent); } .pe-node.role-marketing { border-inline-start:6px solid var(--muted); }
 .pe-changes .added { color:var(--accent); } .pe-changes .removed { color:var(--urgent); }
 @media (max-width:700px) { .pe-cols { grid-template-columns:1fr; } }
+
+.doc-pages { display:flex; flex-direction:column; gap:.75rem; margin:.5rem 0; max-width:48rem; }
+.doc-pages img { width:100%; height:auto; border:1px solid var(--line); background:#fff; }
+.warn-box { border:1px solid var(--important); border-radius:4px; padding:.5rem .75rem; margin:.4rem 0; }

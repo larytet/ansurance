@@ -7,10 +7,12 @@ from typing import Any
 
 from sqlalchemy.orm import Session as Db
 
+from app.documents.render import render_blob
 from app.documents.service import RejectedUpload
 from app.intake import pipeline
 from app.intake.context import IntakeContext
 from app.jobs.queue import Handler
+from app.models import Blob
 
 log = logging.getLogger("ansurance.intake")
 FAX_SUFFIXES = {".pdf", ".tif", ".tiff", ".png", ".jpg", ".jpeg"}
@@ -20,7 +22,12 @@ def make_handlers(ctx: IntakeContext) -> dict[str, Handler]:
     def run(db: Db, payload: dict[str, Any]) -> None:
         pipeline.run(db, ctx, uuid.UUID(payload["item_id"]))
 
-    return {"intake.run": run}
+    def render(db: Db, payload: dict[str, Any]) -> None:
+        blob = db.get(Blob, uuid.UUID(payload["blob_id"]))
+        if blob is not None and blob.scan_status == "clean":
+            render_blob(db, ctx.blobs, ctx.sandbox, blob, ctx.settings.render_dpi)
+
+    return {"intake.run": run, "document.render": render}
 
 
 def poll_fax_folder(db: Db, ctx: IntakeContext) -> int:

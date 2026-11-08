@@ -249,6 +249,33 @@ class Blob(Base):
     created_at: Mapped[datetime] = _now()
 
 
+class BlobRender(Base):
+    """One sandbox run over one stored file: the page images users see (DESIGN 8.1).
+    Keyed by the file's hash and the tool version, so a better engine adds a row and the
+    original is never touched."""
+
+    __tablename__ = "blob_render"
+    __table_args__ = (UniqueConstraint("blob_id", "tool", name="uq_blob_render"),)
+    id: Mapped[uuid.UUID] = _pk()
+    blob_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("blob.id"), nullable=False, index=True)
+    tool: Mapped[str] = mapped_column(String(80), nullable=False)
+    status: Mapped[str] = mapped_column(String(12), nullable=False)  # ready | refused
+    pages: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    reason: Mapped[str | None] = mapped_column(String(60))
+    created_at: Mapped[datetime] = _now()
+
+
+class BlobPage(Base):
+    __tablename__ = "blob_page"
+    __table_args__ = (UniqueConstraint("render_id", "page_no", name="uq_blob_page"),)
+    id: Mapped[uuid.UUID] = _pk()
+    render_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("blob_render.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    page_no: Mapped[int] = mapped_column(Integer, nullable=False)
+    image_blob_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("blob.id"), nullable=False)
+
+
 class Document(Base):
     __tablename__ = "document"
     id: Mapped[uuid.UUID] = _pk()

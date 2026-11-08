@@ -10,6 +10,7 @@ from app.adapters.antivirus import Antivirus, ScannerUnavailable
 from app.audit import chain
 from app.blob.base import BlobStore
 from app.config import Settings
+from app.documents import render
 from app.models import Blob, Client, Document
 
 DOC_TYPES = {
@@ -135,6 +136,8 @@ def ingest(
         f"document:{doc.id}",
         {"client": str(client.id), "sha256": blob.sha256, "scan": blob.scan_status},
     )
+    if blob.scan_status == "clean":
+        render.enqueue(db, blob.id)  # the page images users will see, made in the sandbox
     if blob.scan_status == "infected":
         chain.append(
             db,

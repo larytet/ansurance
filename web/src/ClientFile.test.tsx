@@ -13,7 +13,7 @@ const doc = (id: string, over: object = {}) => ({
   scan_status: "clean", channel: "upload", received_at: "2026-11-06T10:00:00Z", retention_until: "2033-11-06", legal_hold: false, ...over,
 });
 
-const ALL = ["client.read", "policy.read", "document.read", "document.write", "consent.read", "consent.write", "process.read", "process.start", "inbox.read"];
+const ALL = ["client.read", "policy.read", "document.read", "document.write", "document.download_original", "consent.read", "consent.write", "process.read", "process.start", "inbox.read"];
 const base = (caps = ALL, extra: Handler[] = [], roles = ["backoffice"]) => fakeServer(
   (_m, p) => (p === "/api/auth/me" ? { json: ME(roles, caps) } : undefined),
   (_m, p) => (p.startsWith("/api/inbox?") ? { json: { items: [], next: null, read_only: false } } : p === "/api/inbox/counts" ? { json: { open: 0, urgent: 0, done_today: 0 } } : undefined),
@@ -33,6 +33,8 @@ async function openFile(s: ReturnType<typeof base>) {
   await userEvent.click(await screen.findByRole("button", { name: "David Cohen" }));
   await screen.findByRole("heading", { name: /David Cohen/ });
 }
+
+const firstButton = async (name: string) => (await screen.findAllByRole("button", { name }))[0] as HTMLElement;
 
 beforeEach(() => { localStorage.clear(); });
 
@@ -56,16 +58,58 @@ describe("client file", () => {
     expect(li).toHaveTextContent("2027-03-01");
   });
 
-  it("shows each document's scan status, offers download only for clean ones, and marks restricted", async () => {
+  it("shows each document's scan status, offers viewing only for clean ones, and marks restricted", async () => {
     await openFile(base());
     const rows = (await screen.findByText("a.pdf")).closest("ul") as HTMLElement;
     const row = (name: string) => within(rows).getByText(name).closest("li") as HTMLElement;
-    expect(within(row("a.pdf")).getByRole("link", { name: "הורדה" })).toHaveAttribute("href", "/api/documents/a/content");
+    expect(within(row("a.pdf")).getByRole("button", { name: "צפייה" })).toBeInTheDocument();
+    expect(within(row("a.pdf")).queryByRole("link")).toBeNull(); // the original is never a plain link
     expect(within(row("medical.pdf")).getByText("מוגבל")).toBeInTheDocument();
-    expect(within(row("bad.pdf")).queryByRole("link")).toBeNull(); // a quarantined file is never offered
+    expect(within(row("bad.pdf")).queryByRole("button")).toBeNull(); // a quarantined file is never offered
     expect(within(row("bad.pdf")).getByText("בהסגר: נגוע")).toBeInTheDocument();
-    expect(within(row("wait.pdf")).queryByRole("link")).toBeNull();
+    expect(within(row("wait.pdf")).queryByRole("button")).toBeNull();
     expect(within(row("wait.pdf")).getByText("ממתין לסריקת וירוסים")).toBeInTheDocument();
+  });
+
+  it("shows the server-made page images, not the file", async () => {
+    const s = base(ALL, [(m, p) => (m === "GET" && p === "/api/documents/a/pages" ? { json: { status: "ready", pages: 2, reason: null } } : undefined)]);
+    await openFile(s);
+    await userEvent.click(await firstButton("צפייה"));
+    const imgs = await screen.findAllByRole("img");
+    expect(imgs.map((i) => i.getAttribute("src"))).toEqual(["/api/documents/a/pages/1", "/api/documents/a/pages/2"]);
+    expect(imgs[0]).toHaveAttribute("alt", "עמוד 1");
+    expect(document.querySelector("iframe, embed, object")).toBeNull();
+  });
+
+  it("says when the sandbox refused a file, and shows nothing from it", async () => {
+    const s = base(ALL, [(m, p) => (m === "GET" && p === "/api/documents/a/pages" ? { json: { status: "refused", pages: 0, reason: "too_many_pixels" } } : undefined)]);
+    await openFile(s);
+    await userEvent.click(await firstButton("צפייה"));
+    expect(await screen.findByRole("alert")).toHaveTextContent("לא ניתן היה לקרוא את הקובץ בבטחה");
+    expect(screen.queryByRole("img")).toBeNull();
+  });
+
+  it("waits while the page images are being prepared", async () => {
+    const s = base(ALL, [(m, p) => (m === "GET" && p === "/api/documents/a/pages" ? { json: { status: "pending", pages: 0, reason: null } } : undefined)]);
+    await openFile(s);
+    await userEvent.click(await firstButton("צפייה"));
+    expect(await screen.findByRole("status")).toHaveTextContent("מכין את תמונות העמודים");
+  });
+
+  it("downloads the original only after the warning, and the link carries the acknowledgement", async () => {
+    await openFile(base());
+    await userEvent.click(await firstButton("הורדת המקור"));
+    const box = await screen.findByRole("alertdialog");
+    expect(box).toHaveTextContent("אינו מהימן");
+    expect(within(box).getByRole("link", { name: "הורדה בכל זאת" })).toHaveAttribute("href", "/api/documents/a/content?acknowledge=true");
+    await userEvent.click(within(box).getByRole("button", { name: "ביטול" }));
+    expect(screen.queryByRole("alertdialog")).toBeNull();
+  });
+
+  it("does not offer the original to a role without the capability", async () => {
+    await openFile(base(ALL.filter((c) => c !== "document.download_original"), [], ["agent"]));
+    await screen.findAllByRole("button", { name: "צפייה" });
+    expect(screen.queryByRole("button", { name: "הורדת המקור" })).toBeNull();
   });
 
   it("uploads a document with the chosen type", async () => {

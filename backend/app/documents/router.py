@@ -13,7 +13,7 @@ from app.blob.base import BlobRef, BlobStore, IntegrityError
 from app.clients.access import can_see_restricted, get_visible
 from app.config import Settings
 from app.deps import Principal, get_db, get_settings_dep, require
-from app.documents import service
+from app.documents import render, service
 from app.models import Blob, Document
 
 router = APIRouter(prefix="/api")
@@ -122,13 +122,66 @@ def get_document(
     return _doc_dict(doc, blob)
 
 
-@router.get("/documents/{doc_id}/content")
-def download(
+@router.get("/documents/{doc_id}/pages")
+def pages(
     doc_id: uuid.UUID,
     request: Request,
     p: Principal = Depends(require("document.read")),
     db: Db = Depends(get_db, scope="function"),
+) -> dict[str, Any]:
+    """The page images made in the sandbox: what a user sees instead of the file itself."""
+    doc, blob = _load(db, p, doc_id)
+    if blob.scan_status != "clean":
+        raise HTTPException(409, f"scan_{blob.scan_status}")
+    row = render.latest(db, blob.id)
+    if row is None:
+        render.enqueue(db, blob.id)
+        return {"status": "pending", "pages": 0, "reason": None}
+    return {"status": row.status, "pages": row.pages, "reason": row.reason}
+
+
+@router.get("/documents/{doc_id}/pages/{page_no}")
+def page_image(
+    doc_id: uuid.UUID,
+    page_no: int,
+    request: Request,
+    p: Principal = Depends(require("document.read")),
+    db: Db = Depends(get_db, scope="function"),
 ) -> Response:
+    doc, blob = _load(db, p, doc_id)
+    row = render.latest(db, blob.id)
+    img = render.page_blob(db, row, page_no) if row is not None and row.status == "ready" else None
+    if img is None:
+        raise HTTPException(404, "not_found")
+    store: BlobStore = request.app.state.blobs
+    try:
+        data = store.get(BlobRef(img.sha256, img.size, img.bucket, img.key))
+    except IntegrityError as e:
+        raise HTTPException(500, "integrity_check_failed") from e
+    request.app.state.read_audit.record(
+        str(p.user.id), "document.view", f"document:{doc.id}", {"page": page_no}
+    )
+    return Response(
+        data,
+        media_type="image/png",
+        headers={
+            "x-content-type-options": "nosniff",
+            "content-security-policy": "default-src 'none'; img-src 'self'; sandbox",
+            "cache-control": "private, no-store",
+        },
+    )
+
+
+@router.get("/documents/{doc_id}/content")
+def download(
+    doc_id: uuid.UUID,
+    request: Request,
+    acknowledge: bool = False,
+    p: Principal = Depends(require("document.download_original")),
+    db: Db = Depends(get_db, scope="function"),
+) -> Response:
+    """The original file exactly as it arrived. Never opened in the browser, only downloaded,
+    and only after the person has been told it is untrusted (acknowledge=true)."""
     doc, blob = _load(db, p, doc_id)
     if blob.scan_status != "clean":
         chain.append(
@@ -140,6 +193,8 @@ def download(
         )
         db.commit()
         raise HTTPException(409, f"scan_{blob.scan_status}")
+    if not acknowledge:
+        raise HTTPException(409, "warning_required")
     store: BlobStore = request.app.state.blobs
     try:
         data = store.get(BlobRef(blob.sha256, blob.size, blob.bucket, blob.key))
@@ -150,11 +205,15 @@ def download(
         db.commit()
         raise HTTPException(500, "integrity_check_failed") from e
     chain.append(
-        db, str(p.user.id), "document.download", f"document:{doc.id}", {"sha256": blob.sha256}
+        db,
+        str(p.user.id),
+        "document.download",
+        f"document:{doc.id}",
+        {"sha256": blob.sha256, "warning_acknowledged": True},
     )
     return Response(
         data,
-        media_type=blob.media_type,
+        media_type="application/octet-stream",  # never a type the browser would open itself
         headers={
             "content-disposition": f"attachment; filename*=UTF-8''{quote(doc.original_filename)}",
             "x-content-type-options": "nosniff",

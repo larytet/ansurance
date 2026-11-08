@@ -45,7 +45,8 @@ test("open a client file, upload a document, record consent, start a process", a
   const row = page.locator("li[data-scan]", { hasText: `policy-${stamp}.pdf` });
   await expect(row).toBeVisible();
   await expect(row).toHaveAttribute("data-scan", "clean");
-  const href = await row.getByRole("link", { name: "הורדה" }).getAttribute("href");
+  await row.getByRole("button", { name: "הורדת המקור" }).click();
+  const href = await row.getByRole("link", { name: "הורדה בכל זאת" }).getAttribute("href");
   const body = await page.evaluate(async (h) => (await (await fetch(h!)).text()), href);
   expect(body).toContain(`% ${stamp}`); // the exact bytes come back
 

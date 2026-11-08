@@ -5,6 +5,7 @@ import {
 import { type Key } from "../i18n";
 import { useUi } from "../ui";
 import { ClientLink } from "./ClientLink";
+import { DocumentViewer } from "./DocumentViewer";
 import { Messages } from "./Messages";
 import { Pension } from "./Pension";
 import { ProcessRun } from "./ProcessRun";
@@ -29,6 +30,8 @@ export function ClientFile({ clientId, onBack }: { clientId: string; onBack: () 
   const [source, setSource] = useState("");
   const [startKey, setStartKey] = useState("");
   const [openProc, setOpenProc] = useState<string | null>(null);
+  const [viewDoc, setViewDoc] = useState<string | null>(null);
+  const [warnDoc, setWarnDoc] = useState<string | null>(null);
 
   const can = (c: string) => !!me?.capabilities.includes(c);
 
@@ -128,7 +131,29 @@ export function ClientFile({ clientId, onBack }: { clientId: string; onBack: () 
                 {d.restricted && <span className="badge"> {tr("restricted")}</span>}
                 {d.legal_hold && <span className="badge"> {tr("legalHold")}</span>}
                 <span className={`scan ${d.scan_status}`}> {tr(`scan_${d.scan_status}` as Key)}</span>
-                {d.scan_status === "clean" && <> · <a href={`/api/documents/${d.id}/content`}>{tr("download")}</a></>}
+                {d.scan_status === "clean" && (
+                  <>
+                    {" · "}
+                    <button type="button" className="link" aria-expanded={viewDoc === d.id}
+                      onClick={() => setViewDoc(viewDoc === d.id ? null : d.id)}>
+                      {tr(viewDoc === d.id ? "hideDoc" : "viewDoc")}
+                    </button>
+                    {can("document.download_original") && (
+                      <>{" · "}<button type="button" className="link" onClick={() => setWarnDoc(warnDoc === d.id ? null : d.id)}>
+                        {tr("downloadOriginal")}
+                      </button></>
+                    )}
+                  </>
+                )}
+                {warnDoc === d.id && (
+                  <div role="alertdialog" aria-label={tr("downloadOriginal")} className="warn-box">
+                    <p>{tr("originalWarning")}</p>
+                    <a href={`/api/documents/${d.id}/content?acknowledge=true`} onClick={() => setWarnDoc(null)}>{tr("downloadAnyway")}</a>
+                    {" · "}
+                    <button type="button" className="link" onClick={() => setWarnDoc(null)}>{tr("cancel")}</button>
+                  </div>
+                )}
+                {viewDoc === d.id && <DocumentViewer docId={d.id} />}
               </li>
             ))}
           </ul>

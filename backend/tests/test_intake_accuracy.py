@@ -8,6 +8,7 @@ Eight workers process the queue concurrently, which also exercises SKIP LOCKED.
 
 import json
 import random
+import subprocess
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
@@ -22,15 +23,17 @@ from app.ids import is_valid_israeli_id
 from app.intake import pipeline
 from app.intake.context import IntakeContext
 from app.intake.handlers import make_handlers
-from app.intake.ocr import OcrUnavailable, TesseractOcr, installed_languages
+from app.intake.ocr import SandboxOcr
 from app.jobs import queue
 from app.models import Client, Insurer, IntakeItem, Policy
+from app.sandbox.client import Limits, ProcessSandbox
 from app.text import build_search
+from sandbox.tess import installed_languages
 from tests.intake_data import samples as S
 
 try:
     HAVE_OCR = {"heb", "eng"} <= installed_languages()
-except OcrUnavailable:
+except (OSError, subprocess.SubprocessError):
     HAVE_OCR = False
 
 pytestmark = [
@@ -129,8 +132,8 @@ def test_pipeline_accuracy_with_real_ocr(
         two = S.invoice(clients[n].id_number) + [f"ת.ז נוספת {clients[n + 5].id_number}"]
         cases.append((f"two-{n}", S.png(S.render(two, seed=130 + n)), None, {"review"}))
 
-    ocr = TesseractOcr("heb+eng")
-    ctx = IntakeContext(settings, FakeBlobStore(), FakeAntivirus(), ocr)
+    box = ProcessSandbox(Limits())
+    ctx = IntakeContext(settings, FakeBlobStore(), FakeAntivirus(), SandboxOcr(box, "heb+eng"), box)
     handlers = make_handlers(ctx)
     by_name: dict[str, tuple[str | None, set[str]]] = {}
     for name, data, expected, states in cases:

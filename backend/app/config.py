@@ -79,6 +79,13 @@ class Settings(BaseSettings):
     fax_dir: str = ""  # watched drop folder; empty disables the fax channel
     fax_poll_seconds: int = 30
     render_dpi: int = 200
+    # sandbox for untrusted files (DESIGN 8.1)
+    sandbox_runner: str = "container"  # "container" (a separate service) or "process" (dev only)
+    sandbox_url: str = "http://sandbox:8080"
+    sandbox_timeout_s: int = 180
+    sandbox_memory_mb: int = 2048
+    sandbox_max_pages: int = 200
+    sandbox_max_pixels: int = 40_000_000
     # integrations: an adapter runs only if it is both configured and on the approved list
     approved_adapters: list[str] = ["whatsapp", "imap", "agency", "esign", "translate", "smtp"]
     whatsapp_phone_id: str = ""

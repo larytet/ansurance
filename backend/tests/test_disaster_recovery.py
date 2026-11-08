@@ -199,7 +199,7 @@ def test_the_restored_system_has_the_data_and_users_can_log_in(restored: dict[st
     assert [x["id"] for x in found] == [restored["cid"]]
     docs = c.get(f"/api/clients/{restored['cid']}/documents").json()
     assert [d["id"] for d in docs] == [restored["doc"]["id"]]  # type: ignore[index]
-    dl = c.get(f"/api/documents/{restored['doc']['id']}/content")  # type: ignore[index]
+    dl = c.get(f"/api/documents/{restored['doc']['id']}/content?acknowledge=true")  # type: ignore[index]
     assert dl.status_code == 200
     assert hashlib.sha256(dl.content).hexdigest() == hashlib.sha256(restored["pdf"]).hexdigest()  # type: ignore[arg-type]
     v = c.get("/api/audit/verify").json()
