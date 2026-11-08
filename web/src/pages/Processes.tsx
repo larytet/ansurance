@@ -65,7 +65,7 @@ function Diagram({ def, lang }: { def: Definition; lang: "he" | "en" }) {
         return (
           <g key={s.id} data-stage={s.id} transform={`translate(${p.x} ${p.y})`}>
             <title>{name}</title>
-            <rect width={BOX_W} height={BOX_H} rx="8" fill="none" stroke="currentColor" strokeWidth="1.5" />
+            <rect width={BOX_W} height={BOX_H} rx="8" stroke="currentColor" strokeWidth="1.5" />
             <text x={BOX_W / 2} y={BOX_H / 2 - 4} textAnchor="middle" fontSize="12">{name.length > 24 ? `${name.slice(0, 23)}…` : name}</text>
             <text x={BOX_W / 2} y={BOX_H / 2 + 14} textAnchor="middle" fontSize="10" opacity="0.7">{tr(`role.${s.role}` as Key)}</text>
           </g>

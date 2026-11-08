@@ -37,8 +37,8 @@ button.link { border:0; background:none; color:var(--accent); padding:0; text-de
 a.button { display: inline-block; padding: .5rem .9rem; border: 1px solid currentColor; border-radius: .4rem; text-decoration: none; }
 .setup-key { font-size: 1.1rem; letter-spacing: .08em; word-break: break-all; } .recovery { columns: 2; list-style: none; padding: 0; }
 
-.diagram-box { overflow-x: auto; border: 1px solid currentColor; border-radius: 8px; padding: 0.75rem; margin: 0.5rem 0; }
-.diagram { color: inherit; max-width: none; }
+.diagram-box { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; padding: 0.75rem; margin: 0.5rem 0; }
+.diagram { color: var(--fg); max-width: none; } .diagram text { fill: var(--fg); } .diagram rect { fill: var(--bg); stroke: var(--fg); }
 
 .strip { position:relative; display:flex; height:28px; align-items:stretch; gap:1px; border:1px solid var(--line); border-radius:6px; padding:2px; margin:.5rem 0 0; touch-action:none; overflow:hidden; }
 .strip:focus-visible { outline:2px solid var(--accent); }
