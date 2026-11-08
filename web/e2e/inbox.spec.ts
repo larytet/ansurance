@@ -26,7 +26,9 @@ test("sign in, see Inbox items, act on them, switch language, sign out", async (
 
   // two Inbox items created through the API with the browser's own session
   const csrf = await page.evaluate(async () => (await (await fetch("/api/auth/me")).json()).csrf as string);
-  for (const [title, urgency] of [[kyc, "urgent"], [weeklyTitle, "normal"]]) {
+  // filler so the list is longer than the Lens window (a fresh stack has none), then the two under test
+  const filler = Array.from({ length: 22 }, (_, i): [string, string] => [`Filler ${stamp} ${i}`, "normal"]);
+  for (const [title, urgency] of [...filler, [kyc, "urgent"], [weeklyTitle, "normal"]]) {
     const r = await page.evaluate(async ([t, u, c]) => {
       const res = await fetch("/api/inbox", { method: "POST", headers: { "content-type": "application/json", "x-csrf-token": c! },
         body: JSON.stringify({ type: "approval", role: "manager", title: t, urgency: u }) });
@@ -55,8 +57,7 @@ test("sign in, see Inbox items, act on them, switch language, sign out", async (
   await expect(urgent).toBeVisible();
   await expect(page.locator("li.item", { hasText: weeklyTitle })).toHaveCount(0); // not urgent
   await page.getByRole("button", { name: "הכול" }).click();
-  // until the full list arrives the screen still holds the urgent-only one: wait for its "Load more" (the live inbox has over fifty open items)
-  await expect(page.getByRole("button", { name: "טען עוד" })).toBeVisible();
+  // until the full list arrives the screen still holds the shorter urgent-only one; the count below waits for it
   // a long inbox is shown through the Lens: an item outside the window is a thin bar, click it to bring it in
   const bar = page.locator(`li.squashed button[aria-label="${weeklyTitle}"]`);
   await expect(page.locator("li.item")).toHaveCount(20); // the full list has loaded: twenty in the lens window
