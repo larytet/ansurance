@@ -136,6 +136,17 @@ describe("Integrations, Settings and Excel join", () => {
     expect(document.documentElement.dataset.theme).toBe("dark");
   });
 
+  it("settings lists the open source notices with the attribution a licence asks for", async () => {
+    mount(server(["agent"], ["client.read"]).fetcher);
+    await userEvent.click(await screen.findByRole("button", { name: "הגדרות" }));
+    const notices = await screen.findByRole("region", { name: "הודעות קוד פתוח" });
+    expect(within(notices).getByRole("link", { name: "React Flow" })).toHaveAttribute("href", "https://reactflow.dev");
+    expect(within(notices).getByText(/רכיבים/)).toBeInTheDocument();
+    await userEvent.click(within(notices).getByText(/רכיבים/));
+    expect(within(notices).getByText("react")).toBeInTheDocument(); // a shipped component and its licence are listed
+    expect(within(notices).getAllByText("MIT").length).toBeGreaterThan(5);
+  });
+
   it("excel join is for those who may use it, sends the files with the CSRF token and downloads the result", async () => {
     mount(server(["backoffice"], ["excel.use"]).fetcher);
     const seen: { url: string; csrf: string; keys: string[] }[] = [];

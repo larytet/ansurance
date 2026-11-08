@@ -1,0 +1,123 @@
+# Licence policy and the owner's decisions (TESTPLAN L-1..L-8). Read by scripts/licenses.py.
+# A class decision here is a rule; an entry under `exceptions`, `network_licences` and `terms`
+# is a decision about one component and carries who approved it, when and why. An entry with an
+# empty `approved_by` is a proposal: the normal build accepts it, a release (`check --release`)
+# does not.
+allowed: [MIT, MIT-0, BSD-2-Clause, BSD-3-Clause, 0BSD, Apache-2.0, ISC, PSF-2.0, Python-2.0, Unlicense, CC0-1.0, Zlib, BlueOak-1.0.0, HPND, MIT-CMU, X11, curl, ICU, LicenseRef-PublicDomain, MPL-2.0, CC-BY-4.0, OFL-1.1]
+refused: [UNKNOWN, SSPL-1.0, BUSL-1.1, CC-BY-NC-4.0, CC-BY-NC-SA-4.0, Elastic-2.0, Commons-Clause]
+# everything else (LGPL, GPL, AGPL, a named licence not listed) is "needs review"
+max_review_age_days: 180
+review:
+  signed_by: ""     # who read this list, and
+  date: ""          # on what day (L-8)
+# Needs-review licences that ship, one entry each. `approved_by` and `approved_on` are the
+# owner's signature. Everything below is PROPOSED by the review until it is signed.
+exceptions:
+  - component: psycopg
+    ecosystem: python
+    licence: LGPL-3.0-only
+    proposal: allow
+    reason: >
+      The PostgreSQL driver, used unmodified as a library imported by our code. The LGPL lets a
+      program use the library without becoming LGPL itself, provided the licence text ships,
+      the library can be replaced (it is a normal installed package, pinned in uv.lock) and
+      we do not modify it. Alternatives with permissive licences exist (asyncpg, pg8000) at
+      the cost of a rewrite of the database layer.
+    approved_by: ""
+    approved_on: ""
+  - component: psycopg-binary
+    ecosystem: python
+    licence: LGPL-3.0-only
+    proposal: allow
+    reason: The compiled part of the same driver (bundles libpq, PostgreSQL licence). Same conditions as psycopg.
+    approved_by: ""
+    approved_on: ""
+
+# Licences that bind a service you run for users (AGPL, SSPL): running modified software for
+# users can oblige us to offer them the source (L-4).
+network_licences:
+  - name: MinIO server and mc client
+    licence: AGPL-3.0
+    where: deploy/objectstore/Dockerfile (built from the upstream commit, unmodified)
+    proposal: >
+      Keep, unmodified, as a separate service reached only over the S3 protocol; never patch
+      it. Unmodified use creates no duty to publish our code. Reassess if a patch is ever
+      needed. Fallbacks behind the same BlobStore interface: Garage or SeaweedFS (D11), or
+      Amazon S3 in the cloud profile where MinIO is not used at all.
+    approved_by: ""
+    approved_on: ""
+  - name: Grafana
+    licence: AGPL-3.0
+    where: docker-compose profile `observability` (optional, official image, unmodified)
+    proposal: Keep optional and unmodified. Not part of the default deployment.
+    approved_by: ""
+    approved_on: ""
+
+# Terms rather than licences (L-5): services, models, data, attribution.
+terms:
+  - name: WhatsApp Business Platform (Meta)
+    kind: service
+    note: >
+      Commercial terms: per-conversation pricing, template approval, opt-in rules, the business
+      policy. Not a software licence. The adapter is behind `approved_adapters` and off until
+      configured; the agency must hold its own business account.
+    approved_by: ""
+    approved_on: ""
+  - name: Tesseract OCR and its language models (tessdata)
+    kind: engine
+    note: Apache-2.0, runs locally, no data leaves the machine. Models are Apache-2.0. No per-seat limit.
+    approved_by: ""
+    approved_on: ""
+  - name: Translation engine
+    kind: service
+    note: >
+      No real engine is connected (a fake is used). A hosted engine would send client text
+      to a third party: its terms (data use, retention, price per character) must be read
+      before it is switched on. Marked "not decided".
+    approved_by: ""
+    approved_on: ""
+  - name: React Flow free edition (@xyflow/react, MIT)
+    kind: attribution
+    note: >
+      The MIT library asks that the small "React Flow" attribution stay visible in the editor;
+      it does, and a test checks it. The paid Pro edition would remove the need; not needed.
+    approved_by: ""
+    approved_on: ""
+  - name: ClamAV engine and signature databases
+    kind: engine
+    note: >
+      Engine GPL-2.0, run as a separate container and used over a socket. Signature databases
+      are downloaded from the ClamAV mirrors under their terms (free use; a private mirror is
+      recommended for many installations).
+    approved_by: ""
+    approved_on: ""
+  - name: PDFium (inside pypdfium2)
+    kind: engine
+    note: BSD-3-Clause and Apache-2.0 components; runs only in the sandbox image.
+    approved_by: ""
+    approved_on: ""
+  - name: Fonts, icons and test data
+    kind: data
+    note: >
+      The web app ships no web fonts and no icon set (system fonts, text and CSS only). The
+      DejaVu fonts used by the tests to draw synthetic scans (Bitstream Vera licence, free
+      to use) are not shipped. Test data is synthetic. Mermaid Live (the "Edit in Mermaid
+      Live" link) is a third-party site opened by the user and is not a dependency.
+    approved_by: ""
+    approved_on: ""
+
+# Operating-system packages inside the images (Debian and Alpine base images, apt and apk):
+# copyleft licences (GPL, LGPL) belong to separate programs that our code does not link to.
+# The recorded list per image is in docs/licenses-images.json.
+system_packages:
+  rule: >
+    GPL, LGPL and similar licences on operating-system packages are accepted as separate
+    programs, not linked into our code and not modified. Anything else found in an image
+    (a refused licence) fails the check.
+  approved_by: ""
+  approved_on: ""
+
+attributions:
+  - name: React Flow
+    text: Process editor built with React Flow (@xyflow/react), MIT licence.
+    url: https://reactflow.dev

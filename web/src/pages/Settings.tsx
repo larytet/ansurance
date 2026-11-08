@@ -2,6 +2,7 @@ import { type FormEvent, useState } from "react";
 import { ApiError } from "../api";
 import { LANGS, LANG_NAMES, type Key, type Lang } from "../i18n";
 import { useUi } from "../ui";
+import { Notices } from "./Notices";
 
 function ChangePassword() {
   const { api, tr } = useUi();
@@ -53,6 +54,7 @@ export function Settings() {
       {me.auth_mode === "local" && <ChangePassword />}
       <h2>{tr("capabilities")}</h2>
       <ul className="caps">{me.capabilities.map((c) => <li key={c}><code>{c}</code></li>)}</ul>
+      <Notices />
     </section>
   );
 }

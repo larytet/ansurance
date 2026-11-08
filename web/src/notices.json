@@ -1,0 +1,515 @@
+{
+ "attributions": [
+  {
+   "name": "React Flow",
+   "text": "Process editor built with React Flow (@xyflow/react), MIT licence.",
+   "url": "https://reactflow.dev"
+  }
+ ],
+ "components": [
+  {
+   "name": "@types/d3-color",
+   "version": "3.1.3",
+   "licence": "MIT",
+   "ecosystem": "npm"
+  },
+  {
+   "name": "@types/d3-drag",
+   "version": "3.0.7",
+   "licence": "MIT",
+   "ecosystem": "npm"
+  },
+  {
+   "name": "@types/d3-interpolate",
+   "version": "3.0.4",
+   "licence": "MIT",
+   "ecosystem": "npm"
+  },
+  {
+   "name": "@types/d3-selection",
+   "version": "3.0.12",
+   "licence": "MIT",
+   "ecosystem": "npm"
+  },
+  {
+   "name": "@types/d3-transition",
+   "version": "3.0.9",
+   "licence": "MIT",
+   "ecosystem": "npm"
+  },
+  {
+   "name": "@types/d3-zoom",
+   "version": "3.0.9",
+   "licence": "MIT",
+   "ecosystem": "npm"
+  },
+  {
+   "name": "@types/prop-types",
+   "version": "15.7.15",
+   "licence": "MIT",
+   "ecosystem": "npm"
+  },
+  {
+   "name": "@types/react",
+   "version": "18.3.31",
+   "licence": "MIT",
+   "ecosystem": "npm"
+  },
+  {
+   "name": "@types/react-dom",
+   "version": "18.3.7",
+   "licence": "MIT",
+   "ecosystem": "npm"
+  },
+  {
+   "name": "@xyflow/react",
+   "version": "12.12.1",
+   "licence": "MIT",
+   "ecosystem": "npm"
+  },
+  {
+   "name": "@xyflow/system",
+   "version": "0.0.84",
+   "licence": "MIT",
+   "ecosystem": "npm"
+  },
+  {
+   "name": "classcat",
+   "version": "5.0.5",
+   "licence": "MIT",
+   "ecosystem": "npm"
+  },
+  {
+   "name": "csstype",
+   "version": "3.2.3",
+   "licence": "MIT",
+   "ecosystem": "npm"
+  },
+  {
+   "name": "d3-color",
+   "version": "3.1.1",
+   "licence": "ISC",
+   "ecosystem": "npm"
+  },
+  {
+   "name": "d3-dispatch",
+   "version": "3.0.2",
+   "licence": "ISC",
+   "ecosystem": "npm"
+  },
+  {
+   "name": "d3-drag",
+   "version": "3.0.1",
+   "licence": "ISC",
+   "ecosystem": "npm"
+  },
+  {
+   "name": "d3-ease",
+   "version": "3.0.2",
+   "licence": "BSD-3-Clause",
+   "ecosystem": "npm"
+  },
+  {
+   "name": "d3-interpolate",
+   "version": "3.0.2",
+   "licence": "ISC",
+   "ecosystem": "npm"
+  },
+  {
+   "name": "d3-selection",
+   "version": "3.0.1",
+   "licence": "ISC",
+   "ecosystem": "npm"
+  },
+  {
+   "name": "d3-timer",
+   "version": "3.0.2",
+   "licence": "ISC",
+   "ecosystem": "npm"
+  },
+  {
+   "name": "d3-transition",
+   "version": "3.0.2",
+   "licence": "ISC",
+   "ecosystem": "npm"
+  },
+  {
+   "name": "d3-zoom",
+   "version": "3.0.1",
+   "licence": "ISC",
+   "ecosystem": "npm"
+  },
+  {
+   "name": "js-tokens",
+   "version": "4.0.0",
+   "licence": "MIT",
+   "ecosystem": "npm"
+  },
+  {
+   "name": "loose-envify",
+   "version": "1.4.0",
+   "licence": "MIT",
+   "ecosystem": "npm"
+  },
+  {
+   "name": "qrcode-generator",
+   "version": "1.4.4",
+   "licence": "MIT",
+   "ecosystem": "npm"
+  },
+  {
+   "name": "react",
+   "version": "18.3.1",
+   "licence": "MIT",
+   "ecosystem": "npm"
+  },
+  {
+   "name": "react-dom",
+   "version": "18.3.1",
+   "licence": "MIT",
+   "ecosystem": "npm"
+  },
+  {
+   "name": "scheduler",
+   "version": "0.23.2",
+   "licence": "MIT",
+   "ecosystem": "npm"
+  },
+  {
+   "name": "use-sync-external-store",
+   "version": "1.7.0",
+   "licence": "MIT",
+   "ecosystem": "npm"
+  },
+  {
+   "name": "zustand",
+   "version": "4.5.7",
+   "licence": "MIT",
+   "ecosystem": "npm"
+  },
+  {
+   "name": "alembic",
+   "version": "1.20.1",
+   "licence": "MIT",
+   "ecosystem": "python"
+  },
+  {
+   "name": "annotated-doc",
+   "version": "0.0.5",
+   "licence": "MIT",
+   "ecosystem": "python"
+  },
+  {
+   "name": "annotated-types",
+   "version": "0.8.0",
+   "licence": "MIT",
+   "ecosystem": "python"
+  },
+  {
+   "name": "anyio",
+   "version": "4.16.0",
+   "licence": "MIT",
+   "ecosystem": "python"
+  },
+  {
+   "name": "argon2-cffi",
+   "version": "25.1.0",
+   "licence": "MIT",
+   "ecosystem": "python"
+  },
+  {
+   "name": "argon2-cffi-bindings",
+   "version": "26.1.0",
+   "licence": "MIT",
+   "ecosystem": "python"
+  },
+  {
+   "name": "authlib",
+   "version": "1.9.5",
+   "licence": "BSD-3-Clause",
+   "ecosystem": "python"
+  },
+  {
+   "name": "boto3",
+   "version": "1.43.125",
+   "licence": "Apache-2.0",
+   "ecosystem": "python"
+  },
+  {
+   "name": "botocore",
+   "version": "1.43.125",
+   "licence": "Apache-2.0",
+   "ecosystem": "python"
+  },
+  {
+   "name": "certifi",
+   "version": "2026.10.23",
+   "licence": "MPL-2.0",
+   "ecosystem": "python"
+  },
+  {
+   "name": "cffi",
+   "version": "2.1.1",
+   "licence": "MIT-0",
+   "ecosystem": "python"
+  },
+  {
+   "name": "click",
+   "version": "8.5.0",
+   "licence": "BSD-3-Clause",
+   "ecosystem": "python"
+  },
+  {
+   "name": "cryptography",
+   "version": "50.0.2",
+   "licence": "Apache-2.0 OR BSD-3-Clause",
+   "ecosystem": "python"
+  },
+  {
+   "name": "et-xmlfile",
+   "version": "2.0.0",
+   "licence": "MIT",
+   "ecosystem": "python"
+  },
+  {
+   "name": "fastapi",
+   "version": "0.162.0",
+   "licence": "MIT",
+   "ecosystem": "python"
+  },
+  {
+   "name": "h11",
+   "version": "0.16.0",
+   "licence": "MIT",
+   "ecosystem": "python"
+  },
+  {
+   "name": "httpcore",
+   "version": "1.0.9",
+   "licence": "BSD-3-Clause",
+   "ecosystem": "python"
+  },
+  {
+   "name": "httptools",
+   "version": "0.9.0",
+   "licence": "MIT",
+   "ecosystem": "python"
+  },
+  {
+   "name": "httpx",
+   "version": "0.28.1",
+   "licence": "BSD-3-Clause",
+   "ecosystem": "python"
+  },
+  {
+   "name": "idna",
+   "version": "3.20",
+   "licence": "BSD-3-Clause",
+   "ecosystem": "python"
+  },
+  {
+   "name": "jmespath",
+   "version": "1.1.0",
+   "licence": "MIT",
+   "ecosystem": "python"
+  },
+  {
+   "name": "joserfc",
+   "version": "1.8.0",
+   "licence": "BSD-3-Clause",
+   "ecosystem": "python"
+  },
+  {
+   "name": "mako",
+   "version": "1.4.3",
+   "licence": "MIT",
+   "ecosystem": "python"
+  },
+  {
+   "name": "markupsafe",
+   "version": "3.0.4",
+   "licence": "BSD-3-Clause",
+   "ecosystem": "python"
+  },
+  {
+   "name": "numpy",
+   "version": "2.5.4",
+   "licence": "BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0",
+   "ecosystem": "python"
+  },
+  {
+   "name": "opencv-python-headless",
+   "version": "5.0.0.93",
+   "licence": "Apache-2.0",
+   "ecosystem": "python"
+  },
+  {
+   "name": "openpyxl",
+   "version": "3.1.5",
+   "licence": "MIT",
+   "ecosystem": "python"
+  },
+  {
+   "name": "opentelemetry-api",
+   "version": "1.45.2",
+   "licence": "Apache-2.0",
+   "ecosystem": "python"
+  },
+  {
+   "name": "pillow",
+   "version": "13.0.0",
+   "licence": "MIT-CMU",
+   "ecosystem": "python"
+  },
+  {
+   "name": "prometheus-client",
+   "version": "0.26.0",
+   "licence": "Apache-2.0 AND BSD-2-Clause",
+   "ecosystem": "python"
+  },
+  {
+   "name": "psycopg",
+   "version": "3.3.8",
+   "licence": "LGPL-3.0-only",
+   "ecosystem": "python"
+  },
+  {
+   "name": "psycopg-binary",
+   "version": "3.3.8",
+   "licence": "LGPL-3.0-only",
+   "ecosystem": "python"
+  },
+  {
+   "name": "pyarrow",
+   "version": "26.0.1",
+   "licence": "Apache-2.0",
+   "ecosystem": "python"
+  },
+  {
+   "name": "pycparser",
+   "version": "3.12",
+   "licence": "BSD-3-Clause",
+   "ecosystem": "python"
+  },
+  {
+   "name": "pydantic",
+   "version": "2.14.3",
+   "licence": "MIT",
+   "ecosystem": "python"
+  },
+  {
+   "name": "pydantic-core",
+   "version": "2.50.4",
+   "licence": "MIT",
+   "ecosystem": "python"
+  },
+  {
+   "name": "pydantic-settings",
+   "version": "2.16.2",
+   "licence": "MIT",
+   "ecosystem": "python"
+  },
+  {
+   "name": "pyotp",
+   "version": "2.10.0",
+   "licence": "MIT",
+   "ecosystem": "python"
+  },
+  {
+   "name": "pypdfium2",
+   "version": "5.15.1",
+   "licence": "Apache-2.0 OR BSD-3-Clause",
+   "ecosystem": "python"
+  },
+  {
+   "name": "python-dateutil",
+   "version": "2.9.0.post0",
+   "licence": "Apache-2.0 OR BSD-3-Clause",
+   "ecosystem": "python"
+  },
+  {
+   "name": "python-dotenv",
+   "version": "1.2.4",
+   "licence": "BSD-3-Clause",
+   "ecosystem": "python"
+  },
+  {
+   "name": "python-multipart",
+   "version": "0.0.33",
+   "licence": "Apache-2.0",
+   "ecosystem": "python"
+  },
+  {
+   "name": "pyyaml",
+   "version": "6.0.3",
+   "licence": "MIT",
+   "ecosystem": "python"
+  },
+  {
+   "name": "s3transfer",
+   "version": "0.19.3",
+   "licence": "Apache-2.0",
+   "ecosystem": "python"
+  },
+  {
+   "name": "six",
+   "version": "1.17.0",
+   "licence": "MIT",
+   "ecosystem": "python"
+  },
+  {
+   "name": "sqlalchemy",
+   "version": "2.1.8",
+   "licence": "MIT",
+   "ecosystem": "python"
+  },
+  {
+   "name": "starlette",
+   "version": "1.10.0",
+   "licence": "BSD-3-Clause",
+   "ecosystem": "python"
+  },
+  {
+   "name": "typing-extensions",
+   "version": "4.16.0",
+   "licence": "PSF-2.0",
+   "ecosystem": "python"
+  },
+  {
+   "name": "typing-inspection",
+   "version": "0.4.5",
+   "licence": "MIT",
+   "ecosystem": "python"
+  },
+  {
+   "name": "urllib3",
+   "version": "2.8.0",
+   "licence": "MIT",
+   "ecosystem": "python"
+  },
+  {
+   "name": "uvicorn",
+   "version": "0.54.0",
+   "licence": "BSD-3-Clause",
+   "ecosystem": "python"
+  },
+  {
+   "name": "uvloop",
+   "version": "0.23.0",
+   "licence": "MIT",
+   "ecosystem": "python"
+  },
+  {
+   "name": "watchfiles",
+   "version": "1.3.0",
+   "licence": "MIT",
+   "ecosystem": "python"
+  },
+  {
+   "name": "websockets",
+   "version": "17.4",
+   "licence": "BSD-3-Clause",
+   "ecosystem": "python"
+  }
+ ]
+}
