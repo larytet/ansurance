@@ -21,6 +21,7 @@ export const ru: Record<Key, string> = {
   scan_pending: "Ожидает проверки на вирусы", scan_infected: "В карантине: заражён",
   optIn: "Согласие", optOut: "Отзыв согласия", never: "Согласие не записано", source: "Источник согласия (обязательно)",
   startProcess: "Запустить процесс", start: "Запустить", record: "Записать",
+  checksDone: "Выполнено пунктов", stagesFinal: "Завершено этапов", notYourStage: "Этот этап относится к другой роли.", finishStage: "Завершить этап", openChecklist: "Открыть чек-листы", hideChecklist: "Скрыть чек-листы", "err.wrong_role": "Этот этап относится к другой роли.", "err.stage_locked": "Этап заблокирован, пока не завершены предыдущие этапы.", "err.stage_final": "Этап уже завершён.", "err.checks_incomplete": "Сначала отметьте все пункты.", "err.four_eyes_violation": "Этап должен завершить другой человек: пункты в нём отметили вы.", "stagestatus.locked": "заблокирован", "stagestatus.ready": "готов", "stagestatus.in_progress": "в работе", "stagestatus.final": "завершён",
   "channel.whatsapp": "WhatsApp", "channel.email": "Электронная почта", "channel.sms": "SMS", "channel.phone": "Телефон", "channel.post": "Почта",
   "state.opt_in": "Согласен", "state.opt_out": "Отозвал согласие",
   overview: "Обзор", campaigns: "Кампании", mywork: "Моя работа", trust: "Доверие", verifyChain: "Проверить цепочку аудита",

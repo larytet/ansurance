@@ -14,8 +14,8 @@ const doc = (id: string, over: object = {}) => ({
 });
 
 const ALL = ["client.read", "policy.read", "document.read", "document.write", "consent.read", "consent.write", "process.read", "process.start", "inbox.read"];
-const base = (caps = ALL, extra: Handler[] = []) => fakeServer(
-  (_m, p) => (p === "/api/auth/me" ? { json: ME(["backoffice"], caps) } : undefined),
+const base = (caps = ALL, extra: Handler[] = [], roles = ["backoffice"]) => fakeServer(
+  (_m, p) => (p === "/api/auth/me" ? { json: ME(roles, caps) } : undefined),
   (_m, p) => (p.startsWith("/api/inbox?") ? { json: { items: [], next: null, read_only: false } } : p === "/api/inbox/counts" ? { json: { open: 0, urgent: 0, done_today: 0 } } : undefined),
   (_m, p) => (p.startsWith("/api/clients?") ? { json: [{ ...CLIENT }] } : undefined),
   ...extra,
@@ -123,5 +123,64 @@ describe("client file", () => {
     await userEvent.click(await screen.findByRole("button", { name: "לקוחות" }));
     await userEvent.click(await screen.findByRole("button", { name: "David Cohen" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("משהו השתבש");
+  });
+
+  describe("working a process", () => {
+    const stage = (id: string, role: string, status: string, checks: { done?: boolean }[], deps: string[] = []) => ({
+      id, role, status, depends_on: deps, name: { en: id, he: `שלב-${id}` },
+      checks: [{ idx: 0, kind: "heading", text: { en: "Basics", he: "בסיס" } }, ...checks.map((c, i) => ({ idx: i + 1, kind: "check", text: { en: `item ${id}${i}`, he: `פריט ${id}${i}` }, done: !!c.done, done_by: c.done ? "u9" : null }))],
+    });
+    const view = (stages: ReturnType<typeof stage>[]) => ({
+      id: "i1", title: "New client onboarding", status: "running", stages,
+      progress: { checks_done: 0, checks_total: 1, stages_final: 0, stages_total: stages.length },
+    });
+    let state = view([]);
+    const serve = (roles: string[], put?: (path: string) => { status?: number; json?: unknown }) => base(ALL, [
+      (m, p) => (m === "GET" && p === "/api/processes/i1" ? { json: state } : undefined),
+      (m, p) => (m === "PUT" && p.startsWith("/api/processes/i1/stages/") ? put?.(p) : undefined),
+      (m, p) => (m === "POST" && p === "/api/processes/i1/stages/kyc/finalize" ? { json: state } : undefined),
+    ], roles);
+    const open = async () => { await userEvent.click(await screen.findByRole("button", { name: "פתיחת רשימות הבדיקה" })); };
+
+    it("the stage's role ticks an item and the server's view replaces the screen", async () => {
+      state = view([stage("kyc", "agent", "ready", [{}, {}]), stage("reg", "backoffice", "locked", [{}], ["kyc"])]);
+      const s = serve(["agent"], () => { state = view([stage("kyc", "agent", "in_progress", [{ done: true }, {}]), stage("reg", "backoffice", "locked", [{}], ["kyc"])]); return { json: state }; });
+      await openFile(s);
+      await open();
+      const box = await screen.findByRole("checkbox", { name: "פריט kyc0" });
+      expect(box).toBeEnabled();
+      expect(screen.getByRole("checkbox", { name: "פריט reg0" })).toBeDisabled(); // locked
+      expect(screen.getByRole("button", { name: "סיום השלב" })).toBeDisabled(); // one item still open
+      await userEvent.click(box);
+      await waitFor(() => expect(s.calls.find((c) => c.method === "PUT")?.path).toBe("/api/processes/i1/stages/kyc/checks/1"));
+      expect(s.calls.find((c) => c.method === "PUT")?.body).toEqual({ done: true });
+      await waitFor(() => expect(screen.getByRole("checkbox", { name: "פריט kyc0" })).toBeChecked());
+    });
+
+    it("another role sees the checklist but cannot tick or finish", async () => {
+      state = view([stage("kyc", "agent", "ready", [{}])]);
+      await openFile(serve(["backoffice"]));
+      await open();
+      expect(await screen.findByRole("checkbox", { name: "פריט kyc0" })).toBeDisabled();
+      expect(screen.getByText("השלב הזה שייך לתפקיד אחר.")).toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "סיום השלב" })).toBeNull();
+    });
+
+    it("finishing is offered when every item is ticked, and calls finalize", async () => {
+      state = view([stage("kyc", "agent", "in_progress", [{ done: true }])]);
+      const s = serve(["agent"]);
+      await openFile(s);
+      await open();
+      await userEvent.click(await screen.findByRole("button", { name: "סיום השלב" }));
+      await waitFor(() => expect(s.calls.some((c) => c.method === "POST" && c.path === "/api/processes/i1/stages/kyc/finalize")).toBe(true));
+    });
+
+    it("a refusal from the server is explained, not shown as a generic error", async () => {
+      state = view([stage("kyc", "agent", "in_progress", [{}])]);
+      await openFile(serve(["agent"], () => ({ status: 409, json: { detail: "four_eyes_violation" } })));
+      await open();
+      await userEvent.click(await screen.findByRole("checkbox", { name: "פריט kyc0" }));
+      expect(await screen.findByRole("alert")).toHaveTextContent("אדם נוסף צריך לסיים");
+    });
   });
 });

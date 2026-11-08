@@ -269,6 +269,46 @@ Diagrams: [FLOWS.md](FLOWS.md#sign-in) and [FLOWS.md](FLOWS.md#user-lifecycle).
 - Acceptance: a deactivated user cannot sign in and any open session stops working on the next request; a deactivated user's name stays on past work and audit entries; the manager cannot deactivate or remove the manager role from the last active manager; no response or log line after the one-time setup contains a secret or a recovery code.
 - Not in v1: invitation by e-mail with a one-time link, so the manager never sees the secret. The agency decides after using the manager-hands-over step for a while. Passkeys are a later option.
 
+### F17. Working a process and editing its definition
+
+Two screens close the loop on the process engine of section 3.1.
+Diagram of the data they edit: [PROCESSES.md](PROCESSES.md).
+
+**Working a process (agent, back-office, manager), milestone M17.**
+
+- Trigger: a process is running on a client and a stage waits for the user's role (the "My work" list, or the pipeline on the client file).
+- Steps:
+  1. On the client file, "Open the checklists" shows every stage of the running process with its checklist, its owner role and its state (locked, ready, in progress, finished).
+  2. A user whose role owns the stage, or a manager, ticks and unticks items by hand. The first tick starts the stage.
+  3. When every item is ticked the user finishes the stage, which unlocks the stages that were waiting for it.
+  4. A stage of another role, a locked stage and a finished stage show their items but cannot be changed, with the reason in words.
+  5. A refusal from the server (wrong role, locked, items missing, the four-eyes rule) is explained in the user's language, not as a generic error.
+- Outputs: ticks and finished stages in the audit chain (who, which stage, which item), and the progress counts on the process.
+- Acceptance: the screen always shows what the server holds (it is replaced by the answer to every tick, and reloaded after a refusal); a stage that needs four eyes cannot be finished by the person who ticked its items.
+- Not in v1: ticking an item automatically when a document arrives (for example a clean ID card). Auto-ticking a compliance item weakens the audit trail, so a later version may only suggest the tick and ask a person to confirm it.
+
+**Editing a definition (manager), milestone M18.**
+
+- Trigger: the agency changes how it works (a new check, a stage moved, a new process).
+- Tool: the editor is built on React Flow (the `@xyflow/react` library, MIT licence).
+  It draws stages as nodes and dependencies as edges, and handles panning, zooming, dragging a connection between two stages and deleting one.
+  Reason: a definition already is a graph, and the library supplies the interaction that would take months to write and test.
+  The read-only diagram (section 3.1, M14) stays as it is: lighter, and the one the tests compare.
+- Steps:
+  1. The manager opens a definition in the Processes tab and chooses "Edit", which loads the latest version into the editor.
+  2. Stages: add, rename, delete, change the owner role, and set the four-eyes flag.
+  3. Dependencies: drag from one stage to another, or select an edge and delete it. A connection that would make a cycle, or point a stage at itself, is refused at once with the reason.
+  4. Checklists: a side panel edits the selected stage's items (text in Hebrew and English, kind: fill, verify, send, do, and headings), with reordering. A stage needs at least one tickable item.
+  5. A form view lists the same stages and dependencies as text fields, so everything can be done without a pointer (see the keyboard requirement below).
+  6. "Preview" shows what will change against the published version: stages and items added, removed or moved.
+  7. "Publish" writes a new version. Running cases keep the version they started on; new cases use the new one. The Mermaid source and the generated diagram follow the new version.
+- Rules: stage ids cannot be changed after the first publish (running cases refer to them); a stage that running cases are working on can be edited, but the preview warns how many cases keep the old version.
+- Positions of the nodes on the canvas are computed from the dependencies (the same layering as the read-only diagram) and are not saved, so a definition stays pure data and two managers never fight over layout.
+- Outputs: a new definition version, and an audit entry `process_def.publish` with the version number.
+- Acceptance: a definition published from the editor passes the same validation as one posted to the API (`POST /api/process-defs`, capability `process.define`, manager only); the cycle and unknown-stage errors from the server are shown against the offending stage or edge; every action of the canvas can also be done with the keyboard alone; the editor works in right-to-left languages (the canvas itself stays left-to-right, as the read-only diagram does).
+- Non-functional: the library is pinned to an exact version like every other dependency; it is loaded only when the editor opens, so the other screens do not pay for it in size; its small "React Flow" attribution stays visible, as the licence for the free edition expects.
+- Not in v1: drawing from a Mermaid or draw.io import, comments or review of a draft by a second manager, and undo across sessions.
+
 ### 3.1 Processes: stages and checklists
 
 Every flow above is also run as a **process**, in the way banks and financial institutions run controlled procedures.
@@ -280,7 +320,7 @@ Every flow above is also run as a **process**, in the way banks and financial in
 - Each role has a **My work** list (stages waiting for it), and every screen that belongs to a process shows a banner with the pipeline and a link to open it.
 - Each process has an **editable diagram**: a Mermaid source generated from the definition, opened in Mermaid Live (edit, export SVG or PNG) or imported into draw.io. The sources are in [`docs/processes/`](processes/) and the checklists are listed in [PROCESSES.md](PROCESSES.md).
 - The platform flows that are not business processes (sign-in, user lifecycle, the send gate, incoming document routing) are drawn in [FLOWS.md](FLOWS.md).
-- A process definition is data (stages, roles, dependencies, checks). A later phase lets a manager edit or create definitions in the UI (a closed step vocabulary, versioned, with running cases keeping the version they started with).
+- A process definition is data (stages, roles, dependencies, checks). Working a running process in the browser is F17 (M17), and a manager edits or creates definitions in an editor built on React Flow, also F17 (M18): a closed step vocabulary, versioned, with running cases keeping the version they started with.
 
 | Process | Flow | Process | Flow |
 |---|---|---|---|

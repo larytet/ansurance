@@ -21,6 +21,7 @@ export const fr: Record<Key, string> = {
   scan_pending: "En attente de l'analyse antivirus", scan_infected: "En quarantaine : infecté",
   optIn: "Consentir", optOut: "Retirer le consentement", never: "Aucun consentement enregistré", source: "Source du consentement (obligatoire)",
   startProcess: "Démarrer un processus", start: "Démarrer", record: "Enregistrer",
+  checksDone: "Éléments faits", stagesFinal: "Étapes terminées", notYourStage: "Cette étape relève d'un autre rôle.", finishStage: "Terminer l'étape", openChecklist: "Ouvrir les listes de contrôle", hideChecklist: "Masquer les listes de contrôle", "err.wrong_role": "Cette étape relève d'un autre rôle.", "err.stage_locked": "L'étape est verrouillée tant que les étapes précédentes ne sont pas terminées.", "err.stage_final": "L'étape est déjà terminée.", "err.checks_incomplete": "Cochez d'abord tous les éléments.", "err.four_eyes_violation": "Une autre personne doit terminer cette étape : vous y avez coché des éléments.", "stagestatus.locked": "verrouillée", "stagestatus.ready": "prête", "stagestatus.in_progress": "en cours", "stagestatus.final": "terminée",
   "channel.whatsapp": "WhatsApp", "channel.email": "E-mail", "channel.sms": "SMS", "channel.phone": "Téléphone", "channel.post": "Courrier",
   "state.opt_in": "A consenti", "state.opt_out": "A retiré son consentement",
   overview: "Vue d'ensemble", campaigns: "Campagnes", mywork: "Mon travail", trust: "Confiance", verifyChain: "Vérifier la chaîne d'audit",

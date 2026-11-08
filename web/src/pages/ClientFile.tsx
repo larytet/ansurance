@@ -7,6 +7,7 @@ import { useUi } from "../ui";
 import { ClientLink } from "./ClientLink";
 import { Messages } from "./Messages";
 import { Pension } from "./Pension";
+import { ProcessRun } from "./ProcessRun";
 import { ClientMeetings } from "./Tasks";
 
 const CHANNELS = ["whatsapp", "email", "sms"] as const;
@@ -27,6 +28,7 @@ export function ClientFile({ clientId, onBack }: { clientId: string; onBack: () 
   const [docType, setDocType] = useState("other");
   const [source, setSource] = useState("");
   const [startKey, setStartKey] = useState("");
+  const [openProc, setOpenProc] = useState<string | null>(null);
 
   const can = (c: string) => !!me?.capabilities.includes(c);
 
@@ -187,6 +189,10 @@ export function ClientFile({ clientId, onBack }: { clientId: string; onBack: () 
                     <li key={s.id} className={`stage ${s.status}`} title={s.status}>{s.name[lang] ?? s.name.en}</li>
                   ))}
                 </ol>
+                <button className="link" aria-expanded={openProc === p.id} onClick={() => setOpenProc(openProc === p.id ? null : p.id)}>
+                  {tr(openProc === p.id ? "hideChecklist" : "openChecklist")}
+                </button>
+                {openProc === p.id && <ProcessRun instanceId={p.id} onChange={() => void api.processesFor(clientId).then(setProcs)} />}
               </li>
             ))}
           </ul>

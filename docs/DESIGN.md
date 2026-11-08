@@ -117,6 +117,17 @@ REST, JSON, `/api/v1`, OpenAPI published; cursor pagination; ETag/If-Match for o
 
 JSON logs with request and job IDs and no personal data; Prometheus metrics (`/metrics`, internal only): request latency, job queue depth and age, intake auto-file and misfile rates, OCR confidence histogram, audit-verify age, backup age; Grafana dashboards in the `observability` profile; CloudWatch equivalents in AWS. Alerts: queue age over 15 min, audit verify failing, backup older than 26 h, disk over 80%.
 
+Working a process in the browser (M17) uses the existing API unchanged: `GET /api/processes/{id}` returns the whole instance (stages, checks, who ticked), `PUT .../checks/{idx}` ticks, `POST .../finalize` finishes a stage. The screen never computes state: every answer replaces the view, and a refusal reloads it. Error codes (`wrong_role`, `stage_locked`, `stage_final`, `checks_incomplete`, `four_eyes_violation`) map to catalog messages.
+
+Definition editor (M18). The editor uses `@xyflow/react` (React Flow, MIT, exact version pinned, loaded by dynamic import so only the editor pays for it). Design points:
+- The editor state is the `ProcessDefinition` JSON itself; nodes and edges are derived from it on every change (`stages` to nodes, `depends_on` to edges), and edits are applied to the JSON, never to the canvas objects. This keeps one source of truth and lets the backend model validate the same document.
+- Node positions come from the same layering function as the read-only diagram (`layers()` in `Processes.tsx`, moved to a shared module) and are not stored.
+- `onConnect` runs a check before the edge exists: no self-loop, no cycle (a depth-first search over the draft), and the backend rule that a dependency points to an earlier stage is met by writing the stages in topological order on publish. The server validates again; its 422 errors name the stage and are shown on the node.
+- Checklists are edited in a side panel with ordinary form controls, so they are accessible; a form view of the stages and dependencies is the keyboard and screen-reader path, because the canvas offers only partial keyboard support.
+- Preview is a pure diff of two definitions (stages, items, roles, dependencies), computed in the browser, and the same function feeds the test suite.
+- Publishing posts the document to `POST /api/process-defs` (capability `process.define`) and then reloads the list, so the new version appears with its number.
+- Risks: the library's attribution and licence terms for the free edition; bundle size; right-to-left (the canvas is forced to `direction: ltr`, labels keep their own direction).
+
 ## 14. Front end design
 
 Port the mock screen by screen, in the order of the milestones (login and shell with role switcher, theme, language and RTL first). Shared pieces from the mock become components: Lens, client picker (quick search with transliteration), Inbox list, process banner and pipeline, "Show me" tour, time-zone-aware timestamps. i18n catalogs for he, ar, ru, fr, en; `dir` flips per language. API types are generated, never hand-written. The mock's fictional data seeds the `demo` profile so that the first ported screens can be compared one-to-one with `index.html`. A `docs/MOCK-PORT.md` table tracks each mock screen: not started, ported, matches mock.

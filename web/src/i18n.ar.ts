@@ -21,6 +21,7 @@ export const ar: Record<Key, string> = {
   scan_pending: "بانتظار فحص الفيروسات", scan_infected: "محجور: مصاب",
   optIn: "موافقة", optOut: "إلغاء الموافقة", never: "لم تُسجَّل موافقة", source: "مصدر الموافقة (مطلوب)",
   startProcess: "بدء عملية", start: "بدء", record: "تسجيل",
+  checksDone: "البنود المنجزة", stagesFinal: "المراحل المنتهية", notYourStage: "هذه المرحلة تخص دوراً آخر.", finishStage: "إنهاء المرحلة", openChecklist: "فتح قوائم المراجعة", hideChecklist: "إخفاء قوائم المراجعة", "err.wrong_role": "هذه المرحلة تخص دوراً آخر.", "err.stage_locked": "المرحلة مقفلة حتى تنتهي المراحل السابقة لها.", "err.stage_final": "المرحلة منتهية بالفعل.", "err.checks_incomplete": "ضع علامة على كل البنود أولاً.", "err.four_eyes_violation": "يجب أن ينهي شخص آخر هذه المرحلة: لقد وضعت علامات فيها.", "stagestatus.locked": "مقفلة", "stagestatus.ready": "جاهزة", "stagestatus.in_progress": "قيد العمل", "stagestatus.final": "منتهية",
   "channel.whatsapp": "واتساب", "channel.email": "البريد الإلكتروني", "channel.sms": "رسالة نصية", "channel.phone": "الهاتف", "channel.post": "البريد",
   "state.opt_in": "وافق", "state.opt_out": "ألغى الموافقة",
   overview: "نظرة عامة", campaigns: "الحملات", mywork: "عملي", trust: "الثقة", verifyChain: "التحقق من سلسلة التدقيق",

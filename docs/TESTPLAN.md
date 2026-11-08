@@ -225,7 +225,7 @@ The Playwright test for these screens is T-M13-5.
 | T-M14-3 | Real browser: all 18 seeded definitions draw; the reference process has 10 stages, at least 9 dependencies and stages that share a column; the Mermaid source and link are present (`web/e2e/processes.spec.ts`) | Auto, Playwright |
 | T-M14-4 | Every path the screen calls is served by the back end (`test_web_contract.py`) | Auto |
 
-Not covered: editing a definition in the UI (the API creates a new version; there is no editor screen).
+Not covered: editing a definition in the UI (the API creates a new version; the editor is milestone M18).
 
 ### M15 Contacts for marketing (the role's Clients view in the mock)
 
@@ -247,6 +247,33 @@ Not covered: editing a definition in the UI (the API creates a new version; ther
 | T-M16-4 | Real browser: thirty new items, twenty in full, keys and a squashed bar move the window, the chosen item is shown in full (`web/e2e/lens.spec.ts`) | Auto, Playwright |
 
 Not covered: the Lens on the client timeline and the renewals calendar (the spec lists them; only the Inbox has it), and the compact density preference (12 rows).
+
+### M17 Working a process on the client file (REQUIREMENTS F17, first part)
+
+| ID | Test | Type |
+|---|---|---|
+| T-M17-1 | The stage's role ticks an item: the call is `PUT .../checks/{idx}` with `{done: true}`, the box shows the server's answer, a locked stage's boxes are disabled, "Finish the stage" is disabled while an item is open (`ClientFile.test.tsx`) | Auto, Vitest |
+| T-M17-2 | A user of another role sees the items disabled with the reason and has no finish button | Auto, Vitest |
+| T-M17-3 | Finishing is offered once every item is ticked and calls `POST .../finalize` | Auto, Vitest |
+| T-M17-4 | A refusal from the server (`four_eyes_violation`) is explained in words in the user's language and the view is reloaded | Auto, Vitest |
+| T-M17-5 | Real browser: a manager starts "Exit to retirement planning" on a new client, ticks every item of two parallel stages and finishes them, the dependent stage unlocks only after both, and the work is still there after a reload (`web/e2e/process-run.spec.ts`) | Auto, Playwright |
+
+Not covered: ticking items automatically from a document (not built, see F17), and the four-eyes refusal in a real browser (it needs two users on one stage; the backend rule is covered in M4).
+
+### M18 Process definition editor with React Flow (REQUIREMENTS F17, second part). Planned
+
+| ID | Test | Type |
+|---|---|---|
+| T-M18-1 | Definition to graph and back: `toGraph` and `fromGraph` round-trip every one of the 18 seeded definitions to an identical document | Auto, Vitest |
+| T-M18-2 | A connection that makes a cycle or a self-loop is refused with the reason; a valid one adds `depends_on`; deleting an edge removes it | Auto, Vitest |
+| T-M18-3 | Stage and checklist editing: add, rename, delete a stage, change role and four-eyes, add, reorder and remove items and headings; a stage without a tickable item cannot be published | Auto, Vitest |
+| T-M18-4 | The preview diff names added, removed and moved stages and items, and says how many running cases keep the old version | Auto, Vitest |
+| T-M18-5 | The form view does everything the canvas does, with the keyboard alone (no pointer events in the test) | Auto, Vitest |
+| T-M18-6 | Server refusals (422 for unknown or later stage) are shown against the stage; a stage id cannot be changed after the first publish | Auto, Vitest |
+| T-M18-7 | The editor loads lazily: the main bundle does not contain the library (build output check) | Auto, build script |
+| T-M18-8 | Real browser: a manager opens a definition, adds a stage, connects it, edits its checklist, publishes, and a new case on a client uses the new version while a running case keeps the old (`web/e2e/process-editor.spec.ts`) | Auto, Playwright |
+| T-M18-9 | Right-to-left: the editor in Hebrew keeps the canvas left-to-right and the panels right-to-left; the library's attribution is visible | Auto, Playwright |
+| T-M18-10 | Dependency pin: `package.json` and the lock file name an exact version of `@xyflow/react`; `make pins` passes | Auto, existing pin check |
 
 ## 4. Scripted penetration tests (security suite)
 
@@ -314,3 +341,4 @@ Run against a `demo` stack in CI (fast subset) and against `dev` before each rel
 | M14 | 2026-11-07 | T-M14-1..4: 6 web tests (96 in total), the path-contract test, and `processes.spec.ts`; all 7 Playwright tests pass on the live stack rebuilt with `make up` | 0 | The diagram is drawn in the browser from the definition (no diagram library added, so nothing new to pin); the Mermaid source can be opened in Mermaid Live only by following a link that says so. First browser run read the dropdown before the definitions loaded (test race, fixed) |
 | M15 | 2026-11-07 | T-M15-1..5: 3 web tests (99 in total), `marketing.spec.ts`, and the existing backend tests of the marketing view; all 8 Playwright tests pass on the live stack rebuilt with `make up` | 0 | Defect found by the first browser run: the back end sends `none` for no consent, the screen looked up a translation for it and showed blanks; the unit test had used null. Fixed, and the unit test now uses the real value |
 | M16 | 2026-11-07 | T-M16-1..4: 6 web tests (105 in total) and `lens.spec.ts`; all 9 Playwright tests pass on the live stack rebuilt with `make up`. The whole slow suite was run after M15: 50 passed and 5 disaster-recovery tests errored because the restore builds the web image with `tsc` over the whole of `src` and my working tree briefly had a type error in a new test file; after the fix the 5 disaster-recovery tests passed (3 min), so all 55 slow tests pass | 0 | The Lens made the old Inbox browser test wrong in two ways that are now handled in the test: the live manager inbox holds more than one page (50) and more than the twenty-item window. A second finding: a web type error in a test file breaks the restore of a backup, because the restore builds the web image |
+| M17 | 2026-11-08 | T-M17-1..5: 4 new web tests (109 in total) and `process-run.spec.ts`; all 10 Playwright tests pass on the live stack rebuilt with `make up` (the Inbox test was made robust against open items left by earlier runs) |

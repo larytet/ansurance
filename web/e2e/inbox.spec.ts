@@ -36,15 +36,27 @@ test("sign in, see Inbox items, act on them, switch language, sign out", async (
   }
   await page.reload();
   const urgent = page.locator("li.item", { hasText: kyc });
+  // earlier runs leave open items, so a new one may sit outside the Lens window: page forward, click its bar
+  const bring = async (title: string) => {
+    const bar = page.locator(`li.squashed button[aria-label="${title}"]`);
+    const there = () => page.locator("li.item, li.squashed", { hasText: title }).or(bar).count();
+    await expect(page.locator("li.item").first()).toBeVisible();
+    for (let i = 0; (await there()) === 0 && (await page.getByRole("button", { name: "טען עוד" }).count()) > 0 && i < 20; i++) await page.getByRole("button", { name: "טען עוד" }).click({ timeout: 3000 }).catch(() => undefined);
+    if (await bar.count()) await bar.click();
+  };
+  await bring(kyc);
   await expect(urgent).toHaveAttribute("data-urgency", "urgent");
   const open = Number(await page.getByTestId("count-open").innerText());
   expect(open).toBeGreaterThanOrEqual(2); // other open items may exist from earlier runs
 
   // filter, then act
   await page.getByRole("button", { name: "דחופים" }).click();
+  await bring(kyc);
   await expect(urgent).toBeVisible();
   await expect(page.locator("li.item", { hasText: weeklyTitle })).toHaveCount(0); // not urgent
   await page.getByRole("button", { name: "הכול" }).click();
+  // until the full list arrives the screen still holds the urgent-only one: wait for its "Load more" (the live inbox has over fifty open items)
+  await expect(page.getByRole("button", { name: "טען עוד" })).toBeVisible();
   // a long inbox is shown through the Lens: an item outside the window is a thin bar, click it to bring it in
   const bar = page.locator(`li.squashed button[aria-label="${weeklyTitle}"]`);
   await expect(page.locator("li.item")).toHaveCount(20); // the full list has loaded: twenty in the lens window

@@ -45,6 +45,7 @@ test("a long Inbox is shown through the Lens: twenty in full, the rest squashed,
   const title = await bar.getAttribute("aria-label");
   await bar.click();
   await expect(window).not.toContainText("1-20 of");
-  await expect(page.locator("li.item", { hasText: title as string })).toBeVisible();
+  // titles repeat in a long live inbox (many complaints share one), so check that a full item with this title is shown
+  await expect(page.locator("li.item", { hasText: title as string }).first()).toBeVisible();
   await expect(page.locator("li.item")).toHaveCount(20);
 });
