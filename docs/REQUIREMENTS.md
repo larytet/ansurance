@@ -293,21 +293,32 @@ Diagram of the data they edit: [PROCESSES.md](PROCESSES.md).
 - Tool: the editor is built on React Flow (the `@xyflow/react` library, MIT licence).
   It draws stages as nodes and dependencies as edges, and handles panning, zooming, dragging a connection between two stages and deleting one.
   Reason: a definition already is a graph, and the library supplies the interaction that would take months to write and test.
-  The read-only diagram (section 3.1, M14) stays as it is: lighter, and the one the tests compare.
-- Steps:
-  1. The manager opens a definition in the Processes tab and chooses "Edit", which loads the latest version into the editor.
-  2. Stages: add, rename, delete, change the owner role, and set the four-eyes flag.
-  3. Dependencies: drag from one stage to another, or select an edge and delete it. A connection that would make a cycle, or point a stage at itself, is refused at once with the reason.
-  4. Checklists: a side panel edits the selected stage's items (text in Hebrew and English, kind: fill, verify, send, do, and headings), with reordering. A stage needs at least one tickable item.
-  5. A form view lists the same stages and dependencies as text fields, so everything can be done without a pointer (see the keyboard requirement below).
-  6. "Preview" shows what will change against the published version: stages and items added, removed or moved.
-  7. "Publish" writes a new version. Running cases keep the version they started on; new cases use the new one. The Mermaid source and the generated diagram follow the new version.
-- Rules: stage ids cannot be changed after the first publish (running cases refer to them); a stage that running cases are working on can be edited, but the preview warns how many cases keep the old version.
-- Positions of the nodes on the canvas are computed from the dependencies (the same layering as the read-only diagram) and are not saved, so a definition stays pure data and two managers never fight over layout.
-- Outputs: a new definition version, and an audit entry `process_def.publish` with the version number.
-- Acceptance: a definition published from the editor passes the same validation as one posted to the API (`POST /api/process-defs`, capability `process.define`, manager only); the cycle and unknown-stage errors from the server are shown against the offending stage or edge; every action of the canvas can also be done with the keyboard alone; the editor works in right-to-left languages (the canvas itself stays left-to-right, as the read-only diagram does).
+  The read-only diagram (section 3.1, M14) and the run view of a case (F17, M17) stay as they are: lighter, and the ones the tests compare.
+- Stages (nodes): add, delete, and edit the name in Hebrew and English, the owner role (shown as the node colour) and the four-eyes flag.
+  The stage id is typed when the stage is created and cannot be changed after the first publish, because running cases refer to it.
+- Checklist (side panel for the selected stage, ordinary form controls): the text in both languages, the kind (fill, verify, send, do, or a heading), the verify note flag, add, remove and reorder.
+  A stage needs at least one tickable item.
+- Dependencies (edges): drag from one stage to another, or select an edge and delete it.
+  A self-loop, a cycle and a duplicate edge are refused at connect time with the reason.
+  Stages with no dependency between them are drawn in the same column, which means they run in parallel.
+- Layout: left to right, computed from the dependencies with the same layering as the read-only diagram.
+  Dragging a node is allowed, but positions are not saved, so a definition stays pure data and two managers never fight over layout; a "Tidy" button puts every node back.
+- Validation: the rules exist once, on the server.
+  `POST /api/process-defs/validate` takes a draft and returns every error with its place (a stage, an item or an edge), plus how many running cases are on the current version.
+  The editor calls it as the draft changes (debounced) and shows each error on the node or edge that causes it; Publish is disabled while any error remains.
+  Only the instant checks (self-loop, cycle, duplicate edge) also run in the browser, so the connection can be refused while the pointer is still down.
+- Versioning: "Preview" shows the changes against the published version (stages and items added, removed, moved; roles and dependencies changed) and reminds the manager that running cases keep the version they started on and that new cases use the new one.
+  "Publish" is manager-only (capability `process.define`), writes a new version and an audit entry `process_def.publish` with the version number.
+  The Mermaid source and the generated diagram follow the new version.
+- Undo and redo of the edits within the open editor, and a dark theme and right-to-left support (the labels follow the language; the canvas stays left-to-right, as the read-only diagram does).
+- Keyboard: a form view lists the same stages, dependencies and checklists as fields, so every action can be done without a pointer, because the canvas offers only partial keyboard support.
+- Export and import: the JSON definition is the source of truth and can be downloaded and loaded back (an import goes through the same validation).
+  Mermaid stays server-generated, for the documents and for sharing.
+- Out of scope, because the engine cannot execute them: free-form shapes, swimlanes, loops, conditional branches and arbitrary connectors.
+- Outputs: a new definition version in the database, and the audit entry.
+- Acceptance: a definition published from the editor passes the same validation as one posted to the API; the 18 seeded definitions load into the editor and come out unchanged; every action of the canvas can also be done with the keyboard alone; the validate endpoint and the publish endpoint give the same verdict on any document.
 - Non-functional: the library is pinned to an exact version like every other dependency; it is loaded only when the editor opens, so the other screens do not pay for it in size; its small "React Flow" attribution stays visible, as the licence for the free edition expects.
-- Not in v1: drawing from a Mermaid or draw.io import, comments or review of a draft by a second manager, and undo across sessions.
+- Later, not M18: showing a case's stage states on the same canvas (the client banner and "My work" use the lighter diagram today), comments or a second manager's review of a draft, drawing from a Mermaid or draw.io import, and a flipped layout direction for Hebrew and Arabic (the owner may prefer the flow to read right to left; the flow in the read-only diagram is left to right today).
 
 ### 3.1 Processes: stages and checklists
 

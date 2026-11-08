@@ -265,15 +265,21 @@ Not covered: ticking items automatically from a document (not built, see F17), a
 | ID | Test | Type |
 |---|---|---|
 | T-M18-1 | Definition to graph and back: `toGraph` and `fromGraph` round-trip every one of the 18 seeded definitions to an identical document | Auto, Vitest |
-| T-M18-2 | A connection that makes a cycle or a self-loop is refused with the reason; a valid one adds `depends_on`; deleting an edge removes it | Auto, Vitest |
-| T-M18-3 | Stage and checklist editing: add, rename, delete a stage, change role and four-eyes, add, reorder and remove items and headings; a stage without a tickable item cannot be published | Auto, Vitest |
-| T-M18-4 | The preview diff names added, removed and moved stages and items, and says how many running cases keep the old version | Auto, Vitest |
-| T-M18-5 | The form view does everything the canvas does, with the keyboard alone (no pointer events in the test) | Auto, Vitest |
-| T-M18-6 | Server refusals (422 for unknown or later stage) are shown against the stage; a stage id cannot be changed after the first publish | Auto, Vitest |
-| T-M18-7 | The editor loads lazily: the main bundle does not contain the library (build output check) | Auto, build script |
-| T-M18-8 | Real browser: a manager opens a definition, adds a stage, connects it, edits its checklist, publishes, and a new case on a client uses the new version while a running case keeps the old (`web/e2e/process-editor.spec.ts`) | Auto, Playwright |
-| T-M18-9 | Right-to-left: the editor in Hebrew keeps the canvas left-to-right and the panels right-to-left; the library's attribution is visible | Auto, Playwright |
-| T-M18-10 | Dependency pin: `package.json` and the lock file name an exact version of `@xyflow/react`; `make pins` passes | Auto, existing pin check |
+| T-M18-2 | A self-loop, a cycle and a duplicate edge are refused at connect time with the reason; a valid connection adds `depends_on`; deleting an edge removes it; stages without a dependency between them are in the same column | Auto, Vitest |
+| T-M18-3 | Stage editing: add, delete, rename in both languages, role (node colour), four-eyes; the id is editable on a new stage and locked after the first publish | Auto, Vitest |
+| T-M18-4 | Checklist editing: text in both languages, kind including heading, the verify note flag, add, remove, reorder; a stage without a tickable item shows the server's error on its node | Auto, Vitest |
+| T-M18-5 | Server dry-run `POST /api/process-defs/validate`: valid document gives no errors; duplicate stage ids, unknown stage, later stage, self-dependency, a stage without tickable items each give an error with its place; writes nothing (row count unchanged); needs `process.define` (403 for an agent) | Auto, pytest |
+| T-M18-6 | The validate and the publish endpoints give the same verdict on a set of good and bad documents (one function, tested on both) | Auto, pytest |
+| T-M18-7 | The response carries `running_cases` for the current version; the preview says how many cases keep the old version | Auto, pytest and Vitest |
+| T-M18-8 | The preview diff names added, removed and moved stages and items and changed roles and dependencies | Auto, Vitest |
+| T-M18-9 | Undo and redo step through edits and restore the exact document; Tidy restores computed positions without changing the document | Auto, Vitest |
+| T-M18-10 | The form view does everything the canvas does, with the keyboard alone (no pointer events in the test) | Auto, Vitest |
+| T-M18-11 | Export downloads JSON that imports back to the same draft; importing an invalid file shows the server's errors and loads nothing | Auto, Vitest |
+| T-M18-12 | Publish is disabled while any error remains, enabled when none; a server 422 is shown on the stage; publish needs `process.define` | Auto, Vitest |
+| T-M18-13 | The editor loads lazily: the main bundle does not contain the library (build output check) | Auto, build script |
+| T-M18-14 | Real browser: a manager opens a definition, adds a stage, connects it, edits its checklist, publishes; a new case on a client uses the new version and a running case keeps the old (`web/e2e/process-editor.spec.ts`) | Auto, Playwright |
+| T-M18-15 | Dark theme and right-to-left: the editor in Hebrew keeps the canvas left-to-right and the panels right-to-left, text is visible on both themes, the library's attribution is visible | Auto, Playwright |
+| T-M18-16 | Dependency pin: `package.json` and the lock file name an exact version of `@xyflow/react`; `make pins` passes | Auto, existing pin check |
 
 ## 4. Scripted penetration tests (security suite)
 
