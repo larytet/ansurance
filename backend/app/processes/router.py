@@ -2,8 +2,8 @@ import uuid
 from typing import Any, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Response
-from pydantic import BaseModel, Field, ValidationError
-from sqlalchemy import or_, select
+from pydantic import BaseModel, Field
+from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session as Db
 
 from app.audit import chain
@@ -11,7 +11,7 @@ from app.clients.access import get_visible
 from app.deps import Principal, get_db, require
 from app.models import ProcessDef, ProcessInstance, StageInstance
 from app.processes import service
-from app.processes.definition import ProcessDefinition, mermaid
+from app.processes.definition import ProcessDefinition, mermaid, validate_document
 
 router = APIRouter(prefix="/api")
 
@@ -109,6 +109,39 @@ def get_mermaid(
     return Response(mermaid(service.parse(row), lang) + "\n", media_type="text/plain")
 
 
+@router.post("/process-defs/validate")
+def validate_def(
+    body: dict[str, Any],
+    p: Principal = Depends(require("process.define")),
+    db: Db = Depends(get_db, scope="function"),
+) -> dict[str, Any]:
+    """Dry run for the editor: every problem with its place, and how many running cases a new
+    version would leave on the old one. Writes nothing."""
+    problems = validate_document(body)
+    key = body.get("id") if isinstance(body.get("id"), str) else None
+    cur = service.latest(db, key) if key else None
+    running = 0
+    if cur is not None:
+        running = (
+            db.scalar(
+                select(func.count())
+                .select_from(ProcessInstance)
+                .where(
+                    ProcessInstance.key == key,
+                    ProcessInstance.version == cur.version,
+                    ProcessInstance.status == "running",
+                )
+            )
+            or 0
+        )
+    return {
+        "ok": not problems,
+        "errors": problems,
+        "current_version": cur.version if cur else None,
+        "running_cases": running,
+    }
+
+
 @router.post("/process-defs", status_code=201)
 def new_def_version(
     body: dict[str, Any],
@@ -116,10 +149,10 @@ def new_def_version(
     db: Db = Depends(get_db, scope="function"),
 ) -> dict[str, Any]:
     """A manager publishes a new version. Running instances keep the version they started on."""
-    try:
-        definition = ProcessDefinition.model_validate(body)
-    except ValidationError as e:
-        raise HTTPException(422, e.errors(include_url=False, include_context=False)) from e
+    problems = validate_document(body)
+    if problems:
+        raise HTTPException(422, problems)
+    definition = ProcessDefinition.model_validate(body)
     row = service.add_definition(db, definition, p.user.id)
     chain.append(
         db,

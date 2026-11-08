@@ -6,9 +6,9 @@ parallel; otherwise it is locked until they are final) and a checklist.
 """
 
 import re
-from typing import Literal
+from typing import Any, Literal, TypedDict
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, ValidationError, model_validator
 
 Role = Literal["agent", "backoffice", "manager", "marketing"]
 Kind = Literal["fill", "verify", "send", "do", "heading"]
@@ -39,6 +39,127 @@ class StageDef(BaseModel):
         return [(i, c) for i, c in enumerate(self.checks) if c.kind != "heading"]
 
 
+class Problem(TypedDict):
+    """One thing wrong with a draft, with its place so a screen can mark the stage or edge."""
+
+    code: str
+    message: str
+    stage: str | None
+    check: int | None
+    edge: list[str] | None
+
+
+def _problem(
+    code: str,
+    message: str,
+    stage: str | None = None,
+    check: int | None = None,
+    edge: list[str] | None = None,
+) -> Problem:
+    return {"code": code, "message": message, "stage": stage, "check": check, "edge": edge}
+
+
+def graph_problems(stages: list[StageDef]) -> list[Problem]:
+    """Every rule about how stages relate. The one place these rules live."""
+    out: list[Problem] = []
+    ids = [s.id for s in stages]
+    for dup in sorted({i for i in ids if ids.count(i) > 1}):
+        out.append(_problem("duplicate_stage_id", f"duplicate stage ids: {dup}", dup))
+    known: set[str] = set()
+    for s in stages:  # dependencies must point to earlier stages: acyclic by construction
+        seen: set[str] = set()
+        for d in s.depends_on:
+            edge = [d, s.id]
+            if d in seen:
+                out.append(
+                    _problem("duplicate_edge", f"stage {s.id} lists {d} twice", s.id, edge=edge)
+                )
+            seen.add(d)
+            if d == s.id:
+                out.append(
+                    _problem("self_dependency", f"stage {s.id} depends on itself", s.id, edge=edge)
+                )
+            elif d not in ids:
+                out.append(
+                    _problem(
+                        "unknown_stage",
+                        f"stage {s.id} depends on unknown stage {d}",
+                        s.id,
+                        edge=edge,
+                    )
+                )
+            elif d not in known:
+                out.append(
+                    _problem(
+                        "later_stage",
+                        f"stage {s.id} depends on later stage {d} (cycle risk)",
+                        s.id,
+                        edge=edge,
+                    )
+                )
+        known.add(s.id)
+        if not s.real_checks:
+            out.append(_problem("no_tickable_check", f"stage {s.id} has no tickable checks", s.id))
+    return out
+
+
+class _Head(BaseModel):
+    id: str = Field(pattern=r"^[a-z][a-z0-9_]{0,31}$")
+    source_flow: str = ""
+    owner_role: Role
+    name: Text
+
+
+def validate_document(doc: Any) -> list[Problem]:
+    """All problems of a draft definition (empty: it can be published).
+
+    Publishing and the editor's dry run both call this, so they cannot disagree.
+    """
+    if not isinstance(doc, dict):
+        return [_problem("not_an_object", "the definition must be an object")]
+    out: list[Problem] = []
+    try:
+        _Head.model_validate({k: v for k, v in doc.items() if k != "stages"})
+    except ValidationError as e:
+        out += [
+            _problem("invalid", f"{'.'.join(map(str, x['loc']))}: {x['msg']}") for x in e.errors()
+        ]
+    raw = doc.get("stages")
+    parsed: list[StageDef] = []
+    if not isinstance(raw, list) or not raw:
+        out.append(_problem("no_stages", "stages: List should have at least 1 item"))
+        raw = []
+    for n, item in enumerate(raw):
+        try:
+            parsed.append(StageDef.model_validate(item))
+        except ValidationError as e:
+            sid = (
+                item.get("id")
+                if isinstance(item, dict) and isinstance(item.get("id"), str)
+                else f"#{n + 1}"
+            )
+            for x in e.errors():
+                loc = list(x["loc"])
+                chk = (
+                    loc[1]
+                    if len(loc) > 1 and loc[0] == "checks" and isinstance(loc[1], int)
+                    else None
+                )
+                out.append(
+                    _problem(
+                        "invalid", f"stage {sid} {'.'.join(map(str, loc))}: {x['msg']}", sid, chk
+                    )
+                )
+    if not out:
+        out += graph_problems(parsed)
+    if not out:  # safety net: the model itself must agree with the verdict
+        try:
+            ProcessDefinition.model_validate(doc)
+        except ValidationError as e:  # pragma: no cover - would be a bug in the rules above
+            out += [_problem("invalid", x["msg"]) for x in e.errors()]
+    return out
+
+
 class ProcessDefinition(BaseModel):
     id: str = Field(pattern=r"^[a-z][a-z0-9_]{0,31}$")
     source_flow: str = ""
@@ -48,21 +169,9 @@ class ProcessDefinition(BaseModel):
 
     @model_validator(mode="after")
     def _valid_graph(self) -> "ProcessDefinition":
-        ids = [s.id for s in self.stages]
-        if len(set(ids)) != len(ids):
-            raise ValueError("duplicate stage ids")
-        known = set()
-        for s in self.stages:  # dependencies must point to earlier stages: acyclic by construction
-            for d in s.depends_on:
-                if d == s.id:
-                    raise ValueError(f"stage {s.id} depends on itself")
-                if d not in ids:
-                    raise ValueError(f"stage {s.id} depends on unknown stage {d}")
-                if d not in known:
-                    raise ValueError(f"stage {s.id} depends on later stage {d} (cycle risk)")
-            known.add(s.id)
-            if not s.real_checks:
-                raise ValueError(f"stage {s.id} has no tickable checks")
+        found = graph_problems(self.stages)
+        if found:
+            raise ValueError(found[0]["message"])
         return self
 
     def stage(self, key: str) -> StageDef:

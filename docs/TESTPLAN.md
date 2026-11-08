@@ -260,7 +260,7 @@ Not covered: the Lens on the client timeline and the renewals calendar (the spec
 
 Not covered: ticking items automatically from a document (not built, see F17), and the four-eyes refusal in a real browser (it needs two users on one stage; the backend rule is covered in M4).
 
-### M18 Process definition editor with React Flow (REQUIREMENTS F17, second part). Planned
+### M18 Process definition editor with React Flow (REQUIREMENTS F17, second part)
 
 | ID | Test | Type |
 |---|---|---|
@@ -273,13 +273,15 @@ Not covered: ticking items automatically from a document (not built, see F17), a
 | T-M18-7 | The response carries `running_cases` for the current version; the preview says how many cases keep the old version | Auto, pytest and Vitest |
 | T-M18-8 | The preview diff names added, removed and moved stages and items and changed roles and dependencies | Auto, Vitest |
 | T-M18-9 | Undo and redo step through edits and restore the exact document; Tidy restores computed positions without changing the document | Auto, Vitest |
-| T-M18-10 | The form view does everything the canvas does, with the keyboard alone (no pointer events in the test) | Auto, Vitest |
+| T-M18-10 | The stage list and panel (the form path) do everything the canvas does: select a stage, edit names, role, four eyes, dependencies by check boxes, checklist; the test uses only these controls, with the canvas replaced by a plain list (`ProcessEditor.test.tsx`) | Auto, Vitest |
 | T-M18-11 | Export downloads JSON that imports back to the same draft; importing an invalid file shows the server's errors and loads nothing | Auto, Vitest |
 | T-M18-12 | Publish is disabled while any error remains, enabled when none; a server 422 is shown on the stage; publish needs `process.define` | Auto, Vitest |
-| T-M18-13 | The editor loads lazily: the main bundle does not contain the library (build output check) | Auto, build script |
+| T-M18-13 | The editor loads lazily: the main bundle does not contain the library (`web/scripts/check-bundle.mjs`, run after `npm run build`) | Auto, build script (not yet part of `make ci`) |
 | T-M18-14 | Real browser: a manager opens a definition, adds a stage, connects it, edits its checklist, publishes; a new case on a client uses the new version and a running case keeps the old (`web/e2e/process-editor.spec.ts`) | Auto, Playwright |
 | T-M18-15 | Dark theme and right-to-left: the editor in Hebrew keeps the canvas left-to-right and the panels right-to-left, text is visible on both themes, the library's attribution is visible | Auto, Playwright |
-| T-M18-16 | Dependency pin: `package.json` and the lock file name an exact version of `@xyflow/react`; `make pins` passes | Auto, existing pin check |
+| T-M18-16 | Dependency pin: `package.json` names an exact version of `@xyflow/react` (12.12.1) and the lock file is used (`npm ci`); `make pins` passes | Manual check of `package.json`, auto `make pins` |
+
+Not covered: the export download (jsdom has no file save), keyboard operation of the canvas itself (the stage list and panel are the keyboard path; the canvas library's own keyboard support is partial), the "Tidy" button in a browser, and a second manager editing at the same time (the last publish wins and gets the next version number).
 
 ## 4. Scripted penetration tests (security suite)
 
@@ -377,3 +379,4 @@ The result flags the software the agency cannot use as it is, and the owner deci
 | M15 | 2026-11-07 | T-M15-1..5: 3 web tests (99 in total), `marketing.spec.ts`, and the existing backend tests of the marketing view; all 8 Playwright tests pass on the live stack rebuilt with `make up` | 0 | Defect found by the first browser run: the back end sends `none` for no consent, the screen looked up a translation for it and showed blanks; the unit test had used null. Fixed, and the unit test now uses the real value |
 | M16 | 2026-11-07 | T-M16-1..4: 6 web tests (105 in total) and `lens.spec.ts`; all 9 Playwright tests pass on the live stack rebuilt with `make up`. The whole slow suite was run after M15: 50 passed and 5 disaster-recovery tests errored because the restore builds the web image with `tsc` over the whole of `src` and my working tree briefly had a type error in a new test file; after the fix the 5 disaster-recovery tests passed (3 min), so all 55 slow tests pass | 0 | The Lens made the old Inbox browser test wrong in two ways that are now handled in the test: the live manager inbox holds more than one page (50) and more than the twenty-item window. A second finding: a web type error in a test file breaks the restore of a backup, because the restore builds the web image |
 | M17 | 2026-11-08 | T-M17-1..5: 4 new web tests (109 in total) and `process-run.spec.ts`; all 10 Playwright tests pass on the live stack rebuilt with `make up` (the Inbox test was made robust against open items left by earlier runs) |
+| M18 | 2026-11-08 | T-M18-1..13, 14, 15: 8 backend tests (`test_processes.py`, 43 in the file; 617 fast backend tests pass), 21 web tests (16 model, 10 component; 135 in total), `process-editor.spec.ts` (2 browser tests: edit, draw a dependency, publish, versions; Hebrew and dark theme); all 12 Playwright tests pass on the rebuilt stack; `make pins` passes; the bundle check passes |

@@ -13,7 +13,7 @@ test("the Processes screen draws each of the 18 seeded definitions with its stag
   await page.getByRole("button", { name: "Processes" }).click();
 
   const select = page.getByRole("combobox", { name: "Processes" });
-  await expect(select.locator("option")).toHaveCount(18); // the definitions load after the tab opens
+  await expect.poll(() => select.locator("option").count()).toBeGreaterThanOrEqual(18); // the definitions load after the tab opens; the editor test adds its own
   const options = await select.locator("option").all();
 
   // the reference process: ten stages, with stages that run in parallel

@@ -489,3 +489,116 @@ def test_cancel_is_manager_only_needs_a_reason_and_freezes_the_process(env: Env)
         == 409
     )
     assert ca.get("/api/my-work").json()["count"] == 0  # a cancelled process leaves My work
+
+
+# ---- M18: dry-run validation for the editor (T-M18-5 .. T-M18-7) --------------------------
+def _codes(r: Any) -> list[str]:
+    return [e["code"] for e in r.json()["errors"]]
+
+
+def test_validate_accepts_a_good_draft_and_writes_nothing(env: Env) -> None:
+    c, h, _ = env.user("manager")
+    r = c.post("/api/process-defs/validate", headers=h, json=_base())
+    assert r.status_code == 200 and r.json()["ok"] is True and r.json()["errors"] == []
+    assert r.json()["current_version"] is None and r.json()["running_cases"] == 0
+    assert c.get("/api/process-defs/t1").status_code == 404  # nothing was stored
+
+
+@pytest.mark.parametrize(
+    "mutate,code,stage,edge",
+    [
+        (lambda d: d["stages"][1].update(depends_on=["zzz"]), "unknown_stage", "b", ["zzz", "b"]),
+        (lambda d: d["stages"][1].update(depends_on=["b"]), "self_dependency", "b", ["b", "b"]),
+        (lambda d: d["stages"][0].update(depends_on=["b"]), "later_stage", "a", ["b", "a"]),
+        (lambda d: d["stages"][1].update(depends_on=["a", "a"]), "duplicate_edge", "b", ["a", "b"]),
+        (lambda d: d["stages"][1].update(id="a"), "duplicate_stage_id", "a", None),
+        (
+            lambda d: d["stages"][0].update(
+                checks=[{"text": {"en": "h", "he": "h"}, "kind": "heading"}]
+            ),
+            "no_tickable_check",
+            "a",
+            None,
+        ),
+        (lambda d: d["stages"][0].update(role="janitor"), "invalid", "a", None),
+    ],
+)
+def test_validate_says_what_is_wrong_and_where(
+    env: Env, mutate: Any, code: str, stage: str, edge: list[str] | None
+) -> None:
+    c, h, _ = env.user("manager")
+    d = copy.deepcopy(_base())
+    mutate(d)
+    r = c.post("/api/process-defs/validate", headers=h, json=d)
+    assert r.status_code == 200 and r.json()["ok"] is False
+    hit = [e for e in r.json()["errors"] if e["code"] == code]
+    assert hit and hit[0]["stage"] == stage and hit[0]["edge"] == edge, r.json()
+
+
+def test_validate_reports_every_problem_not_only_the_first(env: Env) -> None:
+    c, h, _ = env.user("manager")
+    d = copy.deepcopy(_base())
+    d["stages"][1]["depends_on"] = ["zzz", "b"]
+    d["stages"][0]["checks"][0]["text"]["en"] = ""  # bad text on the first item of stage a
+    codes = _codes(c.post("/api/process-defs/validate", headers=h, json=d))
+    assert "invalid" in codes  # a field error does not hide the others being reported next time
+    d["stages"][0]["checks"][0]["text"]["en"] = "ok"
+    codes = _codes(c.post("/api/process-defs/validate", headers=h, json=d))
+    assert sorted(codes) == ["self_dependency", "unknown_stage"]
+
+
+def test_a_field_error_names_the_check(env: Env) -> None:
+    c, h, _ = env.user("manager")
+    d = copy.deepcopy(_base())
+    d["stages"][0]["checks"].append({"text": {"en": "", "he": "x"}})
+    e = c.post("/api/process-defs/validate", headers=h, json=d).json()["errors"][0]
+    assert (e["stage"], e["check"]) == ("a", 1)
+
+
+def test_validate_and_publish_give_the_same_verdict(env: Env) -> None:
+    c, h, _ = env.user("manager")
+    bad: list[dict[str, Any]] = []
+    for mut in (
+        lambda d: d["stages"][1].update(depends_on=["zzz"]),
+        lambda d: d["stages"][1].update(depends_on=["a", "a"]),
+        lambda d: d["stages"][0].update(checks=[]),
+        lambda d: d.update(id="Bad Id"),
+        lambda d: d.update(stages=[]),
+        lambda d: d.pop("name"),
+    ):
+        d = copy.deepcopy(_base())
+        mut(d)
+        bad.append(d)
+    for d in [_base(), *bad]:
+        ok = c.post("/api/process-defs/validate", headers=h, json=d).json()["ok"]
+        published = c.post("/api/process-defs", headers=h, json=d)
+        assert ok == (published.status_code == 201), d
+        if not ok:
+            assert published.json()["detail"], "the publish refusal carries the same list"
+
+
+def test_validate_counts_cases_running_on_the_current_version(env: Env) -> None:
+    c, h, _ = env.user("manager")
+    assert c.post("/api/process-defs", headers=h, json=_base()).status_code == 201
+    start(c, h, "t1")
+    start(c, h, "t1")
+    r = c.post("/api/process-defs/validate", headers=h, json=_base()).json()
+    assert (r["current_version"], r["running_cases"]) == (1, 2)
+    assert c.post("/api/process-defs", headers=h, json=_base()).json()["version"] == 2
+    r = c.post("/api/process-defs/validate", headers=h, json=_base()).json()
+    assert (r["current_version"], r["running_cases"]) == (2, 0)  # the two stay on version 1
+
+
+def test_validate_needs_the_define_capability(env: Env) -> None:
+    for role, status in (("agent", 403), ("backoffice", 403), ("marketing", 403), ("manager", 200)):
+        c, h, _ = env.user(role)
+        r = c.post("/api/process-defs/validate", headers=h, json=_base())
+        assert r.status_code == status, role
+
+
+def test_the_seeded_definitions_all_validate(env: Env) -> None:
+    c, h, _ = env.user("manager")
+    for d in c.get("/api/process-defs").json():
+        doc = c.get(f"/api/process-defs/{d['key']}").json()["definition"]
+        r = c.post("/api/process-defs/validate", headers=h, json=doc)
+        assert r.json()["ok"], (d["key"], r.json()["errors"])
