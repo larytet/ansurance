@@ -310,9 +310,38 @@ Run against a `demo` stack in CI (fast subset) and against `dev` before each rel
 | P-21 | User administration abuse: a non-manager reaches reset, deactivate, role change or set-password; a manager gives themselves a role by over-posting; the last manager removed | Denied, audited, the last manager kept |
 | P-22 | Session after deactivation or reset: reuse a cookie taken before the change | Rejected on the next request |
 | P-23 | Account takeover through password change: wrong current password, replayed code, CSRF | Refused, counted as a failure |
+| P-24 | Hostile PDF: embedded JavaScript, launch actions, a malformed cross-reference table, an embedded file | Rendered to images in the sandbox, nothing executed, nothing from the file reaches the user |
+| P-25 | Hostile image: decompression bomb (a tiny file with a huge pixel count), a TIFF with thousands of pages, a polyglot (image that is also a script or archive) | Stopped by the pixel and page limits, sent to manual review, the sandbox stays within its memory and time limits |
+| P-26 | Hostile Word file: a macro, an external template link, XML external entities, an embedded OLE object | Converted with macros and links off, no network request leaves the sandbox, no file from the host is read |
+| P-27 | Sandbox escape attempts from inside a file or a patched parser: open a network socket, read the environment, write outside the work directory, fork without limit, run past the time limit | Every attempt fails (no network, no secrets, read-only filesystem, process limit, killed at the limit); the worker records the failure |
+| P-28 | The worker is given a sandbox output that is not an image or JSON, an oversized one, or a path outside the output directory | Rejected, the file goes to manual review |
+| P-29 | Text in a document built to attack the interface and any model: script tags, HTML, markup, text that tells a model to ignore its instructions | Shown escaped, never executed; if text is passed to a model it is passed as data and no action follows from it |
+| P-30 | The original of a document is opened inline, by direct link, by thumbnail or by search preview | Refused: only derived images are served; the original downloads only with the capability, an audit entry and the warning |
+| P-31 | The document viewer's origin and CSP: script from the document, a frame from another site, a form post | Blocked by the separate origin and the content security policy (ZAP baseline against the viewer) |
+| P-32 | Derived artifacts: reach another client's page images or OCR JSON by guessing ids; keep them after erasure or past retention; read them on a legal hold without the capability | Denied; removed with the original on erasure and retention; the legal hold blocks removal |
+| P-33 | At-rest protection: read the object store volume or a backup without the keys | Unreadable |
+| P-34 | Independent penetration test before go-live, by a tester who is not on the team: scope is the whole stack (web, API, sign-in, uploads, sandbox, object store, backups), black-box and with test accounts of every role, report with severities, a retest after fixes | No open critical or high finding at go-live; medium findings have an owner and a date; the report is kept with the release |
+
+### Licence review
+
+Components must be usable commercially without per-seat fees (PLATFORM-REQUIREMENTS section 12).
+The review produces `docs/LICENSES.md` (it does not exist yet) and runs again at every release and whenever a dependency changes.
+The result flags the software the agency cannot use as it is, and the owner decides each flag.
+
+| ID | Test | Type |
+|---|---|---|
+| L-1 | A script lists every dependency from the lock files (Python, npm), every container image and every system package, with its licence identifier (SPDX) and its version | Auto, script |
+| L-2 | Each licence is classed by a policy file: allowed (MIT, BSD, Apache-2.0, ISC, PSF, MPL-2.0 used unmodified), needs review (LGPL, GPL used only as a separate program, AGPL, SSPL, BUSL, "source available", Creative Commons non-commercial), refused (a commercial licence we do not hold, unknown or missing licence) | Auto, script |
+| L-3 | The build fails on a refused licence, and on a needs-review one that is not on the owner's signed exception list (`docs/LICENSES.md`, with who approved it and why) | Auto, CI |
+| L-4 | Network-service licences (AGPL, SSPL) and their effect: flagged separately, because running modified software for users can oblige us to publish our source. MinIO is the known case (AGPL) and is on the list | Manual review, signed |
+| L-5 | Services and data with terms rather than licences: WhatsApp Business, the OCR and translation engines and their models, fonts, icon sets, the React Flow free-edition attribution, ClamAV signature databases, test data. Terms checked for commercial and per-seat limits | Manual review, signed |
+| L-6 | The images in the compose stack and the cloud build: the licence of the base image and of every package added to it, recorded from the image itself rather than from the project page | Auto, script |
+| L-7 | Obligations are met: the licence texts and notices are shipped with the product (an "open source notices" page in Settings), attributions are visible where a licence requires it | Auto, check that the file and the screen exist and list every allowed component |
+| L-8 | The list is reviewed again at every release, and the reviewer signs the date in `docs/LICENSES.md`; a release without a signed, current list is blocked | Manual, release checklist |
 
 ## 5. Exit criteria
 
+- Release: the licence review (L-1..L-8) is signed and current, the penetration tests P-1..P-33 pass, and the independent penetration test (P-34) has no open critical or high finding.
 - Milestone: all its tests pass, no open high-severity defect, lint, type check and security fast subset green, STATUS.md and the Results table updated.
 - Release candidate: all milestone suites, conformance, full penetration suite, restore test, load tests within targets.
 

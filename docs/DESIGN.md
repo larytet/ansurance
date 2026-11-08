@@ -21,6 +21,42 @@ Status: draft v0.1 (2026-11-06), for owner review. Implements [PLATFORM-REQUIREM
 
 ## 2. Repository layout
 
+### 8.1 Document handling in a sandbox
+
+Today the worker renders, de-skews and reads files in its own process (`pypdfium2`, OpenCV and Pillow in `backend/app/intake/digitize.py`).
+A crafted PDF, TIFF or Word file can exploit a parser bug there, so the parsers move into an isolated container; the rest of the pipeline in section 8 is unchanged.
+
+**Principles**
+- The sealed original stays as it is (section 7). It is marked restricted and is never opened inline. Downloading it needs a capability, writes an audit entry and shows a warning first.
+- All risky parsing happens in a sandbox container: PDF and image decoding, Office conversion, page rendering, OCR and text-layer extraction. The worker only orchestrates: it hands the file in, stores what comes out, and never parses the file itself.
+- Users see only derived page images. Nobody is served the original file in a viewer.
+
+**The sandbox**
+- Started per file (or per small batch), then discarded. No network, no secrets or credentials, read-only root filesystem, a `tmpfs` work directory, a non-root user, all capabilities dropped, `no-new-privileges`, a seccomp profile, and limits on CPU, memory, process count and time.
+- Input: the file on stdin or in a read-only temporary directory. Output: page images (PNG or WebP) plus one JSON result, and nothing else; the worker rejects any other output and any output over a size limit.
+- Word files (.doc, .docx) are converted to PDF inside the sandbox with a headless office suite, with macros, external links and embedded objects disabled, and then handled as any PDF.
+- A PDF with a real text layer has its text extracted in the sandbox, which is faster and more accurate than OCR; scans go through OCR. The result says which one was used.
+- gVisor or Firecracker can replace the plain container runtime later for stronger isolation without changing the interface.
+- Limits: page count, total pixel count (the guard against decompression bombs), file size and a time limit per file. A file over any limit, or one that makes the sandbox fail or time out, goes to the manual review queue with the reason, and nothing from it is shown.
+
+**What is stored**
+Each result is a separate derived artifact tied to the original by hash and to the tool versions, so a better engine can run again without touching the original (the job key already includes the stage version):
+- normalized page images (PNG or WebP): what users see;
+- OCR text with a box and a confidence for every word, as JSON;
+- metadata: SHA-256, media type, page count, virus verdict, tool and engine versions, timestamps, and whether text came from a text layer or OCR.
+
+**Showing a document**
+- Default: the server-rendered page images, in the document viewer.
+- For download of a cleaned copy: a rebuilt "safe PDF" made from the page images plus an invisible OCR text layer, so it can be searched and selected but carries nothing from the original file (no scripts, no attachments, no metadata).
+- Later option, for cases that need the original's exact look (a complex Office file): a remote browser or a disposable virtual machine viewer.
+- The viewer runs on a separate origin with a strict content security policy (no scripts from the document, images from our storage only).
+
+**Cautions**
+- OCR text is untrusted input. The interface escapes it; if a language model ever reads it, it can contain instructions meant for the model, so it is passed as data and its output never triggers an action by itself.
+- The image is the source of truth, not the OCR text. Confidence scores are kept, and low confidence routes to a person (section 8 thresholds).
+- Derived text is personal data: the same access control, retention, legal hold and erasure as the original, and it is part of the erasure and export procedures.
+- Everything is encrypted at rest (storage-side encryption with managed keys; SSE-KMS on AWS, MinIO KMS on premises).
+
 ```
 ansurance/
   index.html, docs/            mock and specifications (unchanged location)

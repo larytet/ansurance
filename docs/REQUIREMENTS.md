@@ -380,6 +380,10 @@ Every flow above is also run as a **process**, in the way banks and financial in
 - Misfiled-document risk is a privacy incident: one-click "wrong client" action that moves the item, logs it, and counts toward a monthly misfile metric on the manager dashboard.
 - Target: 90% of items auto-filed with under 1% misfiled (to be measured on the agency's own historical sample).
 - Sensitive documents (medical) are filed with a restricted flag visible only to the agent of record, back-office and manager.
+- An uploaded or received file is untrusted. It is never opened by the application itself and never shown to a user as it arrived: it is parsed only in an isolated sandbox, and users see only page images made there (design: DESIGN section 8.1).
+- Accepted types: PDF, PNG, JPEG, TIFF, e-mail (.eml), and Word documents (.doc, .docx). A file over a limit (pages, pixels, time) goes to the manual review queue and is not processed.
+- Downloading the sealed original needs a capability, writes an audit entry and shows a warning that the file has not been cleaned; the original is never opened in the browser.
+- Text read from a document (OCR or text layer) is personal data with the same access control, retention, legal hold and erasure as the original, and is shown only as escaped text.
 
 ## 5. Real-time translation (Russian, Arabic, French, Hebrew)
 
