@@ -21,7 +21,7 @@ Custom CRM for a small Israeli insurance agency (5 agents, 2 back-office, 1 mark
 8. **Open the app:** `https://<BIND_ADDR>:<HTTPS_PORT>`, for example `https://127.0.0.1:8443`. The proxy uses its own certificate authority, so the browser warns until you trust it (see [docs/OPERATIONS.md](docs/OPERATIONS.md), TLS).
 9. **Verify:** `make smoke`. Later: `make upgrade` (with backup and automatic rollback), `make backup`, `make restore`, `make logs`.
 
-Operations, backups and disaster recovery: [docs/OPERATIONS.md](docs/OPERATIONS.md). AWS: [infra/aws/README.md](infra/aws/README.md).
+Operations, backups and disaster recovery: [docs/OPERATIONS.md](docs/OPERATIONS.md). AWS: [infra/aws/README.md](infra/aws/README.md). Security model, attack surface, findings and remediation plan: [docs/SECURITY.md](docs/SECURITY.md).
 
 ## Add the first user (admin)
 
